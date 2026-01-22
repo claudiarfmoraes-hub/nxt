@@ -396,9 +396,9 @@ async function registrarVenda(event) {
     mostrarStatusAutomacao(sucessoAutomacao);
 
     ultimaVendaRegistrada = venda;
-    atualizarStatusBling();
 
     // Enviar automaticamente para o sistema de emissão (se conectado)
+    await BLING_CONFIG.checkStatus(); // Verificar status atualizado
     if (BLING_CONFIG.isAuthenticated) {
         try {
             await enviarVendaParaBling(venda);
@@ -407,6 +407,7 @@ async function registrarVenda(event) {
             // Continua mostrando o modal mesmo se der erro
         }
     }
+    atualizarStatusBling();
 
     mostrarResumoModal(venda);
 
