@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nxt-lojas-cache-v4'; // Mudei a versão para forçar a atualização
+const CACHE_NAME = 'nxt-lojas-cache-v5'; // Versão atualizada
 const urlsToCache = [
   '/',
   '/index.html',
@@ -20,25 +20,26 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // Ignorar requisições de API e POST
+  if (event.request.url.includes('/api/') || event.request.method !== 'GET') {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Cache hit - return the response
         if (response) {
           return response;
         }
 
-        // Clone the request.
         const fetchRequest = event.request.clone();
 
         return fetch(fetchRequest).then(
           response => {
-            // Check if we received a valid response
             if(!response || response.status !== 200 || response.type !== 'basic') {
               return response;
             }
 
-            // Clone the response.
             const responseToCache = response.clone();
 
             caches.open(CACHE_NAME)
