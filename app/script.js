@@ -2534,11 +2534,11 @@ async function enviarVendaParaBling(venda) {
         const resultadoPedido = await blingRequest('/pedidos/vendas', 'POST', pedido);
         const pedidoId = resultadoPedido.data.id;
 
-        mostrarFeedback(`Pedido #${pedidoId} criado no Bling!`, 'sucesso');
+        mostrarFeedback(`Pedido #${pedidoId} criado no Bling! Emita a NF-e pelo painel do Bling.`, 'sucesso');
 
-        // 7. Perguntar se quer gerar NF-e
-        if (confirm('Pedido criado com sucesso!\n\nDeseja gerar a NF-e automaticamente?')) {
-            await gerarNFeBling(pedidoId);
+        // Abrir o Bling em nova aba para emitir NF-e manualmente
+        if (confirm(`Pedido #${pedidoId} criado com sucesso!\n\nA NF-e deve ser emitida manualmente no Bling.\nDeseja abrir o Bling agora?`)) {
+            window.open('https://www.bling.com.br/pedidos.vendas.php', '_blank');
         }
 
         return pedidoId;
