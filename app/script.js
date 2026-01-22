@@ -2474,7 +2474,13 @@ async function enviarVendaParaBling(venda) {
         // 2. Mapear formas de pagamento do Bling
         const formaPagamentoBling = mapearFormaPagamento(venda.pagamento.formas);
 
-        // 3. Montar itens do pedido - buscar produto no Bling
+        // 3. Detectar se é operação interestadual (cliente fora de SP)
+        const estadoCliente = venda.cliente?.endereco?.estado?.toUpperCase() || '';
+        const isInterestadual = estadoCliente && estadoCliente !== 'SP';
+        const cfopSugerido = isInterestadual ? '6102' : '5102';
+        console.log(`Estado cliente: ${estadoCliente}, Interestadual: ${isInterestadual}, CFOP: ${cfopSugerido}`);
+
+        // 4. Montar itens do pedido - buscar produto no Bling
         const itensPedido = [];
         for (let i = 0; i < venda.produtos.length; i++) {
             const produto = venda.produtos[i];
@@ -2511,7 +2517,7 @@ async function enviarVendaParaBling(venda) {
             itensPedido.push(itemPedido);
         }
 
-        // 4. Adicionar frete se houver
+        // 5. Adicionar frete se houver
         if (venda.valorFrete > 0) {
             itensPedido.push({
                 codigo: 'FRETE',
@@ -2522,7 +2528,7 @@ async function enviarVendaParaBling(venda) {
             });
         }
 
-        // 5. Montar pedido de venda
+        // 6. Montar pedido de venda
         const pedido = {
             contato: { id: contatoId },
             data: venda.dataVenda,
@@ -2532,16 +2538,17 @@ async function enviarVendaParaBling(venda) {
             itens: itensPedido,
             parcelas: [{
                 dataVencimento: venda.dataVenda,
-                valor: venda.total
+                valor: venda.total,
+                formaPagamento: { id: 1 }
             }],
             transporte: {
                 fretePorConta: venda.entrega.tipo === 'domicilio' ? 1 : 0, // 0=Emitente, 1=Destinatário
                 valorFrete: venda.valorFrete || 0
             },
-            observacoes: `Loja: ${venda.loja}\nVendedor: ${venda.vendedor}\n${venda.pagamento.observacoes || ''}`
+            observacoes: `Loja: ${venda.loja}\nVendedor: ${venda.vendedor}\nCFOP sugerido: ${cfopSugerido}${isInterestadual ? ' (interestadual - cliente ' + estadoCliente + ')' : ''}\n${venda.pagamento.observacoes || ''}`
         };
 
-        // 6. Criar pedido de venda
+        // 7. Criar pedido de venda
         const resultadoPedido = await blingRequest('/pedidos/vendas', 'POST', pedido);
         const pedidoId = resultadoPedido.data.id;
 
