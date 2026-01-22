@@ -1,0 +1,9 @@
+{
+  "name": "nxt-sistema-vendas",
+  "version": "3.3.0",
+  "description": "Sistema NXT de Vendas e Inventário com integração Bling",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

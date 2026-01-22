@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NXT Lojas - Sistema de Vendas</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#C6FF00"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <img src="logo nxt.png" alt="NXT Lojas Logo" style="width: 120px;">
+            <h1>SISTEMA NXT V3.3 - Atualizado em 20/01/2026</h1>
+            <div id="statusAutomacao"></div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="forms-container">
+            <div class="secao-vendas">
+                <div class="venda-header">
+                    <h2><span class="header-icon">🏍️</span> Nova Venda</h2>
+                    <div class="venda-progress">
+                        <div class="progress-step active" data-step="1">
+                            <span class="step-number">1</span>
+                            <span class="step-label">Venda</span>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step" data-step="2">
+                            <span class="step-number">2</span>
+                            <span class="step-label">Cliente</span>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step" data-step="3">
+                            <span class="step-number">3</span>
+                            <span class="step-label">Produto</span>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step" data-step="4">
+                            <span class="step-number">4</span>
+                            <span class="step-label">Pagamento</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="venda-form">
+                    <form id="vendaForm">
+                        <!-- SEÇÃO 1: Informações da Venda -->
+                        <div class="secao-form-nova" data-secao="1">
+                            <div class="secao-header" onclick="toggleSecao(this)">
+                                <div class="secao-titulo">
+                                    <span class="secao-icon">🏪</span>
+                                    <h4>Informações da Venda</h4>
+                                </div>
+                                <span class="secao-toggle">▼</span>
+                            </div>
+                            <div class="secao-content">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="lojaVenda">
+                                            <span class="label-icon">📍</span> Loja
+                                        </label>
+                                        <select id="lojaVenda" required class="select-enhanced">
+                                            <option value="">Selecione a loja...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="vendedor">
+                                            <span class="label-icon">👤</span> Vendedor
+                                        </label>
+                                        <div class="vendedor-container">
+                                            <input type="text" id="vendedor" required placeholder="Digite para buscar..." autocomplete="off">
+                                            <div id="vendedorSuggestions" class="vendedor-suggestions"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="dataVenda">
+                                            <span class="label-icon">📅</span> Data
+                                        </label>
+                                        <input type="date" id="dataVenda" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEÇÃO 2: Dados do Cliente -->
+                        <div class="secao-form-nova" data-secao="2">
+                            <div class="secao-header" onclick="toggleSecao(this)">
+                                <div class="secao-titulo">
+                                    <span class="secao-icon">👤</span>
+                                    <h4>Dados do Cliente</h4>
+                                </div>
+                                <span class="secao-toggle">▼</span>
+                            </div>
+                            <div class="secao-content">
+                                <div class="form-row">
+                                    <div class="form-group form-group-large">
+                                        <label for="nomeCliente">
+                                            <span class="label-icon">✏️</span> Nome Completo
+                                        </label>
+                                        <input type="text" id="nomeCliente" required placeholder="Nome do cliente...">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="telefoneCliente">
+                                            <span class="label-icon">📱</span> Telefone
+                                        </label>
+                                        <input type="tel" id="telefoneCliente" required placeholder="(00) 00000-0000" maxlength="15" class="mask-telefone">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="cpfCliente">
+                                            <span class="label-icon">🪪</span> CPF
+                                        </label>
+                                        <input type="text" id="cpfCliente" placeholder="000.000.000-00" maxlength="14" class="mask-cpf">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cnpjCliente">
+                                            <span class="label-icon">🏢</span> CNPJ <span class="opcional-badge">Opcional</span>
+                                        </label>
+                                        <input type="text" id="cnpjCliente" placeholder="00.000.000/0000-00" maxlength="18" class="mask-cnpj">
+                                    </div>
+                                </div>
+
+                                <div class="endereco-section">
+                                    <div class="endereco-header">
+                                        <span class="label-icon">📍</span>
+                                        <h5>Endereço</h5>
+                                        <span class="cep-status" id="cepStatus"></span>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group form-group-small">
+                                            <label for="cepCliente">CEP</label>
+                                            <div class="input-with-loader">
+                                                <input type="text" id="cepCliente" maxlength="9" placeholder="00000-000" class="mask-cep">
+                                                <span class="cep-loader" id="cepLoader"></span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group form-group-large">
+                                            <label for="ruaCliente">Rua</label>
+                                            <input type="text" id="ruaCliente" required placeholder="Nome da rua...">
+                                        </div>
+                                        <div class="form-group form-group-small">
+                                            <label for="numeroCliente">Número</label>
+                                            <input type="text" id="numeroCliente" required placeholder="Nº">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="bairroCliente">Bairro</label>
+                                            <input type="text" id="bairroCliente" placeholder="Bairro...">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="cidadeCliente">Cidade</label>
+                                            <input type="text" id="cidadeCliente" placeholder="Cidade...">
+                                        </div>
+                                        <div class="form-group form-group-small">
+                                            <label for="estadoCliente">UF</label>
+                                            <select id="estadoCliente" class="select-enhanced">
+                                                <option value="">UF</option>
+                                                <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEÇÃO 3: Produto -->
+                        <div class="secao-form-nova" data-secao="3">
+                            <div class="secao-header" onclick="toggleSecao(this)">
+                                <div class="secao-titulo">
+                                    <span class="secao-icon">🏍️</span>
+                                    <h4>Produto</h4>
+                                </div>
+                                <div class="produtos-counter" id="produtosCounter">
+                                    <span class="counter-number">0</span>
+                                    <span class="counter-label">itens</span>
+                                </div>
+                                <span class="secao-toggle">▼</span>
+                            </div>
+                            <div class="secao-content">
+                                <div class="produto-adicionar-card">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="modeloProduto">
+                                                <span class="label-icon">🏍️</span> Modelo
+                                            </label>
+                                            <select id="modeloProduto" class="select-enhanced">
+                                                <option value="">Selecione o modelo...</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="corProduto">
+                                                <span class="label-icon">🎨</span> Cor
+                                            </label>
+                                            <select id="corProduto" class="select-enhanced">
+                                                <option value="">Selecione a cor...</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="precoProduto">
+                                                <span class="label-icon">💰</span> Preço
+                                            </label>
+                                            <input type="text" id="precoProduto" class="currency-input input-preco" placeholder="R$ 0,00">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="chassiProduto">
+                                                Chassi <span class="opcional-badge">Opcional</span>
+                                            </label>
+                                            <input type="text" id="chassiProduto" placeholder="Digite o chassi...">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="motorProduto">
+                                                Motor <span class="opcional-badge">Opcional</span>
+                                            </label>
+                                            <input type="text" id="motorProduto" placeholder="Digite o motor...">
+                                        </div>
+                                    </div>
+                                    <div class="capacete-section">
+                                        <div class="capacete-toggle">
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="acompanhaCapaceteCheck" onchange="toggleCapaceteVisual()">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                            <span class="toggle-label">
+                                                <span class="label-icon">🪖</span> Acompanha Capacete
+                                            </span>
+                                        </div>
+                                        <div id="corCapaceteContainer" class="capacete-cor-container" style="display: none;">
+                                            <input type="text" id="corCapacete" placeholder="Cor do capacete...">
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="acompanhaCapacete" value="nao">
+                                    <button type="button" id="adicionarProdutoBtn" class="btn-adicionar-produto">
+                                        <span class="btn-icon">➕</span>
+                                        Adicionar Produto à Venda
+                                    </button>
+                                </div>
+
+                                <!-- Lista de Produtos -->
+                                <div class="produtos-lista-card">
+                                    <div class="lista-header-produtos">
+                                        <h5><span class="label-icon">📦</span> Produtos na Venda</h5>
+                                    </div>
+                                    <div id="listaProdutosVenda" class="lista-produtos-nova">
+                                        <div class="empty-state-produtos">
+                                            <span class="empty-icon">🛒</span>
+                                            <p>Nenhum produto adicionado</p>
+                                            <p class="empty-hint">Preencha os dados acima e clique em adicionar</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEÇÃO 4: Pagamento -->
+                        <div class="secao-form-nova" data-secao="4">
+                            <div class="secao-header" onclick="toggleSecao(this)">
+                                <div class="secao-titulo">
+                                    <span class="secao-icon">💳</span>
+                                    <h4>Pagamento</h4>
+                                </div>
+                                <span class="secao-toggle">▼</span>
+                            </div>
+                            <div class="secao-content">
+                                <div class="pagamento-opcoes">
+                                    <p class="pagamento-instrucao">Selecione as formas de pagamento:</p>
+                                    <div class="pagamento-grid">
+                                        <label class="pagamento-card" data-forma="pix">
+                                            <input type="checkbox" name="pagamento" value="pix">
+                                            <div class="pagamento-card-content">
+                                                <span class="pagamento-icon">📱</span>
+                                                <span class="pagamento-nome">PIX</span>
+                                            </div>
+                                        </label>
+                                        <label class="pagamento-card" data-forma="pos">
+                                            <input type="checkbox" name="pagamento" value="pos">
+                                            <div class="pagamento-card-content">
+                                                <span class="pagamento-icon">📲</span>
+                                                <span class="pagamento-nome">PIX POS</span>
+                                            </div>
+                                        </label>
+                                        <label class="pagamento-card" data-forma="dinheiro">
+                                            <input type="checkbox" name="pagamento" value="dinheiro">
+                                            <div class="pagamento-card-content">
+                                                <span class="pagamento-icon">💵</span>
+                                                <span class="pagamento-nome">Dinheiro</span>
+                                            </div>
+                                        </label>
+                                        <label class="pagamento-card" data-forma="debito">
+                                            <input type="checkbox" name="pagamento" value="debito">
+                                            <div class="pagamento-card-content">
+                                                <span class="pagamento-icon">💳</span>
+                                                <span class="pagamento-nome">Débito</span>
+                                            </div>
+                                        </label>
+                                        <label class="pagamento-card" data-forma="credito">
+                                            <input type="checkbox" name="pagamento" value="credito">
+                                            <div class="pagamento-card-content">
+                                                <span class="pagamento-icon">💳</span>
+                                                <span class="pagamento-nome">Crédito</span>
+                                            </div>
+                                        </label>
+                                        <label class="pagamento-card" data-forma="outros">
+                                            <input type="checkbox" name="pagamento" value="outros">
+                                            <div class="pagamento-card-content">
+                                                <span class="pagamento-icon">📝</span>
+                                                <span class="pagamento-nome">Outros</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div id="valoresFormasPagamento" class="valores-pagamento-section" style="display: none;">
+                                    <h5><span class="label-icon">💰</span> Valores por Forma de Pagamento</h5>
+                                    <div class="valores-grid">
+                                        <div id="pixValorGroup" class="valor-group" style="display: none;">
+                                            <label for="valorPix">PIX (R$):</label>
+                                            <input type="text" id="valorPix" class="currency-input valor-forma-pagamento" placeholder="R$ 0,00">
+                                        </div>
+                                        <div id="posValorGroup" class="valor-group" style="display: none;">
+                                            <label for="valorPos">PIX POS (R$):</label>
+                                            <input type="text" id="valorPos" class="currency-input valor-forma-pagamento" placeholder="R$ 0,00">
+                                        </div>
+                                        <div id="dinheiroValorGroup" class="valor-group" style="display: none;">
+                                            <label for="valorDinheiro">Dinheiro (R$):</label>
+                                            <input type="text" id="valorDinheiro" class="currency-input valor-forma-pagamento" placeholder="R$ 0,00">
+                                        </div>
+                                        <div id="debitoValorGroup" class="valor-group" style="display: none;">
+                                            <label for="valorDebito">Débito (R$):</label>
+                                            <input type="text" id="valorDebito" class="currency-input valor-forma-pagamento" placeholder="R$ 0,00">
+                                        </div>
+                                        <div id="creditoValorGroup" class="valor-group" style="display: none;">
+                                            <label for="valorCredito">Crédito (R$):</label>
+                                            <input type="text" id="valorCredito" class="currency-input valor-forma-pagamento" placeholder="R$ 0,00">
+                                        </div>
+                                        <div id="outrosValorGroup" class="valor-group" style="display: none;">
+                                            <label for="valorOutros">Outros (R$):</label>
+                                            <input type="text" id="valorOutros" class="currency-input valor-forma-pagamento" placeholder="R$ 0,00">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="parcelasGroup" class="parcelas-section" style="display: none;">
+                                    <label for="parcelasCredito">
+                                        <span class="label-icon">🔢</span> Parcelas do Crédito:
+                                    </label>
+                                    <div class="parcelas-selector">
+                                        <button type="button" class="parcela-btn" data-parcelas="1">1x</button>
+                                        <button type="button" class="parcela-btn" data-parcelas="2">2x</button>
+                                        <button type="button" class="parcela-btn" data-parcelas="3">3x</button>
+                                        <button type="button" class="parcela-btn" data-parcelas="4">4x</button>
+                                        <button type="button" class="parcela-btn" data-parcelas="5">5x</button>
+                                        <button type="button" class="parcela-btn" data-parcelas="6">6x</button>
+                                        <button type="button" class="parcela-btn" data-parcelas="7">7x</button>
+                                        <button type="button" class="parcela-btn" data-parcelas="8">8x</button>
+                                        <button type="button" class="parcela-btn" data-parcelas="9">9x</button>
+                                        <button type="button" class="parcela-btn" data-parcelas="10">10x</button>
+                                        <button type="button" class="parcela-btn" data-parcelas="11">11x</button>
+                                        <button type="button" class="parcela-btn" data-parcelas="12">12x</button>
+                                    </div>
+                                    <input type="hidden" id="parcelasCredito" value="1">
+                                </div>
+
+                                <div id="outrosPagamentoGroup" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="outrosPagamentoTexto">
+                                            <span class="label-icon">📝</span> Especificar Outros:
+                                        </label>
+                                        <input type="text" id="outrosPagamentoTexto" placeholder="Descreva a forma de pagamento...">
+                                    </div>
+                                </div>
+
+                                <div class="pix-info-card" id="pixInfoCard" style="display: none;">
+                                    <div class="pix-info-header">
+                                        <span class="pix-icon">📱</span>
+                                        <span>Dados para PIX</span>
+                                    </div>
+                                    <div class="pix-info-content">
+                                        <p><strong>CNPJ:</strong> 55.099.827/0001-96</p>
+                                        <p><strong>Razão Social:</strong> Ni Hao Comércio e Serviços Ltda</p>
+                                    </div>
+                                </div>
+
+                                <div class="form-group observacoes-group">
+                                    <label for="observacoesPagamento">
+                                        <span class="label-icon">📝</span> Observações do Pagamento
+                                    </label>
+                                    <textarea id="observacoesPagamento" rows="2" placeholder="Informações adicionais..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEÇÃO 5: Entrega -->
+                        <div class="secao-form-nova" data-secao="5">
+                            <div class="secao-header" onclick="toggleSecao(this)">
+                                <div class="secao-titulo">
+                                    <span class="secao-icon">🚚</span>
+                                    <h4>Entrega</h4>
+                                </div>
+                                <span class="secao-toggle">▼</span>
+                            </div>
+                            <div class="secao-content">
+                                <div class="entrega-tipo-selector">
+                                    <label class="entrega-card active" data-tipo="retirada" onclick="selecionarTipoEntrega('retirada')">
+                                        <input type="radio" name="tipoEntregaRadio" value="retirada" checked>
+                                        <div class="entrega-card-content">
+                                            <span class="entrega-icon">🏪</span>
+                                            <span class="entrega-nome">Retirada na Loja</span>
+                                            <span class="entrega-desc">Cliente retira o produto</span>
+                                        </div>
+                                    </label>
+                                    <label class="entrega-card" data-tipo="domicilio" onclick="selecionarTipoEntrega('domicilio')">
+                                        <input type="radio" name="tipoEntregaRadio" value="domicilio">
+                                        <div class="entrega-card-content">
+                                            <span class="entrega-icon">🏠</span>
+                                            <span class="entrega-nome">Entrega em Casa</span>
+                                            <span class="entrega-desc">Enviamos até o cliente</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <input type="hidden" id="tipoEntrega" value="retirada">
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="prazoEntrega">
+                                            <span class="label-icon">📅</span> Data Prevista
+                                        </label>
+                                        <input type="date" id="prazoEntrega">
+                                    </div>
+                                    <div class="form-group" id="freteGroup">
+                                        <label for="valorFrete">
+                                            <span class="label-icon">💰</span> Valor do Frete
+                                        </label>
+                                        <input type="text" id="valorFrete" class="currency-input" placeholder="R$ 0,00">
+                                    </div>
+                                </div>
+
+                                <div class="origem-section">
+                                    <div class="form-group">
+                                        <label for="origemProduto">
+                                            <span class="label-icon">📦</span> Origem do Produto
+                                        </label>
+                                        <select id="origemProduto" class="select-enhanced">
+                                            <option value="propria_loja">Da própria Loja</option>
+                                            <option value="outro_lugar">De outro lugar</option>
+                                        </select>
+                                    </div>
+                                    <div id="lojaSaidaGroup" class="loja-saida-group" style="display: none;">
+                                        <label for="lojaSaida">
+                                            <span class="label-icon">🏪</span> Local de Saída
+                                        </label>
+                                        <select id="lojaSaida" class="select-enhanced">
+                                            <option value="">Selecione...</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TOTAL E AÇÕES -->
+                        <div class="venda-footer">
+                            <div class="total-card">
+                                <div class="total-label">Total da Venda</div>
+                                <div class="total-valor-grande" id="totalVenda">R$ 0,00</div>
+                            </div>
+
+                            <div class="venda-actions">
+                                <button type="submit" class="btn-registrar-venda">
+                                    <span class="btn-icon">✅</span>
+                                    Registrar Venda
+                                </button>
+                                <button type="button" id="copiarResumoVenda" class="btn-copiar-resumo">
+                                    <span class="btn-icon">📋</span>
+                                    Copiar Resumo
+                                </button>
+                                <button type="button" id="limparFormularioBtn" class="btn-limpar-form">
+                                    <span class="btn-icon">🗑️</span>
+                                    Limpar
+                                </button>
+                            </div>
+
+                            <!-- Integração Bling -->
+                            <div class="bling-actions">
+                                <div class="bling-status" id="blingStatus">
+                                    <span class="bling-status-icon" id="blingStatusIcon">⚪</span>
+                                    <span class="bling-status-text" id="blingStatusText">Bling não configurado</span>
+                                </div>
+                                <div class="bling-buttons">
+                                    <button type="button" id="btnConfigBling" class="btn-config-bling" onclick="abrirModalBling()">
+                                        <span class="btn-icon">⚙️</span>
+                                        Configurar Bling
+                                    </button>
+                                    <button type="button" id="btnEnviarBling" class="btn-enviar-bling" onclick="enviarUltimaVendaBling()" disabled>
+                                        <span class="btn-icon">📤</span>
+                                        Enviar para Bling
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="secao-inventario">
+                <h2>Inventário e Movimentação</h2>
+
+                <!-- Header com seleção de loja e ações -->
+                <div class="inventario-header-card">
+                    <div class="loja-selector">
+                        <label for="lojaInventario">Loja:</label>
+                        <select id="lojaInventario" required>
+                            <option value="">Selecione a loja...</option>
+                        </select>
+                    </div>
+                    <div class="inventario-quick-actions">
+                        <button type="button" class="btn-icon" onclick="carregarUltimoInventario()" title="Carregar Último">
+                            <span class="icon">📋</span>
+                            <span class="btn-label">Último</span>
+                        </button>
+                        <button type="button" class="btn-icon" onclick="mostrarHistoricoInventario()" title="Histórico">
+                            <span class="icon">📊</span>
+                            <span class="btn-label">Histórico</span>
+                        </button>
+                        <button type="button" class="btn-icon" onclick="exportarInventarios()" title="Backup">
+                            <span class="icon">💾</span>
+                            <span class="btn-label">Backup</span>
+                        </button>
+                        <button type="button" class="btn-icon" onclick="document.getElementById('importFileInput').click()" title="Restaurar">
+                            <span class="icon">📥</span>
+                            <span class="btn-label">Restaurar</span>
+                        </button>
+                        <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="importarInventarios(event)">
+                    </div>
+                </div>
+
+                <!-- Sistema de Abas -->
+                <div class="tabs-container">
+                    <div class="tabs-header">
+                        <button type="button" class="tab-btn active" data-tab="contagem" onclick="mudarAbaInventario('contagem')">
+                            <span class="tab-icon">📦</span>
+                            <span class="tab-text">Contagem de Estoque</span>
+                        </button>
+                        <button type="button" class="tab-btn" data-tab="movimentacao" onclick="mudarAbaInventario('movimentacao')">
+                            <span class="tab-icon">🔄</span>
+                            <span class="tab-text">Movimentação</span>
+                        </button>
+                    </div>
+
+                    <!-- Aba: Contagem de Estoque -->
+                    <div class="tab-content active" id="tab-contagem">
+                        <div class="tab-description">
+                            <p>Registre a contagem atual do estoque da loja</p>
+                        </div>
+                        <form id="inventarioForm">
+                            <input type="hidden" id="tipoOperacao" value="inventario">
+
+                            <!-- Seleção rápida de tipo de item -->
+                            <div class="tipo-item-selector">
+                                <button type="button" class="tipo-item-btn active" data-tipo="moto" onclick="selecionarTipoItem('moto')">
+                                    <span class="tipo-icon">🏍️</span>
+                                    <span>Moto</span>
+                                </button>
+                                <button type="button" class="tipo-item-btn" data-tipo="capacete" onclick="selecionarTipoItem('capacete')">
+                                    <span class="tipo-icon">🪖</span>
+                                    <span>Capacete</span>
+                                </button>
+                            </div>
+                            <input type="hidden" id="tipoItem" value="moto">
+
+                            <!-- Campos para Moto -->
+                            <div id="camposMoto" class="campos-animados">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="modeloInventario">Modelo:</label>
+                                        <select id="modeloInventario" class="select-enhanced">
+                                            <option value="">Selecione o modelo...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="corInventario">Cor:</label>
+                                        <select id="corInventario" class="select-enhanced">
+                                            <option value="">Selecione a cor...</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="camposChassiMotor" class="form-row campos-opcionais">
+                                    <div class="form-group">
+                                        <label for="chassiInventario">
+                                            Chassi <span class="opcional-badge">Opcional</span>
+                                        </label>
+                                        <input type="text" id="chassiInventario" placeholder="Digite o chassi...">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="motorInventario">
+                                            Motor <span class="opcional-badge">Opcional</span>
+                                        </label>
+                                        <input type="text" id="motorInventario" placeholder="Digite o motor...">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Controle de Quantidade -->
+                            <div class="quantidade-control">
+                                <label>Quantidade:</label>
+                                <div class="quantidade-input-group">
+                                    <button type="button" class="qty-btn minus" onclick="alterarQuantidade(-1)">−</button>
+                                    <input type="number" id="quantidadeInventario" value="1" min="1" required>
+                                    <button type="button" class="qty-btn plus" onclick="alterarQuantidade(1)">+</button>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-add-item" id="btnSubmitInventario">
+                                <span class="btn-icon-left">➕</span>
+                                Adicionar ao Inventário
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Aba: Movimentação -->
+                    <div class="tab-content" id="tab-movimentacao">
+                        <div class="tab-description">
+                            <p>Registre entradas e saídas de estoque</p>
+                        </div>
+                        <form id="movimentacaoForm">
+                            <!-- Tipo de Movimentação com visual claro -->
+                            <div class="movimentacao-tipo-selector">
+                                <button type="button" class="mov-tipo-btn entrada" data-tipo="entrada" onclick="selecionarTipoMovimentacao('entrada')">
+                                    <span class="mov-icon">📥</span>
+                                    <span class="mov-text">Entrada</span>
+                                    <span class="mov-desc">Recebimento de produtos</span>
+                                </button>
+                                <button type="button" class="mov-tipo-btn saida" data-tipo="saida" onclick="selecionarTipoMovimentacao('saida')">
+                                    <span class="mov-icon">📤</span>
+                                    <span class="mov-text">Saída</span>
+                                    <span class="mov-desc">Transferência ou baixa</span>
+                                </button>
+                            </div>
+                            <input type="hidden" id="tipoMovimentacaoHidden" value="">
+
+                            <!-- Seleção de tipo de item -->
+                            <div class="tipo-item-selector mov">
+                                <button type="button" class="tipo-item-btn active" data-tipo="moto" onclick="selecionarTipoItemMov('moto')">
+                                    <span class="tipo-icon">🏍️</span>
+                                    <span>Moto</span>
+                                </button>
+                                <button type="button" class="tipo-item-btn" data-tipo="capacete" onclick="selecionarTipoItemMov('capacete')">
+                                    <span class="tipo-icon">🪖</span>
+                                    <span>Capacete</span>
+                                </button>
+                            </div>
+                            <input type="hidden" id="tipoItemMov" value="moto">
+
+                            <!-- Campos para Moto (Movimentação) -->
+                            <div id="camposMotoMov" class="campos-animados">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="modeloMovimentacao">Modelo:</label>
+                                        <select id="modeloMovimentacao" class="select-enhanced">
+                                            <option value="">Selecione o modelo...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="corMovimentacao">Cor:</label>
+                                        <select id="corMovimentacao" class="select-enhanced">
+                                            <option value="">Selecione a cor...</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row campos-opcionais">
+                                    <div class="form-group">
+                                        <label for="chassiMovimentacao">
+                                            Chassi <span class="opcional-badge">Opcional</span>
+                                        </label>
+                                        <input type="text" id="chassiMovimentacao" placeholder="Digite o chassi...">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="motorMovimentacao">
+                                            Motor <span class="opcional-badge">Opcional</span>
+                                        </label>
+                                        <input type="text" id="motorMovimentacao" placeholder="Digite o motor...">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Motivo da Movimentação -->
+                            <div class="form-group motivo-group">
+                                <label for="motivoMovimentacao">Motivo da Movimentação:</label>
+                                <div class="motivos-rapidos">
+                                    <button type="button" class="motivo-btn" onclick="selecionarMotivo('Transferência entre lojas')">Transferência</button>
+                                    <button type="button" class="motivo-btn" onclick="selecionarMotivo('Recebimento de fábrica')">Fábrica</button>
+                                    <button type="button" class="motivo-btn" onclick="selecionarMotivo('Ajuste de estoque')">Ajuste</button>
+                                    <button type="button" class="motivo-btn" onclick="selecionarMotivo('Devolução')">Devolução</button>
+                                </div>
+                                <input type="text" id="motivoMovimentacao" placeholder="Ou digite o motivo...">
+                            </div>
+
+                            <!-- Controle de Quantidade -->
+                            <div class="quantidade-control">
+                                <label>Quantidade:</label>
+                                <div class="quantidade-input-group">
+                                    <button type="button" class="qty-btn minus" onclick="alterarQuantidadeMov(-1)">−</button>
+                                    <input type="number" id="quantidadeMovimentacao" value="1" min="1" required>
+                                    <button type="button" class="qty-btn plus" onclick="alterarQuantidadeMov(1)">+</button>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-add-item movimentacao" id="btnSubmitMovimentacao" disabled>
+                                <span class="btn-icon-left">🔄</span>
+                                Registrar Movimentação
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Ações principais -->
+                <div class="inventario-main-actions">
+                    <button id="finalizarInventario" class="btn-finalizar" disabled>
+                        <span class="btn-icon-left">✅</span>
+                        Finalizar e Enviar
+                    </button>
+                    <button id="copiarResumoInventario" class="btn-copiar" disabled>
+                        <span class="btn-icon-left">📋</span>
+                        Copiar Resumo
+                    </button>
+                </div>
+
+                <!-- Lista de Itens -->
+                <div class="inventario-lista-card">
+                    <div class="lista-header">
+                        <h3 id="tituloListaInventario">
+                            <span class="lista-icon">📦</span>
+                            Itens Registrados
+                        </h3>
+                        <div class="contador-badge" id="contadorBadge">
+                            <span id="contadorInventario">0</span>
+                            <span class="contador-label">itens</span>
+                        </div>
+                    </div>
+                    <div id="listaInventarioAtual" class="lista-inventario-nova">
+                        <div class="empty-state-novo">
+                            <span class="empty-icon">📭</span>
+                            <p id="mensagemVaziaInventario">Nenhum item registrado ainda</p>
+                            <p class="empty-hint">Selecione uma aba acima e adicione itens</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="modalResumoVenda" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close-btn">&times;</span>
+            <h3>Venda Registrada com Sucesso!</h3>
+            <p>Abaixo está o resumo da venda para compartilhar:</p>
+            <textarea id="textoResumoModal" readonly></textarea>
+            <div class="modal-actions">
+                <button id="copiarResumoModalBtn" class="btn-success">Copiar Resumo</button>
+                <button id="gerarFaturaBtn" class="btn-warning">Gerar Fatura</button>
+                <button class="modal-close-btn btn-secondary">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalHistoricoInventario" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close-btn" onclick="fecharModalHistorico()">&times;</span>
+            <h3>📊 Histórico de Inventários</h3>
+            <p>Selecione um inventário para carregar:</p>
+            <div id="listaHistoricoInventario" style="max-height: 400px; overflow-y: auto; margin: 20px 0;">
+                <!-- Conteúdo será gerado dinamicamente -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="fecharModalHistorico()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalFatura" class="modal-overlay" style="display: none;">
+        <div class="modal-content modal-fatura">
+            <span class="modal-close-btn">&times;</span>
+            <div id="faturaContent" class="fatura-content">
+                <!-- Conteúdo da fatura será gerado aqui -->
+            </div>
+            <div class="modal-actions">
+                <button id="copiarFaturaBtn" class="btn-success">Copiar Fatura</button>
+                <button id="gerarPdfBtn" class="btn-warning">Gerar PDF</button>
+                <button id="imprimirFaturaBtn" class="btn-primary">Imprimir</button>
+                <button class="modal-close-btn btn-secondary">Fechar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Configuração do Bling -->
+    <div id="modalBling" class="modal-overlay" style="display: none;">
+        <div class="modal-content modal-bling">
+            <span class="modal-close-btn" onclick="fecharModalBling()">&times;</span>
+            <div class="bling-modal-header">
+                <h3>⚙️ Configuração do Bling</h3>
+                <p>Configure a integração com o Bling ERP para enviar vendas e gerar NF-e automaticamente.</p>
+            </div>
+
+            <div class="bling-config-status" id="blingConfigStatus">
+                <!-- Status será atualizado via JavaScript -->
+            </div>
+
+            <div class="bling-config-form">
+                <div class="bling-config-section">
+                    <h4>📝 Credenciais da API</h4>
+                    <p class="bling-help-text">Obtenha as credenciais no painel do Bling em: Configurações > Integrações > API</p>
+
+                    <div class="form-group">
+                        <label for="blingClientId">Client ID:</label>
+                        <input type="text" id="blingClientId" placeholder="Cole aqui o Client ID do Bling">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="blingClientSecret">Client Secret:</label>
+                        <input type="password" id="blingClientSecret" placeholder="Cole aqui o Client Secret do Bling">
+                    </div>
+                </div>
+
+                <div class="bling-config-section">
+                    <h4>🔗 Callback URL</h4>
+                    <p class="bling-help-text">Configure esta URL no painel do Bling como URL de redirecionamento:</p>
+                    <div class="bling-callback-url">
+                        <code id="blingCallbackUrl">-</code>
+                        <button type="button" class="btn-copiar-callback" onclick="copiarCallbackUrl()">📋 Copiar</button>
+                    </div>
+                </div>
+
+                <div class="bling-config-section">
+                    <h4>📦 Opções de Envio</h4>
+                    <div class="bling-opcoes">
+                        <label class="bling-opcao">
+                            <input type="checkbox" id="blingCriarPedido" checked>
+                            <span>Criar Pedido de Venda</span>
+                        </label>
+                        <label class="bling-opcao">
+                            <input type="checkbox" id="blingGerarNFe" checked>
+                            <span>Gerar NF-e automaticamente</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bling-modal-actions">
+                <button type="button" id="btnSalvarConfigBling" class="btn-success" onclick="salvarConfigBling()">
+                    💾 Salvar Configurações
+                </button>
+                <button type="button" id="btnAutorizarBling" class="btn-primary" onclick="autorizarBling()" style="display: none;">
+                    🔐 Autorizar no Bling
+                </button>
+                <button type="button" id="btnDesconectarBling" class="btn-warning" onclick="desconectarBling()" style="display: none;">
+                    🔌 Desconectar
+                </button>
+                <button type="button" class="btn-secondary" onclick="fecharModalBling()">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="update-notification" style="display:none;">
+      Uma nova versão do aplicativo está disponível! <button onclick="window.location.reload()">Atualizar</button>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 NXT Lojas - Sistema de Vendas e Inventário</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker registrado com sucesso:', registration);
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                document.getElementById('update-notification').style.display = 'block';
+                            }
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.log('Falha ao registrar Service Worker:', error);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
