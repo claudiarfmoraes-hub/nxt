@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nxt-lojas-cache-v6'; // Versão atualizada - envio automático para emissão
+const CACHE_NAME = 'nxt-lojas-cache-v7'; // Força atualização completa
 const urlsToCache = [
   '/',
   '/index.html',
