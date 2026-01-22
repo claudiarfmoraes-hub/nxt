@@ -2463,14 +2463,32 @@ async function enviarVendaParaBling(venda) {
         // 2. Mapear formas de pagamento do Bling
         const formaPagamentoBling = mapearFormaPagamento(venda.pagamento.formas);
 
-        // 3. Montar itens do pedido
-        const itensPedido = venda.produtos.map((produto, index) => ({
-            codigo: produto.chassi || `MOTO-${index + 1}`,
-            descricao: `${produto.modelo} - ${produto.cor}`,
-            unidade: 'UN',
-            quantidade: 1,
-            valor: produto.preco
-        }));
+        // 3. Montar itens do pedido - buscar produto no Bling
+        const itensPedido = [];
+        for (let i = 0; i < venda.produtos.length; i++) {
+            const produto = venda.produtos[i];
+            const descricaoBling = `NXT Autopropelido ${produto.modelo} ${produto.cor}`;
+
+            // Tentar buscar produto no Bling pela descrição
+            let produtoBling = null;
+            try {
+                const busca = await blingRequest(`/produtos?nome=${encodeURIComponent(descricaoBling)}`);
+                if (busca.data && busca.data.length > 0) {
+                    produtoBling = busca.data[0];
+                    console.log('Produto encontrado no Bling:', produtoBling);
+                }
+            } catch (e) {
+                console.log('Produto não encontrado no Bling, usando descrição manual');
+            }
+
+            itensPedido.push({
+                codigo: produtoBling ? produtoBling.codigo : (produto.chassi || `MOTO-${i + 1}`),
+                descricao: descricaoBling,
+                unidade: 'UN',
+                quantidade: 1,
+                valor: produto.preco
+            });
+        }
 
         // 4. Adicionar frete se houver
         if (venda.valorFrete > 0) {
