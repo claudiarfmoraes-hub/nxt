@@ -2419,20 +2419,14 @@ async function blingRequest(endpoint, method = 'GET', body = null) {
 // Buscar ou criar contato no Bling
 async function buscarOuCriarContato(cliente) {
     try {
-        console.log('Cliente recebido:', JSON.stringify(cliente, null, 2));
-
         // Tentar buscar por CPF/CNPJ
         const documento = cliente.cnpj || cliente.cpf;
-        console.log('Documento:', documento);
 
         if (documento) {
             const docLimpo = documento.replace(/\D/g, '');
-            console.log('Buscando contato por documento:', docLimpo);
             const busca = await blingRequest(`/contatos?numeroDocumento=${docLimpo}`);
-            console.log('Resultado busca:', busca);
 
             if (busca.data && busca.data.length > 0) {
-                console.log('Contato encontrado, ID:', busca.data[0].id);
                 return busca.data[0].id;
             }
         }
@@ -2440,7 +2434,6 @@ async function buscarOuCriarContato(cliente) {
         // Criar novo contato
         const tipoContato = cliente.cnpj ? 'J' : 'F'; // Jurídica ou Física
         const numeroDocumento = (cliente.cnpj || cliente.cpf || '').replace(/\D/g, '');
-        console.log('Criando novo contato. Tipo:', tipoContato, 'Doc:', numeroDocumento);
 
         const novoContato = {
             nome: cliente.nome,
@@ -2462,7 +2455,6 @@ async function buscarOuCriarContato(cliente) {
             }
         };
 
-        console.log('Enviando contato para Bling:', JSON.stringify(novoContato, null, 2));
         const resultado = await blingRequest('/contatos', 'POST', novoContato);
         return resultado.data.id;
 
