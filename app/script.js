@@ -2481,13 +2481,23 @@ async function enviarVendaParaBling(venda) {
                 console.log('Produto não encontrado no Bling, usando descrição manual');
             }
 
-            itensPedido.push({
-                codigo: produtoBling ? produtoBling.codigo : (produto.chassi || `MOTO-${i + 1}`),
+            const itemPedido = {
                 descricao: descricaoBling,
                 unidade: 'UN',
                 quantidade: 1,
                 valor: produto.preco
-            });
+            };
+
+            // Se encontrou o produto no Bling, vincular pelo ID
+            if (produtoBling && produtoBling.id) {
+                itemPedido.produto = { id: produtoBling.id };
+                itemPedido.codigo = produtoBling.codigo || '';
+                console.log(`Vinculando ao produto Bling ID: ${produtoBling.id}`);
+            } else {
+                itemPedido.codigo = produto.chassi || `MOTO-${i + 1}`;
+            }
+
+            itensPedido.push(itemPedido);
         }
 
         // 4. Adicionar frete se houver
