@@ -2493,8 +2493,7 @@ async function enviarVendaParaBling(venda) {
             itens: itensPedido,
             parcelas: [{
                 dataVencimento: venda.dataVenda,
-                valor: venda.total,
-                formaPagamento: { id: formaPagamentoBling }
+                valor: venda.total
             }],
             transporte: {
                 fretePorConta: venda.entrega.tipo === 'domicilio' ? 1 : 0, // 0=Emitente, 1=Destinatário
