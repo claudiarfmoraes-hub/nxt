@@ -1,0 +1,173 @@
+/* Estilos da Tela de Login - NXT Plus */
+
+.login-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.login-box {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+}
+
+.login-logo {
+    width: 150px;
+    margin-bottom: 20px;
+}
+
+.login-box h1 {
+    color: #1a1a2e;
+    margin: 0 0 5px 0;
+    font-size: 28px;
+}
+
+.login-subtitle {
+    color: #666;
+    margin: 0 0 30px 0;
+    font-size: 14px;
+}
+
+.login-field {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.login-field label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.login-field input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    box-sizing: border-box;
+}
+
+.login-field input:focus {
+    outline: none;
+    border-color: #C6FF00;
+    box-shadow: 0 0 0 3px rgba(198, 255, 0, 0.2);
+}
+
+.login-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #C6FF00, #9ACD32);
+    color: #1a1a2e;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(198, 255, 0, 0.4);
+}
+
+.login-btn:active {
+    transform: translateY(0);
+}
+
+.login-error {
+    background: #fee;
+    color: #c00;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.login-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    color: #666;
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #e0e0e0;
+    border-top-color: #C6FF00;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Footer com info do usuário */
+.footer-user-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 10px;
+    color: #666;
+    font-size: 14px;
+}
+
+.btn-logout {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.3s;
+}
+
+.btn-logout:hover {
+    background: #cc0000;
+}
+
+/* Header com nome da loja */
+.header-loja-info {
+    background: rgba(198, 255, 0, 0.2);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Responsivo */
+@media (max-width: 480px) {
+    .login-box {
+        padding: 30px 20px;
+    }
+
+    .login-logo {
+        width: 120px;
+    }
+
+    .login-box h1 {
+        font-size: 24px;
+    }
+}

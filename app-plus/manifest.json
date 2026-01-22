@@ -1,0 +1,21 @@
+{
+  "name": "NXT Lojas - Sistema de Vendas",
+  "short_name": "NXT Vendas",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#C6FF00",
+  "description": "Sistema de Vendas e Inventário para as lojas NXT.",
+  "icons": [
+    {
+      "src": "logo_192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
