@@ -2394,12 +2394,15 @@ async function blingRequest(endpoint, method = 'GET', body = null) {
         })
     });
 
+    const responseData = await response.json().catch(() => ({}));
+
     if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || errorData.error || `Erro ${response.status}`);
+        console.error('Erro Bling API - Status:', response.status);
+        console.error('Erro Bling API - Detalhes:', JSON.stringify(responseData, null, 2));
+        throw new Error(responseData.details?.error?.message || responseData.error || `Erro ${response.status}`);
     }
 
-    return response.json();
+    return responseData;
 }
 
 // Buscar ou criar contato no Bling
