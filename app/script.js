@@ -5,20 +5,31 @@ const POWER_AUTOMATE_URLS = {
 };
 
 // ========================================
-// CONFIGURAÇÃO BLING API V3
+// CONFIGURAÇÃO BLING API V3 (AUTENTICAÇÃO CENTRALIZADA)
 // ========================================
 const BLING_CONFIG = {
-    apiBaseUrl: 'https://www.bling.com.br/Api/v3',
-    authUrl: 'https://www.bling.com.br/Api/v3/oauth/authorize',
-    tokenUrl: 'https://www.bling.com.br/Api/v3/oauth/token',
-    // Credenciais carregadas do localStorage
-    get clientId() { return localStorage.getItem('bling_client_id') || ''; },
-    get clientSecret() { return localStorage.getItem('bling_client_secret') || ''; },
-    get accessToken() { return localStorage.getItem('bling_access_token') || ''; },
-    get refreshToken() { return localStorage.getItem('bling_refresh_token') || ''; },
-    get tokenExpiry() { return parseInt(localStorage.getItem('bling_token_expiry') || '0'); },
-    get isConfigured() { return !!(this.clientId && this.clientSecret); },
-    get isAuthenticated() { return !!(this.accessToken && Date.now() < this.tokenExpiry); }
+    // Status carregado do servidor
+    isConfigured: false,
+    isAuthenticated: false,
+    statusMessage: 'Verificando conexão...',
+
+    // Verificar status no servidor
+    async checkStatus() {
+        try {
+            const response = await fetch('/api/bling/status');
+            const data = await response.json();
+            this.isConfigured = data.configured;
+            this.isAuthenticated = data.authenticated;
+            this.statusMessage = data.message;
+            return data;
+        } catch (error) {
+            console.error('Erro ao verificar status Bling:', error);
+            this.isConfigured = false;
+            this.isAuthenticated = false;
+            this.statusMessage = 'Erro ao conectar com servidor';
+            return { configured: false, authenticated: false };
+        }
+    }
 };
 
 // Variáveis globais de dados
@@ -2371,13 +2382,13 @@ async function renovarTokenBling() {
     }
 }
 
-// Fazer requisição autenticada ao Bling (via API Vercel)
+// Fazer requisição autenticada ao Bling (via API Vercel - autenticação centralizada)
 async function blingRequest(endpoint, method = 'GET', body = null) {
-    // Verificar se token está válido
+    // Verificar se está autenticado no servidor
     if (!BLING_CONFIG.isAuthenticated) {
-        const renovado = await renovarTokenBling();
-        if (!renovado) {
-            throw new Error('Sessão expirada. Autorize novamente.');
+        await BLING_CONFIG.checkStatus();
+        if (!BLING_CONFIG.isAuthenticated) {
+            throw new Error('Bling não está conectado. Contate a matriz.');
         }
     }
 
@@ -2389,8 +2400,8 @@ async function blingRequest(endpoint, method = 'GET', body = null) {
         body: JSON.stringify({
             endpoint: endpoint,
             method: method,
-            body: body,
-            access_token: BLING_CONFIG.accessToken
+            body: body
+            // access_token agora é gerenciado pelo servidor
         })
     });
 
@@ -2598,14 +2609,12 @@ async function gerarNFeBling(pedidoId) {
     }
 }
 
-// Atualizar status visual do Bling
+// Atualizar status visual do Bling (autenticação centralizada)
 function atualizarStatusBling() {
     const statusEl = document.getElementById('blingStatus');
     const statusIcon = document.getElementById('blingStatusIcon');
     const statusText = document.getElementById('blingStatusText');
     const btnEnviar = document.getElementById('btnEnviarBling');
-    const btnAutorizar = document.getElementById('btnAutorizarBling');
-    const btnDesconectar = document.getElementById('btnDesconectarBling');
     const configStatus = document.getElementById('blingConfigStatus');
 
     // Atualizar status no footer da venda
@@ -2619,7 +2628,7 @@ function atualizarStatusBling() {
             if (btnEnviar) btnEnviar.disabled = !ultimaVendaRegistrada;
         } else if (BLING_CONFIG.isConfigured) {
             statusIcon.textContent = '🟡';
-            statusText.textContent = 'Bling não autorizado';
+            statusText.textContent = 'Aguardando autorização';
             if (btnEnviar) btnEnviar.disabled = true;
         } else {
             statusIcon.textContent = '⚪';
@@ -2628,15 +2637,7 @@ function atualizarStatusBling() {
         }
     }
 
-    // Atualizar botões no modal
-    if (btnAutorizar) {
-        btnAutorizar.style.display = BLING_CONFIG.isConfigured && !BLING_CONFIG.isAuthenticated ? 'block' : 'none';
-    }
-    if (btnDesconectar) {
-        btnDesconectar.style.display = BLING_CONFIG.isAuthenticated ? 'block' : 'none';
-    }
-
-    // Atualizar status no modal
+    // Atualizar status no modal (modo centralizado - sem formulário de config)
     if (configStatus) {
         if (BLING_CONFIG.isAuthenticated) {
             configStatus.innerHTML = `
@@ -2652,17 +2653,18 @@ function atualizarStatusBling() {
                 <div class="bling-status-card configurado">
                     <span class="bling-status-icon-large">⚠️</span>
                     <div class="bling-status-info">
-                        <h5>Credenciais Salvas</h5>
-                        <p>Clique em "Autorizar no Bling" para conectar</p>
+                        <h5>Aguardando Autorização</h5>
+                        <p>A matriz precisa autorizar a conexão com o Bling</p>
+                        <a href="/api/bling/auth" class="btn-primary" style="margin-top:10px;display:inline-block;padding:8px 16px;text-decoration:none;border-radius:4px;">Autorizar (Matriz)</a>
                     </div>
                 </div>`;
         } else {
             configStatus.innerHTML = `
                 <div class="bling-status-card nao-configurado">
-                    <span class="bling-status-icon-large">📝</span>
+                    <span class="bling-status-icon-large">⚙️</span>
                     <div class="bling-status-info">
                         <h5>Não Configurado</h5>
-                        <p>Preencha as credenciais da API abaixo</p>
+                        <p>Configure as variáveis de ambiente no Vercel (BLING_CLIENT_ID, BLING_CLIENT_SECRET)</p>
                     </div>
                 </div>`;
         }
@@ -2746,18 +2748,14 @@ async function enviarUltimaVendaBling() {
 }
 
 // Inicializar Bling na carga da página
-function inicializarBling() {
-    // Verificar se há callback de OAuth
-    verificarCallbackBling();
+async function inicializarBling() {
+    // Verificar status no servidor (autenticação centralizada)
+    await BLING_CONFIG.checkStatus();
 
-    // Atualizar status
+    // Atualizar interface
     atualizarStatusBling();
 
-    // Definir URL de callback
-    const callbackUrl = document.getElementById('blingCallbackUrl');
-    if (callbackUrl) {
-        callbackUrl.textContent = window.location.origin + window.location.pathname;
-    }
+    console.log('Bling Status:', BLING_CONFIG.statusMessage);
 }
 
 // Copiar URL de callback para área de transferência

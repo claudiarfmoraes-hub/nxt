@@ -796,69 +796,20 @@
         </div>
     </div>
     
-    <!-- Modal de Configuração do Bling -->
+    <!-- Modal de Status do Bling -->
     <div id="modalBling" class="modal-overlay" style="display: none;">
         <div class="modal-content modal-bling">
             <span class="modal-close-btn" onclick="fecharModalBling()">&times;</span>
             <div class="bling-modal-header">
-                <h3>⚙️ Configuração do Bling</h3>
-                <p>Configure a integração com o Bling ERP para enviar vendas e gerar NF-e automaticamente.</p>
+                <h3>Bling ERP</h3>
+                <p>Integração para enviar vendas e gerar pedidos automaticamente.</p>
             </div>
 
             <div class="bling-config-status" id="blingConfigStatus">
                 <!-- Status será atualizado via JavaScript -->
             </div>
 
-            <div class="bling-config-form">
-                <div class="bling-config-section">
-                    <h4>📝 Credenciais da API</h4>
-                    <p class="bling-help-text">Obtenha as credenciais no painel do Bling em: Configurações > Integrações > API</p>
-
-                    <div class="form-group">
-                        <label for="blingClientId">Client ID:</label>
-                        <input type="text" id="blingClientId" placeholder="Cole aqui o Client ID do Bling">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="blingClientSecret">Client Secret:</label>
-                        <input type="password" id="blingClientSecret" placeholder="Cole aqui o Client Secret do Bling">
-                    </div>
-                </div>
-
-                <div class="bling-config-section">
-                    <h4>🔗 Callback URL</h4>
-                    <p class="bling-help-text">Configure esta URL no painel do Bling como URL de redirecionamento:</p>
-                    <div class="bling-callback-url">
-                        <code id="blingCallbackUrl">-</code>
-                        <button type="button" class="btn-copiar-callback" onclick="copiarCallbackUrl()">📋 Copiar</button>
-                    </div>
-                </div>
-
-                <div class="bling-config-section">
-                    <h4>📦 Opções de Envio</h4>
-                    <div class="bling-opcoes">
-                        <label class="bling-opcao">
-                            <input type="checkbox" id="blingCriarPedido" checked>
-                            <span>Criar Pedido de Venda</span>
-                        </label>
-                        <label class="bling-opcao">
-                            <input type="checkbox" id="blingGerarNFe" checked>
-                            <span>Gerar NF-e automaticamente</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
             <div class="bling-modal-actions">
-                <button type="button" id="btnSalvarConfigBling" class="btn-success" onclick="salvarConfigBling()">
-                    💾 Salvar Configurações
-                </button>
-                <button type="button" id="btnAutorizarBling" class="btn-primary" onclick="autorizarBling()" style="display: none;">
-                    🔐 Autorizar no Bling
-                </button>
-                <button type="button" id="btnDesconectarBling" class="btn-warning" onclick="desconectarBling()" style="display: none;">
-                    🔌 Desconectar
-                </button>
                 <button type="button" class="btn-secondary" onclick="fecharModalBling()">
                     Fechar
                 </button>
