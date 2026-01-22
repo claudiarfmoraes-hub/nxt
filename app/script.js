@@ -385,6 +385,7 @@ async function registrarVenda(event) {
     mostrarStatusAutomacao(sucessoAutomacao);
 
     ultimaVendaRegistrada = venda;
+    atualizarStatusBling(); // Habilita o botão Enviar para Bling
     mostrarResumoModal(venda);
 
     // Não limpa automaticamente o formulário para permitir usar copiar/enviar fatura
