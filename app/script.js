@@ -2425,7 +2425,7 @@ async function buscarOuCriarContato(cliente) {
 
         const novoContato = {
             nome: cliente.nome,
-            tipoPessoa: tipoContato,
+            tipo: tipoContato,
             situacao: 'A',
             numeroDocumento: numeroDocumento,
             telefone: cliente.telefone.replace(/\D/g, ''),
