@@ -396,7 +396,18 @@ async function registrarVenda(event) {
     mostrarStatusAutomacao(sucessoAutomacao);
 
     ultimaVendaRegistrada = venda;
-    atualizarStatusBling(); // Habilita o botão Enviar para Bling
+    atualizarStatusBling();
+
+    // Enviar automaticamente para o sistema de emissão (se conectado)
+    if (BLING_CONFIG.isAuthenticated) {
+        try {
+            await enviarVendaParaBling(venda);
+        } catch (error) {
+            console.error('Erro ao enviar para emissão:', error);
+            // Continua mostrando o modal mesmo se der erro
+        }
+    }
+
     mostrarResumoModal(venda);
 
     // Não limpa automaticamente o formulário para permitir usar copiar/enviar fatura
