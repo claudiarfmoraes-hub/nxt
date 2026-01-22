@@ -1,26 +1,32 @@
 // API Route proxy para requisições ao Bling (autenticação centralizada)
-// Vercel Serverless Function
+// Vercel Serverless Function - com persistência de tokens via Upstash Redis
 
-// Cache simples para o access_token (em memória durante a execução)
-let cachedToken = null;
-let tokenExpiry = null;
+import { getTokens, saveTokens, isTokenValid } from './tokenStore.js';
 
-// Função para obter access_token usando refresh_token
+// Função para obter access_token (renova automaticamente se necessário)
 async function getAccessToken() {
     const clientId = process.env.BLING_CLIENT_ID;
     const clientSecret = process.env.BLING_CLIENT_SECRET;
-    const refreshToken = process.env.BLING_REFRESH_TOKEN;
 
-    if (!clientId || !clientSecret || !refreshToken) {
+    if (!clientId || !clientSecret) {
         throw new Error('Credenciais do Bling não configuradas no servidor');
     }
 
-    // Verificar se temos token em cache válido (com margem de 5 min)
-    if (cachedToken && tokenExpiry && Date.now() < tokenExpiry - 300000) {
-        return cachedToken;
+    // Obter tokens salvos (Redis ou env)
+    const tokens = await getTokens();
+
+    if (!tokens.refreshToken) {
+        throw new Error('Refresh token não encontrado. Autorize o Bling primeiro.');
     }
 
-    // Obter novo access_token
+    // Verificar se access_token ainda é válido
+    if (tokens.accessToken && isTokenValid(tokens.expiry)) {
+        console.log('Usando access_token em cache');
+        return tokens.accessToken;
+    }
+
+    // Renovar access_token usando refresh_token
+    console.log('Renovando access_token...');
     const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
     const response = await fetch('https://www.bling.com.br/Api/v3/oauth/token', {
@@ -31,7 +37,7 @@ async function getAccessToken() {
         },
         body: new URLSearchParams({
             grant_type: 'refresh_token',
-            refresh_token: refreshToken
+            refresh_token: tokens.refreshToken
         })
     });
 
@@ -39,14 +45,14 @@ async function getAccessToken() {
 
     if (!response.ok) {
         console.error('Erro ao renovar token:', data);
-        throw new Error('Erro ao renovar token do Bling. Pode ser necessário reautorizar.');
+        throw new Error('Erro ao renovar token do Bling. Reautorize em /api/bling/auth');
     }
 
-    // Cachear o token (expires_in geralmente é em segundos)
-    cachedToken = data.access_token;
-    tokenExpiry = Date.now() + (data.expires_in * 1000);
+    // Salvar novos tokens (incluindo o novo refresh_token!)
+    await saveTokens(data.access_token, data.refresh_token, data.expires_in);
+    console.log('Tokens renovados e salvos');
 
-    return cachedToken;
+    return data.access_token;
 }
 
 export default async function handler(req, res) {
