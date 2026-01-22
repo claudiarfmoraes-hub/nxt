@@ -487,16 +487,16 @@
                                 </button>
                             </div>
 
-                            <!-- Integração Bling -->
+                            <!-- Integração Sistema de Notas -->
                             <div class="bling-actions">
                                 <div class="bling-status" id="blingStatus">
                                     <span class="bling-status-icon" id="blingStatusIcon">⚪</span>
-                                    <span class="bling-status-text" id="blingStatusText">Bling não configurado</span>
+                                    <span class="bling-status-text" id="blingStatusText">Sistema de Notas</span>
                                 </div>
                                 <div class="bling-buttons">
                                     <button type="button" id="btnConfigBling" class="btn-config-bling" onclick="abrirModalBling()">
                                         <span class="btn-icon">⚙️</span>
-                                        Configurar Bling
+                                        Status Emissão
                                     </button>
                                 </div>
                             </div>
@@ -761,7 +761,7 @@
             <div class="modal-actions">
                 <button id="copiarResumoModalBtn" class="btn-success">Copiar Resumo</button>
                 <button id="gerarFaturaBtn" class="btn-warning">Gerar Fatura</button>
-                <button id="enviarBlingModalBtn" class="btn-primary" onclick="enviarUltimaVendaBling()">Enviar para Bling</button>
+                <button id="enviarBlingModalBtn" class="btn-primary" onclick="enviarUltimaVendaBling()">Enviar para Emissão</button>
                 <button class="modal-close-btn btn-secondary">Fechar</button>
             </div>
         </div>
@@ -796,13 +796,13 @@
         </div>
     </div>
     
-    <!-- Modal de Status do Bling -->
+    <!-- Modal de Status do Sistema de Emissão -->
     <div id="modalBling" class="modal-overlay" style="display: none;">
         <div class="modal-content modal-bling">
             <span class="modal-close-btn" onclick="fecharModalBling()">&times;</span>
             <div class="bling-modal-header">
-                <h3>Bling ERP</h3>
-                <p>Integração para enviar vendas e gerar pedidos automaticamente.</p>
+                <h3>Sistema de Emissão de Notas Fiscais</h3>
+                <p>Integração para enviar vendas e gerar notas fiscais automaticamente.</p>
             </div>
 
             <div class="bling-config-status" id="blingConfigStatus">

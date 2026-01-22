@@ -2336,12 +2336,12 @@ async function trocarCodigoPorToken(code) {
         localStorage.setItem('bling_refresh_token', data.refresh_token);
         localStorage.setItem('bling_token_expiry', Date.now() + (data.expires_in * 1000));
 
-        mostrarFeedback('Bling conectado com sucesso!', 'sucesso');
+        mostrarFeedback('Sistema conectado com sucesso!', 'sucesso');
         atualizarStatusBling();
 
     } catch (error) {
         console.error('Erro ao trocar código por token:', error);
-        mostrarFeedback('Erro ao conectar com Bling. Tente novamente.', 'erro');
+        mostrarFeedback('Erro ao conectar com sistema. Tente novamente.', 'erro');
     }
 }
 
@@ -2388,7 +2388,7 @@ async function blingRequest(endpoint, method = 'GET', body = null) {
     if (!BLING_CONFIG.isAuthenticated) {
         await BLING_CONFIG.checkStatus();
         if (!BLING_CONFIG.isAuthenticated) {
-            throw new Error('Bling não está conectado. Contate a matriz.');
+            throw new Error('Sistema de emissão não conectado. Contate a matriz.');
         }
     }
 
@@ -2467,7 +2467,7 @@ async function buscarOuCriarContato(cliente) {
 // Enviar venda para o Bling
 async function enviarVendaParaBling(venda) {
     try {
-        mostrarFeedback('Enviando para o Bling...', 'sucesso');
+        mostrarFeedback('Enviando para emissão...', 'sucesso');
 
         // 1. Buscar ou criar contato
         const contatoId = await buscarOuCriarContato(venda.cliente);
@@ -2625,7 +2625,7 @@ function atualizarStatusBling() {
 
         if (BLING_CONFIG.isAuthenticated) {
             statusIcon.textContent = '🟢';
-            statusText.textContent = 'Bling conectado';
+            statusText.textContent = 'Emissão conectada';
             statusEl.classList.add('conectado');
             if (btnEnviar) btnEnviar.disabled = !ultimaVendaRegistrada;
         } else if (BLING_CONFIG.isConfigured) {
@@ -2634,7 +2634,7 @@ function atualizarStatusBling() {
             if (btnEnviar) btnEnviar.disabled = true;
         } else {
             statusIcon.textContent = '⚪';
-            statusText.textContent = 'Bling não configurado';
+            statusText.textContent = 'Emissão não configurada';
             if (btnEnviar) btnEnviar.disabled = true;
         }
     }
@@ -2646,7 +2646,7 @@ function atualizarStatusBling() {
                 <div class="bling-status-card conectado">
                     <span class="bling-status-icon-large">✅</span>
                     <div class="bling-status-info">
-                        <h5>Conectado ao Bling</h5>
+                        <h5>Sistema Conectado</h5>
                         <p>A integração está ativa e funcionando</p>
                     </div>
                 </div>`;
@@ -2656,7 +2656,7 @@ function atualizarStatusBling() {
                     <span class="bling-status-icon-large">⚠️</span>
                     <div class="bling-status-info">
                         <h5>Aguardando Autorização</h5>
-                        <p>A matriz precisa autorizar a conexão com o Bling</p>
+                        <p>A matriz precisa autorizar a conexão com o sistema</p>
                         <a href="/api/bling/auth" class="btn-primary" style="margin-top:10px;display:inline-block;padding:8px 16px;text-decoration:none;border-radius:4px;">Autorizar (Matriz)</a>
                     </div>
                 </div>`;
