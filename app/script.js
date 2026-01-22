@@ -2474,9 +2474,9 @@ async function enviarVendaParaBling(venda) {
         // 2. Mapear formas de pagamento do Bling
         const formaPagamentoBling = mapearFormaPagamento(venda.pagamento.formas);
 
-        // 3. Detectar se é operação interestadual (cliente fora de SP)
+        // 3. Detectar se é operação interestadual (cliente fora de SC - matriz em Santa Catarina)
         const estadoCliente = venda.cliente?.endereco?.estado?.toUpperCase() || '';
-        const isInterestadual = estadoCliente && estadoCliente !== 'SP';
+        const isInterestadual = estadoCliente && estadoCliente !== 'SC';
         const cfopSugerido = isInterestadual ? '6102' : '5102';
         console.log(`Estado cliente: ${estadoCliente}, Interestadual: ${isInterestadual}, CFOP: ${cfopSugerido}`);
 
