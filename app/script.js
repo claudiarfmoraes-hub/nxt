@@ -2425,18 +2425,21 @@ async function buscarOuCriarContato(cliente) {
 
         const novoContato = {
             nome: cliente.nome,
-            tipo: tipoContato,
+            tipoPessoa: tipoContato,
             situacao: 'A',
             numeroDocumento: numeroDocumento,
             telefone: cliente.telefone.replace(/\D/g, ''),
+            celular: cliente.telefone.replace(/\D/g, ''),
             email: cliente.email || '',
             endereco: {
-                endereco: cliente.endereco.rua,
-                numero: cliente.endereco.numero,
-                bairro: cliente.endereco.bairro,
-                municipio: cliente.endereco.cidade,
-                uf: cliente.endereco.estado,
-                cep: cliente.endereco.cep.replace(/\D/g, '')
+                geral: {
+                    endereco: cliente.endereco.rua,
+                    numero: cliente.endereco.numero,
+                    bairro: cliente.endereco.bairro,
+                    municipio: cliente.endereco.cidade,
+                    uf: cliente.endereco.estado,
+                    cep: cliente.endereco.cep.replace(/\D/g, '')
+                }
             }
         };
 
