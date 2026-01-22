@@ -2436,9 +2436,7 @@ async function buscarOuCriarContato(cliente) {
 
         const novoContato = {
             nome: cliente.nome,
-            tipo: tipoContato,
             tipoPessoa: tipoContato,
-            situacao: 'A',
             numeroDocumento: numeroDocumento,
             telefone: cliente.telefone.replace(/\D/g, ''),
             celular: cliente.telefone.replace(/\D/g, ''),
@@ -2455,6 +2453,7 @@ async function buscarOuCriarContato(cliente) {
             }
         };
 
+        console.log('Criando contato:', JSON.stringify(novoContato, null, 2));
         const resultado = await blingRequest('/contatos', 'POST', novoContato);
         return resultado.data.id;
 
