@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nxt-lojas-cache-v8'; // Força deploy Vercel
+const CACHE_NAME = 'nxt-lojas-cache-v9'; // Versão 4.0
 const urlsToCache = [
   '/',
   '/index.html',
