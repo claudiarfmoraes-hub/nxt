@@ -398,10 +398,12 @@ async function registrarVenda(event) {
     ultimaVendaRegistrada = venda;
 
     // Enviar automaticamente para o sistema de emissão (se conectado)
+    let enviadoParaBling = false;
     await BLING_CONFIG.checkStatus(); // Verificar status atualizado
     if (BLING_CONFIG.isAuthenticated) {
         try {
             await enviarVendaParaBling(venda);
+            enviadoParaBling = true;
         } catch (error) {
             console.error('Erro ao enviar para emissão:', error);
             // Continua mostrando o modal mesmo se der erro
@@ -409,7 +411,7 @@ async function registrarVenda(event) {
     }
     atualizarStatusBling();
 
-    mostrarResumoModal(venda);
+    mostrarResumoModal(venda, enviadoParaBling);
 
     // Não limpa automaticamente o formulário para permitir usar copiar/enviar fatura
     // O usuário pode usar o botão "Limpar Formulário" quando desejar
@@ -1220,7 +1222,7 @@ function importarInventarios(event) {
 
 // --- FUNÇÕES DE CÓPIA E MODAL ---
 
-function gerarTextoResumoVenda(venda) {
+function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     const dataFormatada = new Date(venda.dataVenda).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
 
     let resumo = `=== SISTEMA NXT V4 ===\n🏍️ *RESUMO DA VENDA - ${venda.loja}*\n`;
@@ -1294,7 +1296,11 @@ function gerarTextoResumoVenda(venda) {
         resumo += `*Local de Retirada:* ${lojaRetirada}\n`;
     }
     resumo += `\n`;
-    
+
+    if (enviadoParaBling) {
+        resumo += `✅ *Venda enviada ao sistema Bling para emissão da NF-e*\n`;
+    }
+
     return resumo;
 }
 
@@ -1366,8 +1372,8 @@ function copiarResumoVenda(isFromModal) {
     }
 }
 
-function mostrarResumoModal(venda) {
-    ultimoResumoVenda = gerarTextoResumoVenda(venda);
+function mostrarResumoModal(venda, enviadoParaBling = false) {
+    ultimoResumoVenda = gerarTextoResumoVenda(venda, enviadoParaBling);
     const modal = document.getElementById('modalResumoVenda');
     const textArea = document.getElementById('textoResumoModal');
     textArea.value = ultimoResumoVenda;
