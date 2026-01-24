@@ -180,7 +180,6 @@ function configurarFormularios() {
 
     document.getElementById('origemProduto').addEventListener('change', handleOrigemProdutoChange);
 
-    document.getElementById('copiarResumoVenda').addEventListener('click', () => copiarResumoVenda(false));
     document.getElementById('gerarFaturaBtn').addEventListener('click', gerarFatura);
     document.getElementById('limparFormularioBtn').addEventListener('click', limparFormularioVenda);
 
@@ -359,6 +358,7 @@ async function registrarVenda(event) {
             cpf: document.getElementById('cpfCliente').value,
             cnpj: document.getElementById('cnpjCliente').value,
             telefone: document.getElementById('telefoneCliente').value,
+            email: document.getElementById('emailCliente').value,
             endereco: {
                 cep: document.getElementById('cepCliente').value,
                 rua: document.getElementById('ruaCliente').value,
@@ -1232,6 +1232,7 @@ function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     resumo += `👤 *CLIENTE*\n`;
     resumo += `*Nome:* ${venda.cliente.nome}\n`;
     resumo += `*Telefone:* ${venda.cliente.telefone}\n`;
+    if (venda.cliente.email) resumo += `*E-mail:* ${venda.cliente.email}\n`;
     if (venda.cliente.cpf) resumo += `*CPF:* ${venda.cliente.cpf}\n`;
     if (venda.cliente.cnpj) resumo += `*CNPJ:* ${venda.cliente.cnpj}\n`;
     const end = venda.cliente.endereco;
@@ -1323,6 +1324,7 @@ function copiarResumoVenda(isFromModal) {
                 cliente: {
                     nome: document.getElementById('nomeCliente').value,
                     telefone: document.getElementById('telefoneCliente').value,
+                    email: document.getElementById('emailCliente').value,
                     cpf: document.getElementById('cpfCliente').value,
                     cnpj: document.getElementById('cnpjCliente').value,
                     endereco: {

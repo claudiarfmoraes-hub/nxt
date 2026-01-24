@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nxt-lojas-cache-v9'; // Versão 4.0
+const CACHE_NAME = 'nxt-lojas-cache-v10';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -10,6 +10,8 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
+  // Força ativação imediata
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -25,46 +27,44 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Estratégia: Network First (busca online primeiro, fallback para cache)
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(response => {
-        if (response) {
-          return response;
+        // Se obteve resposta válida, atualiza o cache
+        if (response && response.status === 200) {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME)
+            .then(cache => {
+              cache.put(event.request, responseToCache);
+            });
         }
-
-        const fetchRequest = event.request.clone();
-
-        return fetch(fetchRequest).then(
-          response => {
-            if(!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          }
-        );
+        return response;
       })
-    );
+      .catch(() => {
+        // Se falhou (offline), tenta buscar do cache
+        return caches.match(event.request);
+      })
+  );
 });
 
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
+  // Assume controle imediato de todas as páginas
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    Promise.all([
+      // Limpa caches antigos
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(cacheName => {
+            if (cacheName !== CACHE_NAME) {
+              console.log('Removendo cache antigo:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      // Assume controle de todas as abas abertas
+      self.clients.claim()
+    ])
   );
 });
