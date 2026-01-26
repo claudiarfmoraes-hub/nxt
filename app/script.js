@@ -3025,18 +3025,24 @@ async function wizardGerarPDF() {
     // Mostrar o modal da fatura temporariamente (necessário para html2canvas)
     const modalFatura = document.getElementById('modalFatura');
     const estadoAnterior = modalFatura.style.display;
+
+    // Posicionar fora da tela (visível para html2canvas mas não para o usuário)
+    modalFatura.style.position = 'fixed';
+    modalFatura.style.left = '-9999px';
+    modalFatura.style.top = '0';
     modalFatura.style.display = 'block';
-    modalFatura.style.visibility = 'hidden'; // Esconde visualmente mas mantém renderizado
 
     // Aguarda renderização
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     try {
         await gerarPDF();
     } finally {
         // Restaurar estado do modal
         modalFatura.style.display = estadoAnterior;
-        modalFatura.style.visibility = '';
+        modalFatura.style.position = '';
+        modalFatura.style.left = '';
+        modalFatura.style.top = '';
     }
 }
 
