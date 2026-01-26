@@ -2992,3 +2992,541 @@ h4, h5 {
         border-radius: 4px;
     }
 }
+
+/* ========================================
+   WIZARD PÓS-VENDA - ESTILOS
+   ======================================== */
+
+/* Modal Wizard */
+.modal-wizard {
+    max-width: 650px;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 16px;
+}
+
+/* Progress Bar do Wizard */
+.wizard-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    gap: 0;
+}
+
+.wizard-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.4;
+    transition: all 0.3s ease;
+}
+
+.wizard-step.active {
+    opacity: 1;
+}
+
+.wizard-step.completed {
+    opacity: 1;
+}
+
+.wizard-step-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #444;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.wizard-step.active .wizard-step-icon {
+    background-color: var(--cor-primaria);
+    color: #1a1a1a;
+    transform: scale(1.15);
+    box-shadow: 0 0 20px rgba(198, 255, 0, 0.4);
+}
+
+.wizard-step.completed .wizard-step-icon {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.wizard-step.completed .wizard-step-icon::before {
+    content: '✓';
+}
+
+.wizard-step-label {
+    font-size: 0.75rem;
+    color: #888;
+    font-weight: 500;
+}
+
+.wizard-step.active .wizard-step-label {
+    color: var(--cor-primaria);
+    font-weight: 600;
+}
+
+.wizard-step.completed .wizard-step-label {
+    color: #28a745;
+}
+
+.wizard-progress-line {
+    flex: 1;
+    height: 3px;
+    background-color: #444;
+    margin: 0 0.5rem;
+    margin-bottom: 1.5rem;
+    max-width: 60px;
+    transition: background-color 0.3s ease;
+}
+
+.wizard-progress-line.active {
+    background-color: var(--cor-primaria);
+}
+
+/* Conteúdo do Wizard */
+.wizard-content {
+    padding: 2rem;
+    text-align: center;
+    animation: wizardFadeIn 0.3s ease;
+}
+
+@keyframes wizardFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.wizard-content h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.4rem;
+    color: #333;
+}
+
+.wizard-subtitle {
+    color: #666;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.wizard-success-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: bounceIn 0.5s ease;
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Checklist de Etapas */
+.wizard-checklist {
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    text-align: left;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e9ecef;
+    color: #666;
+}
+
+.checklist-item:last-child {
+    border-bottom: none;
+}
+
+.checklist-item.done {
+    color: #28a745;
+}
+
+.checklist-item.done .checklist-icon {
+    color: #28a745;
+}
+
+.checklist-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.wizard-info {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 1rem 0;
+    padding: 0.75rem;
+    background-color: #fff3cd;
+    border-radius: 8px;
+    border-left: 4px solid #ffc107;
+}
+
+/* Botões do Wizard */
+.wizard-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    justify-content: center;
+}
+
+.btn-wizard-next {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-wizard-next:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.btn-wizard-next.btn-confirmar {
+    background: linear-gradient(135deg, #0066cc 0%, #004499 100%);
+}
+
+.btn-wizard-next.btn-confirmar:hover {
+    box-shadow: 0 6px 20px rgba(0, 102, 204, 0.4);
+}
+
+.btn-wizard-back {
+    padding: 1rem 1.5rem;
+    background-color: #e9ecef;
+    color: #333;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.btn-wizard-back:hover {
+    background-color: #ddd;
+}
+
+.btn-arrow {
+    font-size: 1.2rem;
+}
+
+/* Botões Especiais do Wizard */
+.wizard-button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+}
+
+.btn-whatsapp-fatura,
+.btn-whatsapp-grupo {
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    flex: 1;
+    min-width: 180px;
+    justify-content: center;
+}
+
+.btn-whatsapp-fatura:hover,
+.btn-whatsapp-grupo:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+}
+
+.btn-download-pdf {
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    flex: 1;
+    min-width: 140px;
+    justify-content: center;
+}
+
+.btn-download-pdf:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+}
+
+.btn-ver-fatura {
+    padding: 1rem 1.5rem;
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    flex: 1;
+    min-width: 140px;
+    justify-content: center;
+}
+
+.btn-ver-fatura:hover {
+    background-color: #5a6268;
+}
+
+.btn-copiar-resumo {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: #1a1a1a;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    flex: 1;
+    justify-content: center;
+}
+
+.btn-copiar-resumo:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+}
+
+.btn-icon-wpp,
+.btn-icon-pdf,
+.btn-icon-eye,
+.btn-icon-copy {
+    font-size: 1.25rem;
+}
+
+/* Textarea do Resumo */
+.wizard-content textarea {
+    width: 100%;
+    height: 200px;
+    padding: 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    resize: none;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.wizard-content textarea:focus {
+    outline: none;
+    border-color: var(--cor-primaria);
+}
+
+/* Feedback de Copiado */
+.wizard-copiado {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    margin-top: 1rem;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Preview da Fatura */
+.wizard-fatura-preview {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 1rem 0;
+    text-align: left;
+    font-size: 0.9rem;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.wizard-fatura-preview p {
+    margin: 0.25rem 0;
+}
+
+.wizard-fatura-preview strong {
+    color: #333;
+}
+
+/* Etapa Final */
+.wizard-success-final {
+    margin-bottom: 1.5rem;
+}
+
+.success-icon-big {
+    font-size: 5rem;
+    animation: bounceIn 0.5s ease;
+}
+
+.wizard-checklist-final {
+    background-color: #d4edda;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    text-align: left;
+}
+
+.checklist-item-final {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    color: #155724;
+    font-weight: 500;
+}
+
+.checklist-icon-final {
+    font-size: 1.1rem;
+}
+
+.wizard-info-final {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 1rem 0;
+}
+
+.btn-nova-venda {
+    padding: 1.25rem 3rem;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-nova-venda:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+/* Botão de Registrar Venda desabilitado */
+.btn-registrar-venda:disabled {
+    background: #888 !important;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+    opacity: 0.7;
+}
+
+.btn-registrar-venda:disabled:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Responsividade do Wizard */
+@media (max-width: 768px) {
+    .modal-wizard {
+        max-width: 95%;
+        margin: 1rem;
+    }
+
+    .wizard-progress {
+        padding: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .wizard-step-label {
+        display: none;
+    }
+
+    .wizard-step-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.85rem;
+    }
+
+    .wizard-progress-line {
+        max-width: 30px;
+        margin-bottom: 0;
+    }
+
+    .wizard-content {
+        padding: 1.5rem 1rem;
+    }
+
+    .wizard-content h3 {
+        font-size: 1.2rem;
+    }
+
+    .wizard-button-group {
+        flex-direction: column;
+    }
+
+    .btn-whatsapp-fatura,
+    .btn-whatsapp-grupo,
+    .btn-download-pdf,
+    .btn-ver-fatura,
+    .btn-copiar-resumo {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .wizard-actions {
+        flex-direction: column;
+    }
+
+    .btn-wizard-next,
+    .btn-wizard-back {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .wizard-content textarea {
+        height: 150px;
+        font-size: 0.8rem;
+    }
+}

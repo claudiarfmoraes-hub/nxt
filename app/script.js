@@ -41,6 +41,11 @@ let itensInventario = [];
 let ultimoResumoVenda = '';
 let ultimaVendaRegistrada = null;
 
+// Variáveis do Wizard de Pós-Venda
+let wizardEtapaAtual = 1;
+let vendaJaEnviada = false;
+let wizardEnviadoParaBling = false;
+
 // Variáveis para o novo sistema de inventário
 let abaAtualInventario = 'contagem';
 let tipoMovimentacaoSelecionado = '';
@@ -180,8 +185,7 @@ function configurarFormularios() {
 
     document.getElementById('origemProduto').addEventListener('change', handleOrigemProdutoChange);
 
-    document.getElementById('gerarFaturaBtn').addEventListener('click', gerarFatura);
-    document.getElementById('limparFormularioBtn').addEventListener('click', limparFormularioVenda);
+    document.getElementById('limparFormularioBtn').addEventListener('click', () => limparFormularioVenda(false));
 
     // Configurar busca de vendedores após DOM estar pronto
     configurarBuscaVendedor();
@@ -202,26 +206,25 @@ function configurarFormularios() {
         movimentacaoForm.addEventListener('submit', adicionarItemMovimentacao);
     }
 
-    const modal = document.getElementById('modalResumoVenda');
+    const modalWizard = document.getElementById('modalWizardVenda');
     const modalFatura = document.getElementById('modalFatura');
 
+    // Fechar modais ao clicar no X
     document.querySelectorAll('.modal-close-btn').forEach(btn => {
         btn.onclick = function() {
-            modal.style.display = "none";
-            modalFatura.style.display = "none";
+            if (modalWizard) modalWizard.style.display = "none";
+            if (modalFatura) modalFatura.style.display = "none";
         }
     });
 
+    // Fechar modal de fatura ao clicar fora
     window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
         if (event.target == modalFatura) {
             modalFatura.style.display = "none";
         }
     }
 
-    document.getElementById('copiarResumoModalBtn').addEventListener('click', () => copiarResumoVenda(true));
+    // Event listeners para o modal de fatura (ainda usado para ver fatura completa)
     document.getElementById('copiarFaturaBtn').addEventListener('click', copiarFatura);
     document.getElementById('gerarPdfBtn').addEventListener('click', gerarPDF);
     document.getElementById('imprimirFaturaBtn').addEventListener('click', imprimirFatura);
@@ -327,6 +330,12 @@ async function registrarVenda(event) {
     event.preventDefault();
 
     try {
+        // Proteção anti-duplicidade: verificar se a venda já foi enviada
+        if (vendaJaEnviada) {
+            mostrarFeedback('Esta venda já foi enviada! Clique em "Nova Venda" para registrar outra.', 'erro');
+            return;
+        }
+
         if (produtosDaVenda.length === 0) {
             mostrarFeedback('Adicione pelo menos um produto à venda', 'erro');
             return;
@@ -344,6 +353,11 @@ async function registrarVenda(event) {
             mostrarFeedback('Preencha todos os campos obrigatórios', 'erro');
             return;
         }
+
+        // Desabilitar botão de registrar imediatamente para evitar cliques duplos
+        const btnRegistrar = document.querySelector('.btn-registrar-venda');
+        btnRegistrar.disabled = true;
+        btnRegistrar.innerHTML = '<span class="btn-icon">⏳</span> Enviando...';
     
     const lojaId = document.getElementById('lojaVenda').value;
     const nomeLoja = dadosLojas[lojaId]?.nome || lojaId;
@@ -411,14 +425,28 @@ async function registrarVenda(event) {
     }
     atualizarStatusBling();
 
+    // Marcar venda como enviada para proteção anti-duplicidade
+    vendaJaEnviada = true;
+
+    // Atualizar botão para indicar que venda foi enviada
+    btnRegistrar.innerHTML = '<span class="btn-icon">✅</span> Venda Enviada';
+    // Mantém desabilitado até limpar o formulário
+
     mostrarResumoModal(venda, enviadoParaBling);
 
     // Não limpa automaticamente o formulário para permitir usar copiar/enviar fatura
-    // O usuário pode usar o botão "Limpar Formulário" quando desejar
+    // O usuário deve usar o botão "Nova Venda" no wizard quando desejar
 
     } catch (error) {
         console.error('Erro ao registrar venda:', error);
         mostrarFeedback('Erro ao registrar venda. Verifique o console.', 'erro');
+
+        // Reabilitar botão em caso de erro
+        const btnRegistrarErro = document.querySelector('.btn-registrar-venda');
+        if (btnRegistrarErro) {
+            btnRegistrarErro.disabled = false;
+            btnRegistrarErro.innerHTML = '<span class="btn-icon">✅</span> Registrar Venda';
+        }
     }
 }
 
@@ -1376,10 +1404,9 @@ function copiarResumoVenda(isFromModal) {
 
 function mostrarResumoModal(venda, enviadoParaBling = false) {
     ultimoResumoVenda = gerarTextoResumoVenda(venda, enviadoParaBling);
-    const modal = document.getElementById('modalResumoVenda');
-    const textArea = document.getElementById('textoResumoModal');
-    textArea.value = ultimoResumoVenda;
-    modal.style.display = 'block';
+
+    // Usar o novo wizard de pós-venda
+    iniciarWizardPosVenda(venda, enviadoParaBling);
 }
 
 // --- FUNÇÕES DE FATURA ---
@@ -1972,8 +1999,8 @@ function configurarBuscaVendedor() {
 
 // --- FUNÇÕES AUXILIARES E DE UI ---
 
-function limparFormularioVenda() {
-    if (produtosDaVenda.length > 0 || document.getElementById('nomeCliente').value.trim() !== '') {
+function limparFormularioVenda(skipConfirm = false) {
+    if (!skipConfirm && (produtosDaVenda.length > 0 || document.getElementById('nomeCliente').value.trim() !== '')) {
         if (!confirm('Tem certeza que deseja limpar todos os dados do formulário? Esta ação não pode ser desfeita.')) {
             return;
         }
@@ -1992,6 +2019,18 @@ function limparFormularioVenda() {
     toggleCorCapacete();
     handlePagamentoChange();
     definirDataAtual();
+
+    // Resetar proteção anti-duplicidade
+    vendaJaEnviada = false;
+    wizardEtapaAtual = 1;
+    wizardEnviadoParaBling = false;
+
+    // Reabilitar botão de registrar venda
+    const btnRegistrar = document.querySelector('.btn-registrar-venda');
+    if (btnRegistrar) {
+        btnRegistrar.disabled = false;
+        btnRegistrar.innerHTML = '<span class="btn-icon">✅</span> Registrar Venda';
+    }
 }
 
 function limparCamposProduto() {
@@ -2549,13 +2588,41 @@ async function enviarVendaParaBling(venda) {
             });
         }
 
-        // 6. Montar pedido de venda
+        // 6. Montar informações adicionais com dados dos produtos e garantia
+        let infoProdutos = '';
+        venda.produtos.forEach((produto, index) => {
+            infoProdutos += `\nModelo: ${produto.modelo}
+Cor: ${produto.cor}
+Chassi: ${produto.chassi || 'N/A'}
+Motor: ${produto.motor || 'N/A'}`;
+            if (index < venda.produtos.length - 1) infoProdutos += '\n---';
+        });
+
+        const anoAtual = new Date().getFullYear();
+        const observacoesCompletas = `O uso de equipamentos de segurança é obrigatório.
+Fabricante NXT${infoProdutos}
+Ano ${anoAtual}
+
+Informações de Garantia do Fabricante:
+Quadro: Garantia de 2 (dois) anos contra defeitos de fabricação, contados a partir da data da nota fiscal.
+Motor: Garantia de 2 (dois) anos contra defeitos de fabricação, contados a partir da data da nota fiscal.
+Bateria: Garantia de 6 (seis) meses contra defeitos de fabricação, contados a partir da data da nota fiscal.
+
+Observação: As garantias acima referem-se exclusivamente a defeitos de fabricação. Danos causados por uso inadequado, acidentes ou desgaste natural não estão cobertos.
+
+Loja: ${venda.loja}
+Vendedor: ${venda.vendedor}
+${venda.cliente.email ? 'E-mail: ' + venda.cliente.email : ''}
+${venda.pagamento.observacoes ? 'Obs: ' + venda.pagamento.observacoes : ''}`;
+
+        // 7. Montar pedido de venda
         const pedido = {
             contato: { id: contatoId },
             data: venda.dataVenda,
             numero: venda.id.replace('VNDA-', ''),
             numeroLoja: venda.id,
             vendedor: { nome: venda.vendedor },
+            naturezaOperacao: { id: 15105967674 }, // Venda de mercadoria Interestadual
             itens: itensPedido,
             parcelas: [{
                 dataVencimento: venda.dataVenda,
@@ -2565,7 +2632,7 @@ async function enviarVendaParaBling(venda) {
                 fretePorConta: venda.entrega.tipo === 'domicilio' ? 1 : 0, // 0=Emitente, 1=Destinatário
                 valorFrete: venda.valorFrete || 0
             },
-            observacoes: `Loja: ${venda.loja}\nVendedor: ${venda.vendedor}\nCFOP sugerido: ${cfopSugerido}${isInterestadual ? ' (interestadual - cliente ' + estadoCliente + ')' : ''}\n${venda.pagamento.observacoes || ''}`
+            observacoes: observacoesCompletas
         };
 
         // 7. Criar pedido de venda
@@ -2796,3 +2863,248 @@ function copiarCallbackUrl() {
         mostrarFeedback('URL copiada!', 'sucesso');
     });
 }
+
+// ========================================
+// WIZARD DE PÓS-VENDA
+// ========================================
+
+// Iniciar o wizard de pós-venda
+function iniciarWizardPosVenda(venda, enviadoParaBling) {
+    wizardEtapaAtual = 1;
+    wizardEnviadoParaBling = enviadoParaBling;
+
+    // Preencher o resumo no textarea
+    const textArea = document.getElementById('textoResumoModal');
+    if (textArea) {
+        textArea.value = ultimoResumoVenda;
+    }
+
+    // Atualizar checklist de envio
+    const checkBling = document.getElementById('checkBling');
+    if (checkBling) {
+        if (enviadoParaBling) {
+            checkBling.classList.add('done');
+            checkBling.querySelector('.checklist-icon').textContent = '✓';
+        } else {
+            checkBling.classList.remove('done');
+            checkBling.querySelector('.checklist-icon').textContent = '⏳';
+        }
+    }
+
+    // Preencher preview da fatura na etapa 2
+    preencherPreviewFatura(venda);
+
+    // Resetar progress bar
+    atualizarWizardProgress(1);
+
+    // Mostrar etapa 1, esconder outras
+    mostrarEtapaWizard(1);
+
+    // Abrir o modal
+    document.getElementById('modalWizardVenda').style.display = 'flex';
+}
+
+// Preencher preview resumido da fatura
+function preencherPreviewFatura(venda) {
+    const preview = document.getElementById('wizardFaturaPreview');
+    if (!preview || !venda) return;
+
+    const dataFormatada = new Date(venda.dataVenda).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
+
+    let produtosLista = venda.produtos.map(p => `${p.modelo} ${p.cor}`).join(', ');
+
+    preview.innerHTML = `
+        <p><strong>Cliente:</strong> ${venda.cliente.nome}</p>
+        <p><strong>Telefone:</strong> ${venda.cliente.telefone}</p>
+        <p><strong>Produtos:</strong> ${produtosLista}</p>
+        <p><strong>Total:</strong> R$ ${formatarValorMonetario(venda.total)}</p>
+        <p><strong>Data:</strong> ${dataFormatada}</p>
+    `;
+}
+
+// Atualizar progress bar do wizard
+function atualizarWizardProgress(etapa) {
+    const steps = document.querySelectorAll('.wizard-step');
+    const lines = document.querySelectorAll('.wizard-progress-line');
+
+    steps.forEach((step, index) => {
+        const stepNum = index + 1;
+        step.classList.remove('active', 'completed');
+
+        if (stepNum < etapa) {
+            step.classList.add('completed');
+        } else if (stepNum === etapa) {
+            step.classList.add('active');
+        }
+    });
+
+    lines.forEach((line, index) => {
+        if (index < etapa - 1) {
+            line.classList.add('active');
+        } else {
+            line.classList.remove('active');
+        }
+    });
+}
+
+// Mostrar uma etapa específica do wizard
+function mostrarEtapaWizard(etapa) {
+    for (let i = 1; i <= 4; i++) {
+        const stepEl = document.getElementById(`wizardStep${i}`);
+        if (stepEl) {
+            stepEl.style.display = (i === etapa) ? 'block' : 'none';
+        }
+    }
+}
+
+// Avançar para próxima etapa
+function wizardAvancar() {
+    if (wizardEtapaAtual < 4) {
+        wizardEtapaAtual++;
+        atualizarWizardProgress(wizardEtapaAtual);
+        mostrarEtapaWizard(wizardEtapaAtual);
+
+        // Na etapa 4, atualizar checklist final
+        if (wizardEtapaAtual === 4) {
+            atualizarChecklistFinal();
+        }
+    }
+}
+
+// Voltar para etapa anterior
+function wizardVoltar() {
+    if (wizardEtapaAtual > 1) {
+        wizardEtapaAtual--;
+        atualizarWizardProgress(wizardEtapaAtual);
+        mostrarEtapaWizard(wizardEtapaAtual);
+    }
+}
+
+// Atualizar checklist final na etapa 4
+function atualizarChecklistFinal() {
+    const checkBlingFinal = document.getElementById('checkBlingFinal');
+    if (checkBlingFinal) {
+        if (wizardEnviadoParaBling) {
+            checkBlingFinal.style.display = 'flex';
+        } else {
+            checkBlingFinal.style.display = 'none';
+        }
+    }
+}
+
+// Enviar fatura por WhatsApp
+function enviarFaturaWhatsApp() {
+    if (!ultimaVendaRegistrada) {
+        mostrarFeedback('Nenhuma venda registrada', 'erro');
+        return;
+    }
+
+    const telefone = ultimaVendaRegistrada.cliente.telefone.replace(/\D/g, '');
+    const nomeCliente = ultimaVendaRegistrada.cliente.nome.split(' ')[0]; // Primeiro nome
+    const total = formatarValorMonetario(ultimaVendaRegistrada.total);
+
+    const mensagem = `Olá ${nomeCliente}! 🏍️\n\nSegue a fatura da sua compra NXT no valor de R$ ${total}.\n\n*NXT Lojas - Mobilidade Urbana*\nwww.nxt.eco.br`;
+
+    const mensagemEncoded = encodeURIComponent(mensagem);
+    const url = `https://wa.me/55${telefone}?text=${mensagemEncoded}`;
+
+    window.open(url, '_blank');
+    mostrarFeedback('WhatsApp aberto! Envie a fatura em anexo.', 'sucesso');
+}
+
+// Gerar PDF no wizard
+async function wizardGerarPDF() {
+    if (!ultimaVendaRegistrada) {
+        mostrarFeedback('Nenhuma venda registrada', 'erro');
+        return;
+    }
+
+    // Primeiro gera o HTML da fatura (necessário para o PDF)
+    gerarHTMLFatura(ultimaVendaRegistrada);
+
+    // Mostrar o modal da fatura temporariamente (necessário para html2canvas)
+    const modalFatura = document.getElementById('modalFatura');
+    const estadoAnterior = modalFatura.style.display;
+    modalFatura.style.display = 'block';
+    modalFatura.style.visibility = 'hidden'; // Esconde visualmente mas mantém renderizado
+
+    // Aguarda renderização
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    try {
+        await gerarPDF();
+    } finally {
+        // Restaurar estado do modal
+        modalFatura.style.display = estadoAnterior;
+        modalFatura.style.visibility = '';
+    }
+}
+
+// Ver fatura completa no wizard
+function wizardVerFatura() {
+    gerarFatura();
+}
+
+// Copiar resumo no wizard
+function copiarResumoWizard() {
+    const textArea = document.getElementById('textoResumoModal');
+    if (!textArea || !textArea.value) {
+        mostrarFeedback('Nenhum resumo para copiar', 'erro');
+        return;
+    }
+
+    navigator.clipboard.writeText(textArea.value).then(() => {
+        // Mostrar feedback visual
+        const feedbackEl = document.getElementById('feedbackCopiado');
+        if (feedbackEl) {
+            feedbackEl.style.display = 'block';
+            setTimeout(() => {
+                feedbackEl.style.display = 'none';
+            }, 3000);
+        }
+        mostrarFeedback('Resumo copiado!', 'sucesso');
+    }).catch(() => {
+        // Fallback
+        textArea.select();
+        document.execCommand('copy');
+        mostrarFeedback('Resumo copiado!', 'sucesso');
+    });
+}
+
+// Abrir WhatsApp para enviar resumo ao grupo
+function abrirWhatsAppGrupo() {
+    // Abre o WhatsApp Web/App sem número específico (usuário escolhe o grupo)
+    const url = 'https://wa.me/?text=' + encodeURIComponent(ultimoResumoVenda);
+    window.open(url, '_blank');
+    mostrarFeedback('WhatsApp aberto! Cole o resumo no grupo.', 'sucesso');
+}
+
+// Finalizar wizard e iniciar nova venda
+function wizardNovaVenda() {
+    // Fechar o modal
+    document.getElementById('modalWizardVenda').style.display = 'none';
+
+    // Limpar formulário sem pedir confirmação
+    limparFormularioVenda(true);
+
+    mostrarFeedback('Formulário limpo! Pronto para nova venda.', 'sucesso');
+}
+
+// Fechar modal wizard (se clicar fora ou no X)
+document.addEventListener('DOMContentLoaded', () => {
+    const modalWizard = document.getElementById('modalWizardVenda');
+    if (modalWizard) {
+        modalWizard.addEventListener('click', (e) => {
+            // Só fecha se clicar no overlay (fundo escuro), não no conteúdo
+            if (e.target === modalWizard) {
+                // Perguntar se quer fechar sem completar
+                if (wizardEtapaAtual < 4) {
+                    if (!confirm('Você ainda não completou todas as etapas. Deseja fechar mesmo assim?')) {
+                        return;
+                    }
+                }
+                modalWizard.style.display = 'none';
+            }
+        });
+    }
+});

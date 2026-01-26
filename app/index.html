@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Build: 2026-01-24-v7 -->
+<!-- Build: 2026-01-26-v8 -->
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -757,16 +757,154 @@
         </div>
     </main>
 
-    <div id="modalResumoVenda" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <span class="modal-close-btn">&times;</span>
-            <h3>Venda Registrada com Sucesso!</h3>
-            <p>Abaixo está o resumo da venda para compartilhar:</p>
-            <textarea id="textoResumoModal" readonly></textarea>
-            <div class="modal-actions">
-                <button id="copiarResumoModalBtn" class="btn-success">Copiar Resumo</button>
-                <button id="gerarFaturaBtn" class="btn-warning">Gerar Fatura</button>
-                <button class="modal-close-btn btn-secondary">Fechar</button>
+    <!-- WIZARD DE PÓS-VENDA (4 ETAPAS) -->
+    <div id="modalWizardVenda" class="modal-overlay" style="display: none;">
+        <div class="modal-content modal-wizard">
+            <!-- Progress Bar -->
+            <div class="wizard-progress">
+                <div class="wizard-step active" data-step="1">
+                    <div class="wizard-step-icon">1</div>
+                    <div class="wizard-step-label">Enviado</div>
+                </div>
+                <div class="wizard-progress-line"></div>
+                <div class="wizard-step" data-step="2">
+                    <div class="wizard-step-icon">2</div>
+                    <div class="wizard-step-label">Fatura</div>
+                </div>
+                <div class="wizard-progress-line"></div>
+                <div class="wizard-step" data-step="3">
+                    <div class="wizard-step-icon">3</div>
+                    <div class="wizard-step-label">Resumo</div>
+                </div>
+                <div class="wizard-progress-line"></div>
+                <div class="wizard-step" data-step="4">
+                    <div class="wizard-step-icon">4</div>
+                    <div class="wizard-step-label">Concluir</div>
+                </div>
+            </div>
+
+            <!-- ETAPA 1: Confirmação de Envio -->
+            <div class="wizard-content" id="wizardStep1">
+                <div class="wizard-success-icon">✅</div>
+                <h3>Venda Registrada com Sucesso!</h3>
+                <div class="wizard-checklist">
+                    <div class="checklist-item done" id="checkPlanilha">
+                        <span class="checklist-icon">✓</span>
+                        <span>Venda salva na planilha</span>
+                    </div>
+                    <div class="checklist-item" id="checkBling">
+                        <span class="checklist-icon">⏳</span>
+                        <span>Enviado ao sistema de notas (Bling)</span>
+                    </div>
+                </div>
+                <p class="wizard-info">Agora vamos enviar a fatura ao cliente e copiar o resumo para o grupo.</p>
+                <div class="wizard-actions">
+                    <button type="button" class="btn-wizard-next" onclick="wizardAvancar()">
+                        Próximo: Enviar Fatura ao Cliente
+                        <span class="btn-arrow">→</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ETAPA 2: Fatura para o Cliente -->
+            <div class="wizard-content" id="wizardStep2" style="display: none;">
+                <h3>📄 Enviar Fatura ao Cliente</h3>
+                <p class="wizard-subtitle">Envie a fatura para o cliente por WhatsApp ou salve o PDF.</p>
+
+                <div class="wizard-fatura-preview" id="wizardFaturaPreview">
+                    <!-- Preview resumido da fatura será inserido aqui -->
+                </div>
+
+                <div class="wizard-button-group">
+                    <button type="button" class="btn-whatsapp-fatura" onclick="enviarFaturaWhatsApp()">
+                        <span class="btn-icon-wpp">📱</span>
+                        Enviar Fatura por WhatsApp
+                    </button>
+                    <button type="button" class="btn-download-pdf" onclick="wizardGerarPDF()">
+                        <span class="btn-icon-pdf">📄</span>
+                        Baixar PDF
+                    </button>
+                    <button type="button" class="btn-ver-fatura" onclick="wizardVerFatura()">
+                        <span class="btn-icon-eye">👁️</span>
+                        Ver Fatura Completa
+                    </button>
+                </div>
+
+                <div class="wizard-actions">
+                    <button type="button" class="btn-wizard-back" onclick="wizardVoltar()">
+                        <span class="btn-arrow">←</span> Voltar
+                    </button>
+                    <button type="button" class="btn-wizard-next btn-confirmar" onclick="wizardAvancar()">
+                        ✓ Fatura Enviada - Próximo
+                    </button>
+                </div>
+            </div>
+
+            <!-- ETAPA 3: Resumo para o Grupo -->
+            <div class="wizard-content" id="wizardStep3" style="display: none;">
+                <h3>📋 Copiar Resumo para o Grupo</h3>
+                <p class="wizard-subtitle">Copie o resumo da venda para enviar no grupo de WhatsApp.</p>
+
+                <textarea id="textoResumoModal" readonly></textarea>
+
+                <div class="wizard-button-group">
+                    <button type="button" class="btn-copiar-resumo" onclick="copiarResumoWizard()">
+                        <span class="btn-icon-copy">📋</span>
+                        Copiar Resumo
+                    </button>
+                    <button type="button" class="btn-whatsapp-grupo" onclick="abrirWhatsAppGrupo()">
+                        <span class="btn-icon-wpp">📱</span>
+                        Abrir WhatsApp
+                    </button>
+                </div>
+
+                <div class="wizard-copiado" id="feedbackCopiado" style="display: none;">
+                    ✅ Resumo copiado! Cole no grupo do WhatsApp.
+                </div>
+
+                <div class="wizard-actions">
+                    <button type="button" class="btn-wizard-back" onclick="wizardVoltar()">
+                        <span class="btn-arrow">←</span> Voltar
+                    </button>
+                    <button type="button" class="btn-wizard-next btn-confirmar" onclick="wizardAvancar()">
+                        ✓ Resumo Copiado - Finalizar
+                    </button>
+                </div>
+            </div>
+
+            <!-- ETAPA 4: Conclusão -->
+            <div class="wizard-content" id="wizardStep4" style="display: none;">
+                <div class="wizard-success-final">
+                    <div class="success-icon-big">🎉</div>
+                    <h3>Venda Concluída com Sucesso!</h3>
+                </div>
+
+                <div class="wizard-checklist-final">
+                    <div class="checklist-item-final done">
+                        <span class="checklist-icon-final">✅</span>
+                        <span>Venda registrada no sistema</span>
+                    </div>
+                    <div class="checklist-item-final done" id="checkBlingFinal">
+                        <span class="checklist-icon-final">✅</span>
+                        <span>Enviado ao Bling para NF-e</span>
+                    </div>
+                    <div class="checklist-item-final done">
+                        <span class="checklist-icon-final">✅</span>
+                        <span>Fatura enviada ao cliente</span>
+                    </div>
+                    <div class="checklist-item-final done">
+                        <span class="checklist-icon-final">✅</span>
+                        <span>Resumo copiado para o grupo</span>
+                    </div>
+                </div>
+
+                <p class="wizard-info-final">O formulário será limpo automaticamente para uma nova venda.</p>
+
+                <div class="wizard-actions">
+                    <button type="button" class="btn-nova-venda" onclick="wizardNovaVenda()">
+                        🆕 Nova Venda
+                    </button>
+                </div>
             </div>
         </div>
     </div>
