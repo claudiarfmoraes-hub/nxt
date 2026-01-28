@@ -3069,16 +3069,20 @@ ${entregaTexto}
 ━━━━━━━━━━━━━━━━━
 
 🛡️ *GARANTIA DO FABRICANTE*
-• Quadro: 2 anos
-• Motor: 2 anos
-• Bateria: 6 meses
-_Contra defeitos de fabricação._
+• Quadro: 2 anos contra defeitos de fabricação
+• Motor: 2 anos contra defeitos de fabricação
+• Bateria: 6 meses contra defeitos de fabricação
+_Danos por uso inadequado, acidentes ou desgaste natural não são cobertos pela garantia._
 
 📅 Data da Venda: ${dataVenda}
 📅 Emissão: ${dataEmissao}
 🏪 Loja: ${venda.loja}
 
+⚠️ _Este documento tem caráter informativo e não substitui a nota fiscal. A nota fiscal eletrônica será emitida e enviada separadamente._
+
 _*NXT Lojas - Mobilidade Urbana*_
+CNPJ: 55.099.827/0001-96
+Ni Hao Comércio e Serviços Ltda
 www.nxt.eco.br`;
 
     const url = `https://wa.me/55${telefone}?text=${encodeURIComponent(mensagem)}`;
