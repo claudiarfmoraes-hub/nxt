@@ -2996,45 +2996,95 @@ function atualizarChecklistFinal() {
     }
 }
 
-// Enviar fatura por WhatsApp (gera PDF primeiro, depois abre WhatsApp)
-async function enviarFaturaWhatsApp() {
+// Enviar fatura por WhatsApp (monta a fatura como texto na mensagem)
+function enviarFaturaWhatsApp() {
     if (!ultimaVendaRegistrada) {
         mostrarFeedback('Nenhuma venda registrada', 'erro');
         return;
     }
 
-    // Desabilitar botão enquanto gera o PDF
-    const btnWhatsApp = document.querySelector('.btn-whatsapp-fatura');
-    if (btnWhatsApp) {
-        btnWhatsApp.disabled = true;
-        btnWhatsApp.textContent = 'Aguarde, gerando PDF...';
-    }
+    const venda = ultimaVendaRegistrada;
+    const telefone = venda.cliente.telefone.replace(/\D/g, '');
+    const nomeCliente = venda.cliente.nome.split(' ')[0];
+    const dataVenda = new Date(venda.dataVenda).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
+    const dataEmissao = new Date().toLocaleDateString('pt-BR');
 
-    try {
-        // Gerar e baixar o PDF primeiro
-        await wizardGerarPDF();
-
-        // Depois abre o WhatsApp com a mensagem
-        const telefone = ultimaVendaRegistrada.cliente.telefone.replace(/\D/g, '');
-        const nomeCliente = ultimaVendaRegistrada.cliente.nome.split(' ')[0];
-        const total = formatarValorMonetario(ultimaVendaRegistrada.total);
-
-        const mensagem = `Olá ${nomeCliente}! 🏍️\n\nSegue a fatura da sua compra NXT no valor de R$ ${total}.\n\n*NXT Lojas - Mobilidade Urbana*\nwww.nxt.eco.br`;
-
-        const url = `https://wa.me/55${telefone}?text=${encodeURIComponent(mensagem)}`;
-        window.open(url, '_blank');
-
-        mostrarFeedback('PDF baixado! No WhatsApp, toque no clipe e anexe o PDF.', 'sucesso');
-    } catch (error) {
-        console.error('Erro ao enviar fatura:', error);
-        mostrarFeedback('Erro ao gerar PDF. Tente de novo.', 'erro');
-    } finally {
-        // Restaurar botão
-        if (btnWhatsApp) {
-            btnWhatsApp.disabled = false;
-            btnWhatsApp.innerHTML = '<span class="btn-icon-wpp">📱</span> Baixar PDF e Abrir WhatsApp';
+    // Montar formas de pagamento
+    let pagamentoTexto = '';
+    if (venda.pagamento.valores && Object.keys(venda.pagamento.valores).length > 0) {
+        const formas = [];
+        for (const [forma, valor] of Object.entries(venda.pagamento.valores)) {
+            const nome = forma === 'pos' ? 'PIX POS' : forma === 'pix' ? 'PIX' : forma === 'debito' ? 'DÉBITO' : forma === 'credito' ? 'CRÉDITO' : forma.toUpperCase();
+            formas.push(`${nome}: R$ ${formatarValorMonetario(valor)}`);
         }
+        pagamentoTexto = formas.join('\n');
+    } else {
+        pagamentoTexto = venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f.toUpperCase()).join(', ');
     }
+    if (venda.pagamento.formas.includes('credito')) {
+        pagamentoTexto += ` (${venda.pagamento.parcelas}x)`;
+    }
+
+    // Montar lista de produtos
+    let produtosTexto = '';
+    venda.produtos.forEach((p, i) => {
+        produtosTexto += `${i + 1}. *${p.modelo}* - ${p.cor}\n`;
+        produtosTexto += `   Chassi: ${p.chassi || 'N/A'} | Motor: ${p.motor || 'N/A'}\n`;
+        produtosTexto += `   Valor: R$ ${formatarValorMonetario(p.preco)}\n`;
+    });
+
+    // Entrega
+    let entregaTexto = venda.entrega.tipo === 'retirada' ? 'Retirado pelo Cliente' : 'Receber em Casa';
+    if (venda.entrega.prazo) {
+        entregaTexto += ` - Prazo: ${new Date(venda.entrega.prazo).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}`;
+    }
+    if (venda.valorFrete && venda.valorFrete > 0) {
+        entregaTexto += ` - Frete: R$ ${formatarValorMonetario(venda.valorFrete)}`;
+    }
+
+    // Montar mensagem completa
+    const mensagem = `Olá ${nomeCliente}! 🏍️
+
+Segue a fatura da sua compra:
+
+━━━━━━━━━━━━━━━━━
+*FATURA DE VENDA - NXT LOJAS*
+━━━━━━━━━━━━━━━━━
+
+*Cliente:* ${venda.cliente.nome}
+*Telefone:* ${venda.cliente.telefone}${venda.cliente.cpf ? `\n*CPF:* ${venda.cliente.cpf}` : ''}${venda.cliente.cnpj ? `\n*CNPJ:* ${venda.cliente.cnpj}` : ''}
+*Endereço:* ${venda.cliente.endereco.rua}, ${venda.cliente.endereco.numero} - ${venda.cliente.endereco.bairro}
+${venda.cliente.endereco.cidade}/${venda.cliente.endereco.estado} - CEP: ${venda.cliente.endereco.cep}
+
+📦 *PRODUTOS*
+${produtosTexto}
+💳 *PAGAMENTO*
+${pagamentoTexto}${venda.pagamento.observacoes ? `\nObs: ${venda.pagamento.observacoes}` : ''}
+
+🚚 *ENTREGA*
+${entregaTexto}
+
+━━━━━━━━━━━━━━━━━
+*TOTAL: R$ ${formatarValorMonetario(venda.total)}*
+━━━━━━━━━━━━━━━━━
+
+🛡️ *GARANTIA DO FABRICANTE*
+• Quadro: 2 anos
+• Motor: 2 anos
+• Bateria: 6 meses
+_Contra defeitos de fabricação._
+
+📅 Data da Venda: ${dataVenda}
+📅 Emissão: ${dataEmissao}
+🏪 Loja: ${venda.loja}
+
+_*NXT Lojas - Mobilidade Urbana*_
+www.nxt.eco.br`;
+
+    const url = `https://wa.me/55${telefone}?text=${encodeURIComponent(mensagem)}`;
+    window.open(url, '_blank');
+
+    mostrarFeedback('WhatsApp aberto com a fatura! É só enviar.', 'sucesso');
 }
 
 // Gerar PDF no wizard
