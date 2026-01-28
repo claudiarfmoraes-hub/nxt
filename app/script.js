@@ -209,11 +209,14 @@ function configurarFormularios() {
     const modalWizard = document.getElementById('modalWizardVenda');
     const modalFatura = document.getElementById('modalFatura');
 
-    // Fechar modais ao clicar no X
+    // Fechar modais ao clicar no X - fecha apenas o modal pai do botão
     document.querySelectorAll('.modal-close-btn').forEach(btn => {
         btn.onclick = function() {
-            if (modalWizard) modalWizard.style.display = "none";
-            if (modalFatura) modalFatura.style.display = "none";
+            const parentModal = this.closest('.modal-overlay');
+            if (parentModal) {
+                parentModal.style.display = "none";
+                parentModal.style.zIndex = '';
+            }
         }
     });
 
@@ -221,6 +224,7 @@ function configurarFormularios() {
     window.onclick = function(event) {
         if (event.target == modalFatura) {
             modalFatura.style.display = "none";
+            modalFatura.style.zIndex = '';
         }
     }
 
@@ -1733,11 +1737,11 @@ async function gerarPDF() {
         // Fazer download do PDF
         pdf.save(nomeArquivo);
 
-        alert('PDF gerado com sucesso!');
+        mostrarFeedback('PDF gerado com sucesso!', 'sucesso');
 
     } catch (error) {
         console.error('Erro ao gerar PDF:', error);
-        alert(`Erro ao gerar PDF: ${error.message}. Tente novamente ou use a função de impressão.`);
+        mostrarFeedback('Erro ao gerar PDF. Tente novamente ou use a função de impressão.', 'erro');
     }
 }
 
@@ -2992,24 +2996,45 @@ function atualizarChecklistFinal() {
     }
 }
 
-// Enviar fatura por WhatsApp
-function enviarFaturaWhatsApp() {
+// Enviar fatura por WhatsApp (gera PDF primeiro, depois abre WhatsApp)
+async function enviarFaturaWhatsApp() {
     if (!ultimaVendaRegistrada) {
         mostrarFeedback('Nenhuma venda registrada', 'erro');
         return;
     }
 
-    const telefone = ultimaVendaRegistrada.cliente.telefone.replace(/\D/g, '');
-    const nomeCliente = ultimaVendaRegistrada.cliente.nome.split(' ')[0]; // Primeiro nome
-    const total = formatarValorMonetario(ultimaVendaRegistrada.total);
+    // Desabilitar botão enquanto gera o PDF
+    const btnWhatsApp = document.querySelector('.btn-whatsapp-fatura');
+    if (btnWhatsApp) {
+        btnWhatsApp.disabled = true;
+        btnWhatsApp.textContent = 'Aguarde, gerando PDF...';
+    }
 
-    const mensagem = `Olá ${nomeCliente}! 🏍️\n\nSegue a fatura da sua compra NXT no valor de R$ ${total}.\n\n*NXT Lojas - Mobilidade Urbana*\nwww.nxt.eco.br`;
+    try {
+        // Gerar e baixar o PDF primeiro
+        await wizardGerarPDF();
 
-    const mensagemEncoded = encodeURIComponent(mensagem);
-    const url = `https://wa.me/55${telefone}?text=${mensagemEncoded}`;
+        // Depois abre o WhatsApp com a mensagem
+        const telefone = ultimaVendaRegistrada.cliente.telefone.replace(/\D/g, '');
+        const nomeCliente = ultimaVendaRegistrada.cliente.nome.split(' ')[0];
+        const total = formatarValorMonetario(ultimaVendaRegistrada.total);
 
-    window.open(url, '_blank');
-    mostrarFeedback('WhatsApp aberto! Envie a fatura em anexo.', 'sucesso');
+        const mensagem = `Olá ${nomeCliente}! 🏍️\n\nSegue a fatura da sua compra NXT no valor de R$ ${total}.\n\n*NXT Lojas - Mobilidade Urbana*\nwww.nxt.eco.br`;
+
+        const url = `https://wa.me/55${telefone}?text=${encodeURIComponent(mensagem)}`;
+        window.open(url, '_blank');
+
+        mostrarFeedback('PDF baixado! No WhatsApp, toque no clipe e anexe o PDF.', 'sucesso');
+    } catch (error) {
+        console.error('Erro ao enviar fatura:', error);
+        mostrarFeedback('Erro ao gerar PDF. Tente de novo.', 'erro');
+    } finally {
+        // Restaurar botão
+        if (btnWhatsApp) {
+            btnWhatsApp.disabled = false;
+            btnWhatsApp.innerHTML = '<span class="btn-icon-wpp">📱</span> Baixar PDF e Abrir WhatsApp';
+        }
+    }
 }
 
 // Gerar PDF no wizard
@@ -3046,9 +3071,14 @@ async function wizardGerarPDF() {
     }
 }
 
-// Ver fatura completa no wizard
+// Ver fatura completa no wizard (abre por cima sem fechar o wizard)
 function wizardVerFatura() {
     gerarFatura();
+    // Elevar z-index da fatura para ficar acima do wizard
+    const modalFatura = document.getElementById('modalFatura');
+    if (modalFatura) {
+        modalFatura.style.zIndex = '10003';
+    }
 }
 
 // Copiar resumo no wizard

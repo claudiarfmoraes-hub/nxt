@@ -809,7 +809,13 @@
             <!-- ETAPA 2: Fatura para o Cliente -->
             <div class="wizard-content" id="wizardStep2" style="display: none;">
                 <h3>📄 Enviar Fatura ao Cliente</h3>
-                <p class="wizard-subtitle">Envie a fatura para o cliente por WhatsApp ou salve o PDF.</p>
+
+                <div class="wizard-instrucoes">
+                    <p class="wizard-instrucao-titulo">Como enviar a fatura:</p>
+                    <div class="wizard-passo"><span class="wizard-passo-num">1</span> Clique no botão verde abaixo. O PDF vai baixar no seu celular/computador e o WhatsApp vai abrir.</div>
+                    <div class="wizard-passo"><span class="wizard-passo-num">2</span> No WhatsApp, toque no clipe (anexo) e envie o PDF que acabou de baixar.</div>
+                    <div class="wizard-passo"><span class="wizard-passo-num">3</span> Depois de enviar, volte aqui e clique em "Próximo".</div>
+                </div>
 
                 <div class="wizard-fatura-preview" id="wizardFaturaPreview">
                     <!-- Preview resumido da fatura será inserido aqui -->
@@ -818,15 +824,18 @@
                 <div class="wizard-button-group">
                     <button type="button" class="btn-whatsapp-fatura" onclick="enviarFaturaWhatsApp()">
                         <span class="btn-icon-wpp">📱</span>
-                        Enviar Fatura por WhatsApp
+                        Baixar PDF e Abrir WhatsApp
                     </button>
+                </div>
+
+                <div class="wizard-button-group wizard-btns-secundarios">
                     <button type="button" class="btn-download-pdf" onclick="wizardGerarPDF()">
                         <span class="btn-icon-pdf">📄</span>
-                        Baixar PDF
+                        Só Baixar PDF
                     </button>
                     <button type="button" class="btn-ver-fatura" onclick="wizardVerFatura()">
                         <span class="btn-icon-eye">👁️</span>
-                        Ver Fatura Completa
+                        Ver Fatura
                     </button>
                 </div>
 
@@ -835,15 +844,21 @@
                         <span class="btn-arrow">←</span> Voltar
                     </button>
                     <button type="button" class="btn-wizard-next btn-confirmar" onclick="wizardAvancar()">
-                        ✓ Fatura Enviada - Próximo
+                        Próximo →
                     </button>
                 </div>
             </div>
 
             <!-- ETAPA 3: Resumo para o Grupo -->
             <div class="wizard-content" id="wizardStep3" style="display: none;">
-                <h3>📋 Copiar Resumo para o Grupo</h3>
-                <p class="wizard-subtitle">Copie o resumo da venda para enviar no grupo de WhatsApp.</p>
+                <h3>📋 Enviar Resumo no Grupo</h3>
+
+                <div class="wizard-instrucoes">
+                    <p class="wizard-instrucao-titulo">Como enviar o resumo:</p>
+                    <div class="wizard-passo"><span class="wizard-passo-num">1</span> Clique em "Copiar Resumo" para copiar o texto.</div>
+                    <div class="wizard-passo"><span class="wizard-passo-num">2</span> Clique em "Abrir WhatsApp" e cole o texto no grupo.</div>
+                    <div class="wizard-passo"><span class="wizard-passo-num">3</span> Volte aqui e clique em "Finalizar".</div>
+                </div>
 
                 <textarea id="textoResumoModal" readonly></textarea>
 
@@ -854,12 +869,12 @@
                     </button>
                     <button type="button" class="btn-whatsapp-grupo" onclick="abrirWhatsAppGrupo()">
                         <span class="btn-icon-wpp">📱</span>
-                        Abrir WhatsApp
+                        Abrir WhatsApp do Grupo
                     </button>
                 </div>
 
                 <div class="wizard-copiado" id="feedbackCopiado" style="display: none;">
-                    ✅ Resumo copiado! Cole no grupo do WhatsApp.
+                    Resumo copiado! Agora cole no grupo do WhatsApp.
                 </div>
 
                 <div class="wizard-actions">
@@ -867,7 +882,7 @@
                         <span class="btn-arrow">←</span> Voltar
                     </button>
                     <button type="button" class="btn-wizard-next btn-confirmar" onclick="wizardAvancar()">
-                        ✓ Resumo Copiado - Finalizar
+                        Finalizar →
                     </button>
                 </div>
             </div>

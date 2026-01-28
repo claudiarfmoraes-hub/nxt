@@ -3115,6 +3115,65 @@ h4, h5 {
     font-size: 0.95rem;
 }
 
+/* Instruções passo-a-passo do wizard */
+.wizard-instrucoes {
+    background: #f0f7ff;
+    border: 1px solid #c8dff7;
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.2rem;
+    text-align: left;
+}
+
+.wizard-instrucao-titulo {
+    font-weight: 700;
+    color: #1a5276;
+    margin: 0 0 0.6rem 0;
+    font-size: 0.95rem;
+}
+
+.wizard-passo {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.4;
+}
+
+.wizard-passo:last-child {
+    margin-bottom: 0;
+}
+
+.wizard-passo-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    background: #1a5276;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* Botões secundários menores no wizard */
+.wizard-btns-secundarios {
+    gap: 0.5rem !important;
+    margin-top: 0 !important;
+}
+
+.wizard-btns-secundarios .btn-download-pdf,
+.wizard-btns-secundarios .btn-ver-fatura {
+    flex: 1;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.8rem;
+    opacity: 0.8;
+}
+
 .wizard-success-icon {
     font-size: 4rem;
     margin-bottom: 1rem;
