@@ -769,12 +769,12 @@
                 <div class="wizard-progress-line"></div>
                 <div class="wizard-step" data-step="2">
                     <div class="wizard-step-icon">2</div>
-                    <div class="wizard-step-label">Fatura</div>
+                    <div class="wizard-step-label">Resumo</div>
                 </div>
                 <div class="wizard-progress-line"></div>
                 <div class="wizard-step" data-step="3">
                     <div class="wizard-step-icon">3</div>
-                    <div class="wizard-step-label">Resumo</div>
+                    <div class="wizard-step-label">Fatura</div>
                 </div>
                 <div class="wizard-progress-line"></div>
                 <div class="wizard-step" data-step="4">
@@ -800,14 +800,52 @@
                 <p class="wizard-info">Agora vamos enviar a fatura ao cliente e copiar o resumo para o grupo.</p>
                 <div class="wizard-actions">
                     <button type="button" class="btn-wizard-next" onclick="wizardAvancar()">
-                        Próximo: Enviar Fatura ao Cliente
+                        Próximo: Enviar Resumo no Grupo
                         <span class="btn-arrow">→</span>
                     </button>
                 </div>
             </div>
 
-            <!-- ETAPA 2: Fatura para o Cliente -->
+            <!-- ETAPA 2: Resumo para o Grupo -->
             <div class="wizard-content" id="wizardStep2" style="display: none;">
+                <h3>📋 Enviar Resumo no Grupo</h3>
+
+                <div class="wizard-instrucoes">
+                    <p class="wizard-instrucao-titulo">Como enviar o resumo:</p>
+                    <div class="wizard-passo"><span class="wizard-passo-num">1</span> Clique em "Copiar Resumo" para copiar o texto.</div>
+                    <div class="wizard-passo"><span class="wizard-passo-num">2</span> Clique em "Abrir WhatsApp" e cole o texto no grupo.</div>
+                    <div class="wizard-passo"><span class="wizard-passo-num">3</span> Volte aqui e clique em "Próximo".</div>
+                </div>
+
+                <textarea id="textoResumoModal" readonly></textarea>
+
+                <div class="wizard-button-group">
+                    <button type="button" class="btn-copiar-resumo" onclick="copiarResumoWizard()">
+                        <span class="btn-icon-copy">📋</span>
+                        Copiar Resumo
+                    </button>
+                    <button type="button" class="btn-whatsapp-grupo" onclick="abrirWhatsAppGrupo()">
+                        <span class="btn-icon-wpp">📱</span>
+                        Abrir WhatsApp do Grupo
+                    </button>
+                </div>
+
+                <div class="wizard-copiado" id="feedbackCopiado" style="display: none;">
+                    Resumo copiado! Agora cole no grupo do WhatsApp.
+                </div>
+
+                <div class="wizard-actions">
+                    <button type="button" class="btn-wizard-back" onclick="wizardVoltar()">
+                        <span class="btn-arrow">←</span> Voltar
+                    </button>
+                    <button type="button" class="btn-wizard-next btn-confirmar" onclick="wizardAvancar()">
+                        Próximo →
+                    </button>
+                </div>
+            </div>
+
+            <!-- ETAPA 3: Fatura para o Cliente -->
+            <div class="wizard-content" id="wizardStep3" style="display: none;">
                 <h3>📄 Enviar Fatura ao Cliente</h3>
 
                 <div class="wizard-instrucoes">
@@ -837,44 +875,6 @@
                         <span class="btn-icon-eye">👁️</span>
                         Ver Fatura
                     </button>
-                </div>
-
-                <div class="wizard-actions">
-                    <button type="button" class="btn-wizard-back" onclick="wizardVoltar()">
-                        <span class="btn-arrow">←</span> Voltar
-                    </button>
-                    <button type="button" class="btn-wizard-next btn-confirmar" onclick="wizardAvancar()">
-                        Próximo →
-                    </button>
-                </div>
-            </div>
-
-            <!-- ETAPA 3: Resumo para o Grupo -->
-            <div class="wizard-content" id="wizardStep3" style="display: none;">
-                <h3>📋 Enviar Resumo no Grupo</h3>
-
-                <div class="wizard-instrucoes">
-                    <p class="wizard-instrucao-titulo">Como enviar o resumo:</p>
-                    <div class="wizard-passo"><span class="wizard-passo-num">1</span> Clique em "Copiar Resumo" para copiar o texto.</div>
-                    <div class="wizard-passo"><span class="wizard-passo-num">2</span> Clique em "Abrir WhatsApp" e cole o texto no grupo.</div>
-                    <div class="wizard-passo"><span class="wizard-passo-num">3</span> Volte aqui e clique em "Finalizar".</div>
-                </div>
-
-                <textarea id="textoResumoModal" readonly></textarea>
-
-                <div class="wizard-button-group">
-                    <button type="button" class="btn-copiar-resumo" onclick="copiarResumoWizard()">
-                        <span class="btn-icon-copy">📋</span>
-                        Copiar Resumo
-                    </button>
-                    <button type="button" class="btn-whatsapp-grupo" onclick="abrirWhatsAppGrupo()">
-                        <span class="btn-icon-wpp">📱</span>
-                        Abrir WhatsApp do Grupo
-                    </button>
-                </div>
-
-                <div class="wizard-copiado" id="feedbackCopiado" style="display: none;">
-                    Resumo copiado! Agora cole no grupo do WhatsApp.
                 </div>
 
                 <div class="wizard-actions">
