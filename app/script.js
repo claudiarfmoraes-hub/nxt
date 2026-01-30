@@ -45,6 +45,7 @@ let ultimaVendaRegistrada = null;
 let wizardEtapaAtual = 1;
 let vendaJaEnviada = false;
 let wizardEnviadoParaBling = false;
+let wizardOperacaoEmAndamento = false;
 
 // Variáveis para o novo sistema de inventário
 let abaAtualInventario = 'contagem';
@@ -220,9 +221,9 @@ function configurarFormularios() {
         }
     });
 
-    // Fechar modal de fatura ao clicar fora
+    // Fechar modal de fatura ao clicar fora (protege contra fechamento durante geração de PDF)
     window.onclick = function(event) {
-        if (event.target == modalFatura) {
+        if (event.target == modalFatura && !wizardOperacaoEmAndamento) {
             modalFatura.style.display = "none";
             modalFatura.style.zIndex = '';
         }
@@ -410,33 +411,46 @@ async function registrarVenda(event) {
     vendasSalvas.push(venda);
     localStorage.setItem('vendas', JSON.stringify(vendasSalvas));
 
-    const sucessoAutomacao = await enviarParaAutomacao('vendas', venda);
-    mostrarStatusAutomacao(sucessoAutomacao);
-
     ultimaVendaRegistrada = venda;
-
-    // Enviar automaticamente para o sistema de emissão (se conectado)
-    let enviadoParaBling = false;
-    await BLING_CONFIG.checkStatus(); // Verificar status atualizado
-    if (BLING_CONFIG.isAuthenticated) {
-        try {
-            await enviarVendaParaBling(venda);
-            enviadoParaBling = true;
-        } catch (error) {
-            console.error('Erro ao enviar para emissão:', error);
-            // Continua mostrando o modal mesmo se der erro
-        }
-    }
-    atualizarStatusBling();
 
     // Marcar venda como enviada para proteção anti-duplicidade
     vendaJaEnviada = true;
 
     // Atualizar botão para indicar que venda foi enviada
     btnRegistrar.innerHTML = '<span class="btn-icon">✅</span> Venda Enviada';
-    // Mantém desabilitado até limpar o formulário
 
-    mostrarResumoModal(venda, enviadoParaBling);
+    // Mostrar wizard IMEDIATAMENTE - dados já salvos no localStorage
+    // Evita fechamento precipitado: o usuário já vê a fatura mesmo se envios falharem
+    mostrarResumoModal(venda, false);
+
+    // Enviar para automação em background (não bloqueia o wizard)
+    enviarParaAutomacao('vendas', venda).then(sucesso => {
+        mostrarStatusAutomacao(sucesso);
+    });
+
+    // Enviar para Bling em background (se conectado)
+    BLING_CONFIG.checkStatus().then(() => {
+        if (BLING_CONFIG.isAuthenticated) {
+            enviarVendaParaBling(venda).then(() => {
+                wizardEnviadoParaBling = true;
+                const checkBling = document.getElementById('checkBling');
+                if (checkBling) {
+                    checkBling.classList.add('done');
+                    checkBling.querySelector('.checklist-icon').textContent = '✓';
+                }
+                atualizarStatusBling();
+            }).catch(error => {
+                console.error('Erro ao enviar para emissão:', error);
+                const checkBling = document.getElementById('checkBling');
+                if (checkBling) {
+                    checkBling.querySelector('.checklist-icon').textContent = '✗';
+                }
+                atualizarStatusBling();
+            });
+        } else {
+            atualizarStatusBling();
+        }
+    });
 
     // Não limpa automaticamente o formulário para permitir usar copiar/enviar fatura
     // O usuário deve usar o botão "Nova Venda" no wizard quando desejar
@@ -3098,6 +3112,8 @@ async function wizardGerarPDF() {
         return;
     }
 
+    wizardOperacaoEmAndamento = true;
+
     // Primeiro gera o HTML da fatura (necessário para o PDF)
     gerarHTMLFatura(ultimaVendaRegistrada);
 
@@ -3111,8 +3127,8 @@ async function wizardGerarPDF() {
     modalFatura.style.top = '0';
     modalFatura.style.display = 'block';
 
-    // Aguarda renderização
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Aguarda renderização completa do HTML antes de capturar
+    await new Promise(resolve => setTimeout(resolve, 600));
 
     try {
         await gerarPDF();
@@ -3122,6 +3138,7 @@ async function wizardGerarPDF() {
         modalFatura.style.position = '';
         modalFatura.style.left = '';
         modalFatura.style.top = '';
+        wizardOperacaoEmAndamento = false;
     }
 }
 
@@ -3187,6 +3204,11 @@ document.addEventListener('DOMContentLoaded', () => {
         modalWizard.addEventListener('click', (e) => {
             // Só fecha se clicar no overlay (fundo escuro), não no conteúdo
             if (e.target === modalWizard) {
+                // Bloquear fechamento durante operações assíncronas (ex: geração de PDF)
+                if (wizardOperacaoEmAndamento) {
+                    mostrarFeedback('Aguarde a operação em andamento...', 'erro');
+                    return;
+                }
                 // Perguntar se quer fechar sem completar
                 if (wizardEtapaAtual < 4) {
                     if (!confirm('Você ainda não completou todas as etapas. Deseja fechar mesmo assim?')) {
