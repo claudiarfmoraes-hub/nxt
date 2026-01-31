@@ -14,21 +14,22 @@
     "Zilla"
   ],
   "cores": [
+    "Branco",
+    "Preto",
     "Prateado",
     "Cinza",
-    "Preto",
-    "Branco",
-    "Branco Pérola",
-    "Vermelho",
     "Amarelo",
-    "Laranja",
-    "Rosa",
     "Azul Claro",
     "Azul Escuro",
     "Azul Turquesa",
-    "Verde Militar",
-    "Verde",
+    "Bege",
+    "Branco Pérola",
     "Fendi",
-    "Roxa"
+    "Laranja",
+    "Rosa",
+    "Roxa",
+    "Verde",
+    "Verde Militar",
+    "Vermelho"
   ]
 }
