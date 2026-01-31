@@ -438,16 +438,29 @@ async function registrarVenda(event) {
                     checkBling.classList.add('done');
                     checkBling.querySelector('.checklist-icon').textContent = '✓';
                 }
+                // Regenerar resumo com a confirmação do Bling
+                ultimoResumoVenda = gerarTextoResumoVenda(venda, true);
+                const textArea = document.getElementById('textoResumoModal');
+                if (textArea) {
+                    textArea.value = ultimoResumoVenda;
+                }
                 atualizarStatusBling();
             }).catch(error => {
                 console.error('Erro ao enviar para emissão:', error);
                 const checkBling = document.getElementById('checkBling');
                 if (checkBling) {
                     checkBling.querySelector('.checklist-icon').textContent = '✗';
+                    checkBling.querySelector('span:last-child').textContent = 'Bling indisponível — continue normalmente';
                 }
                 atualizarStatusBling();
             });
         } else {
+            // Bling não conectado — marcar como ignorado e seguir
+            const checkBling = document.getElementById('checkBling');
+            if (checkBling) {
+                checkBling.querySelector('.checklist-icon').textContent = '—';
+                checkBling.querySelector('span:last-child').textContent = 'Emissão não conectada — continue normalmente';
+            }
             atualizarStatusBling();
         }
     });
@@ -3144,11 +3157,20 @@ async function wizardGerarPDF() {
 
 // Ver fatura completa no wizard (abre por cima sem fechar o wizard)
 function wizardVerFatura() {
+    wizardOperacaoEmAndamento = true;
     gerarFatura();
     // Elevar z-index da fatura para ficar acima do wizard
     const modalFatura = document.getElementById('modalFatura');
     if (modalFatura) {
         modalFatura.style.zIndex = '10003';
+        // Liberar flag quando modalFatura for fechada
+        const observer = new MutationObserver(() => {
+            if (modalFatura.style.display === 'none' || modalFatura.style.display === '') {
+                wizardOperacaoEmAndamento = false;
+                observer.disconnect();
+            }
+        });
+        observer.observe(modalFatura, { attributes: true, attributeFilter: ['style'] });
     }
 }
 
@@ -3197,26 +3219,38 @@ function wizardNovaVenda() {
     mostrarFeedback('Formulário limpo! Pronto para nova venda.', 'sucesso');
 }
 
-// Fechar modal wizard (se clicar fora ou no X)
+// Fechar modal wizard - backdrop NÃO fecha nas etapas 1-3 (evita fechamento acidental)
 document.addEventListener('DOMContentLoaded', () => {
     const modalWizard = document.getElementById('modalWizardVenda');
     if (modalWizard) {
         modalWizard.addEventListener('click', (e) => {
-            // Só fecha se clicar no overlay (fundo escuro), não no conteúdo
             if (e.target === modalWizard) {
-                // Bloquear fechamento durante operações assíncronas (ex: geração de PDF)
                 if (wizardOperacaoEmAndamento) {
                     mostrarFeedback('Aguarde a operação em andamento...', 'erro');
                     return;
                 }
-                // Perguntar se quer fechar sem completar
-                if (wizardEtapaAtual < 4) {
-                    if (!confirm('Você ainda não completou todas as etapas. Deseja fechar mesmo assim?')) {
-                        return;
-                    }
+                // Na etapa 4 (Concluir), permite fechar pelo backdrop
+                if (wizardEtapaAtual >= 4) {
+                    modalWizard.style.display = 'none';
+                    return;
                 }
-                modalWizard.style.display = 'none';
+                // Nas etapas 1-3, NÃO fecha pelo backdrop - só pelo botão X
+                mostrarFeedback('Use o botão ✕ para fechar o wizard.', 'erro');
             }
         });
     }
 });
+
+// Fechar wizard pelo botão X (com confirmação)
+function fecharWizardVenda() {
+    if (wizardOperacaoEmAndamento) {
+        mostrarFeedback('Aguarde a operação em andamento...', 'erro');
+        return;
+    }
+    if (wizardEtapaAtual < 4) {
+        if (!confirm('Você ainda não completou todas as etapas do pós-venda.\n\nA venda já foi salva, mas a fatura pode não ter sido enviada ao cliente.\n\nDeseja fechar mesmo assim?')) {
+            return;
+        }
+    }
+    document.getElementById('modalWizardVenda').style.display = 'none';
+}
