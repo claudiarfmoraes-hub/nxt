@@ -36,6 +36,7 @@ const BLING_CONFIG = {
 let dadosLojas = {};
 let dadosProdutos = {};
 let dadosVendedores = [];
+let dadosFiscais = {};
 let produtosDaVenda = [];
 let itensInventario = [];
 let ultimoResumoVenda = '';
@@ -80,10 +81,11 @@ function inicializarInventarioNovo() {
 
 async function carregarDadosIniciais() {
     try {
-        const [lojasRes, produtosRes, vendedoresRes] = await Promise.all([
+        const [lojasRes, produtosRes, vendedoresRes, fiscalRes] = await Promise.all([
             fetch('dados/lojas.json'),
             fetch('dados/produtos.json'),
-            fetch('dados/vendedores_json.json')
+            fetch('dados/vendedores_json.json'),
+            fetch('dados/produtos-fiscal.json')
         ]);
         if (!lojasRes.ok) throw new Error(`Erro ao buscar lojas.json: ${lojasRes.statusText}`);
         try {
@@ -105,6 +107,19 @@ async function carregarDadosIniciais() {
             dadosVendedores = vendedoresData.vendedores || [];
         } catch (e) {
             throw new Error("Erro de sintaxe no arquivo 'vendedores_json.json'. Verifique as vírgulas e chaves {}.");
+        }
+
+        if (fiscalRes.ok) {
+            try {
+                const fiscalData = await fiscalRes.json();
+                // Extrair apenas os modelos (ignorar _info)
+                Object.keys(fiscalData).forEach(key => {
+                    if (key !== '_info') dadosFiscais[key] = fiscalData[key];
+                });
+                console.log('Dados fiscais carregados:', Object.keys(dadosFiscais));
+            } catch (e) {
+                console.warn('Erro ao parsear produtos-fiscal.json:', e);
+            }
         }
 
         preencherDropdowns();
@@ -1062,28 +1077,46 @@ async function finalizarInventario() {
         alert('Adicione itens antes de finalizar o inventário.');
         return;
     }
-    
-    const nomeLoja = dadosLojas[lojaId]?.nome || lojaId;
-    const totalItens = itensInventario.reduce((acc, item) => acc + item.quantidade, 0);
 
-    const inventarioFinalizado = {
-        id: `INV-${Date.now()}`,
-        loja: nomeLoja,
-        data: new Date().toISOString(),
-        totalItens: totalItens,
-        itens: itensInventario
-    };
-    
-    const inventariosSalvos = JSON.parse(localStorage.getItem('inventarios') || '[]');
-    inventariosSalvos.push(inventarioFinalizado);
-    localStorage.setItem('inventarios', JSON.stringify(inventariosSalvos));
+    // Desabilitar botão e mostrar loading
+    const btnFinalizar = document.getElementById('finalizarInventario');
+    btnFinalizar.disabled = true;
+    btnFinalizar.innerHTML = '<span class="btn-icon-left">⏳</span> Enviando...';
 
-    alert(`Inventário com ${totalItens} itens finalizado e salvo!`);
-    
-    const sucessoAutomacao = await enviarParaAutomacao('inventario', inventarioFinalizado);
-    mostrarStatusAutomacao(sucessoAutomacao);
+    try {
+        const nomeLoja = dadosLojas[lojaId]?.nome || lojaId;
+        const totalItens = itensInventario.reduce((acc, item) => acc + item.quantidade, 0);
 
-    limparFormularioInventario();
+        const inventarioFinalizado = {
+            id: `INV-${Date.now()}`,
+            loja: nomeLoja,
+            data: new Date().toISOString(),
+            totalItens: totalItens,
+            itens: itensInventario
+        };
+
+        const inventariosSalvos = JSON.parse(localStorage.getItem('inventarios') || '[]');
+        inventariosSalvos.push(inventarioFinalizado);
+        localStorage.setItem('inventarios', JSON.stringify(inventariosSalvos));
+
+        const sucessoAutomacao = await enviarParaAutomacao('inventario', inventarioFinalizado);
+        mostrarStatusAutomacao(sucessoAutomacao);
+
+        if (sucessoAutomacao) {
+            alert(`Inventário com ${totalItens} itens finalizado e enviado!`);
+        } else {
+            alert(`Inventário salvo localmente, mas houve erro ao enviar para a planilha. Tente novamente.`);
+        }
+
+        limparFormularioInventario();
+    } catch (error) {
+        console.error('Erro ao finalizar inventário:', error);
+        alert('Erro ao finalizar inventário. Tente novamente.');
+    } finally {
+        // Sempre restaurar o botão
+        btnFinalizar.disabled = false;
+        btnFinalizar.innerHTML = '<span class="btn-icon-left">✅</span> Finalizar e Enviar';
+    }
 }
 
 // --- FUNÇÕES DE CARREGAR INVENTÁRIO ---
@@ -1773,107 +1806,79 @@ async function gerarPDF() {
 }
 
 function copiarResumoInventario() {
-    const lojaSelect = document.getElementById('lojaInventario');
-    if (!lojaSelect.value) {
-        alert('Selecione a loja.');
-        return;
-    }
-    if (itensInventario.length === 0) {
-        alert('Adicione itens para gerar um resumo.');
-        return;
-    }
+    try {
+        const lojaSelect = document.getElementById('lojaInventario');
+        if (!lojaSelect.value) {
+            alert('Selecione a loja.');
+            return;
+        }
+        if (itensInventario.length === 0) {
+            alert('Adicione itens para gerar um resumo.');
+            return;
+        }
 
-    const lojaNome = lojaSelect.options[lojaSelect.selectedIndex].text;
-    const itensInventarioOnly = itensInventario.filter(item => item.operacao === 'inventario');
-    const itensMovimentacao = itensInventario.filter(item => item.operacao === 'movimentacao');
+        const lojaNome = lojaSelect.options[lojaSelect.selectedIndex].text;
+        const itensInventarioOnly = itensInventario.filter(item => item.operacao === 'inventario');
+        const itensMovimentacao = itensInventario.filter(item => item.operacao === 'movimentacao');
 
-    let resumo = `=== SISTEMA NXT V4 ===\n`;
+        let resumo = `=== SISTEMA NXT V4 ===\n`;
 
-    // Cabeçalho
-    if (itensInventarioOnly.length > 0 && itensMovimentacao.length > 0) {
-        resumo += `📦 *INVENTÁRIO E MOVIMENTAÇÃO - ${lojaNome}*\n`;
-    } else if (itensMovimentacao.length > 0) {
-        resumo += `📦 *MOVIMENTAÇÃO - ${lojaNome}*\n`;
-    } else {
-        resumo += `📦 *INVENTÁRIO - ${lojaNome}*\n`;
-    }
+        // Cabeçalho
+        if (itensInventarioOnly.length > 0 && itensMovimentacao.length > 0) {
+            resumo += `📦 *INVENTÁRIO E MOVIMENTAÇÃO - ${lojaNome}*\n`;
+        } else if (itensMovimentacao.length > 0) {
+            resumo += `📦 *MOVIMENTAÇÃO - ${lojaNome}*\n`;
+        } else {
+            resumo += `📦 *INVENTÁRIO - ${lojaNome}*\n`;
+        }
 
-    resumo += `*Data:* ${new Date().toLocaleDateString('pt-BR')}\n`;
-    resumo += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        resumo += `*Data:* ${new Date().toLocaleDateString('pt-BR')}\n`;
+        resumo += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
-    // ═══════════════════════════════
-    // SEÇÃO INVENTÁRIO
-    // ═══════════════════════════════
-    if (itensInventarioOnly.length > 0) {
-        // Calcular totais
-        const contagemModelos = {};
-        let totalMotos = 0;
-        let totalCapacetes = 0;
+        // ═══════════════════════════════
+        // SEÇÃO INVENTÁRIO
+        // ═══════════════════════════════
+        if (itensInventarioOnly.length > 0) {
+            // Calcular totais
+            const contagemModelos = {};
+            let totalMotos = 0;
+            let totalCapacetes = 0;
 
-        itensInventarioOnly.forEach(item => {
-            if (item.tipoItem === 'capacete') {
-                totalCapacetes += item.quantidade;
-            } else {
-                const modelo = item.modelo;
-                if (!contagemModelos[modelo]) {
-                    contagemModelos[modelo] = 0;
+            itensInventarioOnly.forEach(item => {
+                if (item.tipoItem === 'capacete') {
+                    totalCapacetes += item.quantidade;
+                } else {
+                    const modelo = item.modelo;
+                    if (!contagemModelos[modelo]) {
+                        contagemModelos[modelo] = 0;
+                    }
+                    contagemModelos[modelo] += item.quantidade;
+                    totalMotos += item.quantidade;
                 }
-                contagemModelos[modelo] += item.quantidade;
-                totalMotos += item.quantidade;
-            }
-        });
-
-        resumo += `📋 *INVENTÁRIO*\n\n`;
-
-        // Resumo por modelo
-        if (totalMotos > 0) {
-            resumo += `🏍️ *Motos: ${totalMotos} unidades*\n`;
-            Object.entries(contagemModelos).forEach(([modelo, qtd]) => {
-                resumo += `   • ${qtd}x ${modelo}\n`;
             });
-            resumo += `\n`;
-        }
 
-        if (totalCapacetes > 0) {
-            resumo += `🪖 *Capacetes: ${totalCapacetes} unidades*\n\n`;
-        }
+            resumo += `📋 *INVENTÁRIO*\n\n`;
 
-        // Discriminação detalhada
-        resumo += `*DISCRIMINAÇÃO:*\n`;
-        itensInventarioOnly.forEach(item => {
-            if (item.tipoItem === 'capacete') {
-                resumo += `• ${item.quantidade}x Capacete\n`;
-            } else {
-                resumo += `• ${item.quantidade}x ${item.modelo} ${item.cor}`;
-                if (item.chassi) {
-                    resumo += ` | Chassi: ${item.chassi}`;
-                }
+            // Resumo por modelo
+            if (totalMotos > 0) {
+                resumo += `🏍️ *Motos: ${totalMotos} unidades*\n`;
+                Object.entries(contagemModelos).forEach(([modelo, qtd]) => {
+                    resumo += `   • ${qtd}x ${modelo}\n`;
+                });
                 resumo += `\n`;
             }
-        });
-        resumo += `\n`;
-    }
 
-    // ═══════════════════════════════
-    // SEÇÃO MOVIMENTAÇÕES
-    // ═══════════════════════════════
-    if (itensMovimentacao.length > 0) {
-        const itensEntrada = itensMovimentacao.filter(item => item.tipo === 'entrada');
-        const itensSaida = itensMovimentacao.filter(item => item.tipo === 'saida');
-        const totalEntradas = itensEntrada.reduce((acc, item) => acc + item.quantidade, 0);
-        const totalSaidas = itensSaida.reduce((acc, item) => acc + item.quantidade, 0);
+            if (totalCapacetes > 0) {
+                resumo += `🪖 *Capacetes: ${totalCapacetes} unidades*\n\n`;
+            }
 
-        resumo += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-        resumo += `📊 *MOVIMENTAÇÕES*\n\n`;
-
-        // Entradas
-        if (itensEntrada.length > 0) {
-            resumo += `📥 *ENTRADAS (${totalEntradas} unidades):*\n`;
-            itensEntrada.forEach(item => {
+            // Discriminação detalhada
+            resumo += `*DISCRIMINAÇÃO:*\n`;
+            itensInventarioOnly.forEach(item => {
                 if (item.tipoItem === 'capacete') {
-                    resumo += `• ${item.quantidade}x Capacete - ${item.motivo}\n`;
+                    resumo += `• ${item.quantidade}x Capacete\n`;
                 } else {
-                    resumo += `• ${item.quantidade}x ${item.modelo} ${item.cor} - ${item.motivo}`;
+                    resumo += `• ${item.quantidade}x ${item.modelo} ${item.cor}`;
                     if (item.chassi) {
                         resumo += ` | Chassi: ${item.chassi}`;
                     }
@@ -1883,27 +1888,70 @@ function copiarResumoInventario() {
             resumo += `\n`;
         }
 
-        // Saídas
-        if (itensSaida.length > 0) {
-            resumo += `📤 *SAÍDAS (${totalSaidas} unidades):*\n`;
-            itensSaida.forEach(item => {
-                if (item.tipoItem === 'capacete') {
-                    resumo += `• ${item.quantidade}x Capacete - ${item.motivo}\n`;
-                } else {
-                    resumo += `• ${item.quantidade}x ${item.modelo} ${item.cor} - ${item.motivo}`;
-                    if (item.chassi) {
-                        resumo += ` | Chassi: ${item.chassi}`;
-                    }
-                    resumo += `\n`;
-                }
-            });
-        }
-    }
+        // ═══════════════════════════════
+        // SEÇÃO MOVIMENTAÇÕES
+        // ═══════════════════════════════
+        if (itensMovimentacao.length > 0) {
+            const itensEntrada = itensMovimentacao.filter(item => item.tipo === 'entrada');
+            const itensSaida = itensMovimentacao.filter(item => item.tipo === 'saida');
+            const totalEntradas = itensEntrada.reduce((acc, item) => acc + item.quantidade, 0);
+            const totalSaidas = itensSaida.reduce((acc, item) => acc + item.quantidade, 0);
 
-    const tipoResumo = itensMovimentacao.length > 0 ? 'movimentação' : 'inventário';
-    navigator.clipboard.writeText(resumo).then(() => {
-        alert(`Resumo do ${tipoResumo} copiado para a área de transferência!`);
-    });
+            resumo += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            resumo += `📊 *MOVIMENTAÇÕES*\n\n`;
+
+            // Entradas
+            if (itensEntrada.length > 0) {
+                resumo += `📥 *ENTRADAS (${totalEntradas} unidades):*\n`;
+                itensEntrada.forEach(item => {
+                    if (item.tipoItem === 'capacete') {
+                        resumo += `• ${item.quantidade}x Capacete - ${item.motivo}\n`;
+                    } else {
+                        resumo += `• ${item.quantidade}x ${item.modelo} ${item.cor} - ${item.motivo}`;
+                        if (item.chassi) {
+                            resumo += ` | Chassi: ${item.chassi}`;
+                        }
+                        resumo += `\n`;
+                    }
+                });
+                resumo += `\n`;
+            }
+
+            // Saídas
+            if (itensSaida.length > 0) {
+                resumo += `📤 *SAÍDAS (${totalSaidas} unidades):*\n`;
+                itensSaida.forEach(item => {
+                    if (item.tipoItem === 'capacete') {
+                        resumo += `• ${item.quantidade}x Capacete - ${item.motivo}\n`;
+                    } else {
+                        resumo += `• ${item.quantidade}x ${item.modelo} ${item.cor} - ${item.motivo}`;
+                        if (item.chassi) {
+                            resumo += ` | Chassi: ${item.chassi}`;
+                        }
+                        resumo += `\n`;
+                    }
+                });
+            }
+        }
+
+        const tipoResumo = itensMovimentacao.length > 0 ? 'movimentação' : 'inventário';
+        navigator.clipboard.writeText(resumo).then(() => {
+            alert(`Resumo do ${tipoResumo} copiado para a área de transferência!`);
+        }).catch(err => {
+            console.error('Erro ao copiar inventário:', err);
+            // Fallback para método alternativo
+            const textArea = document.createElement('textarea');
+            textArea.value = resumo;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            alert(`Resumo do ${tipoResumo} copiado para a área de transferência!`);
+        });
+    } catch (error) {
+        console.error('Erro ao gerar resumo do inventário:', error);
+        alert('Erro ao copiar resumo. Tente novamente.');
+    }
 }
 
 // --- FUNÇÕES DE PAGAMENTO ---
@@ -2259,14 +2307,24 @@ async function enviarParaAutomacao(tipo, dados) {
     }
 
     try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
+            body: JSON.stringify(dados),
+            signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
         return response.ok;
     } catch (error) {
-        console.error(`Erro ao enviar dados para automação (${tipo}):`, error);
+        if (error.name === 'AbortError') {
+            console.error(`Timeout ao enviar dados para automação (${tipo})`);
+        } else {
+            console.error(`Erro ao enviar dados para automação (${tipo}):`, error);
+        }
         return false;
     }
 }
@@ -2571,41 +2629,83 @@ async function enviarVendaParaBling(venda) {
         const cfopSugerido = isInterestadual ? '6102' : '5102';
         console.log(`Estado cliente: ${estadoCliente}, Interestadual: ${isInterestadual}, CFOP: ${cfopSugerido}`);
 
-        // 4. Montar itens do pedido - buscar produto no Bling
+        // 4. Montar itens do pedido - desdobramento fiscal se disponível
         const itensPedido = [];
         for (let i = 0; i < venda.produtos.length; i++) {
             const produto = venda.produtos[i];
-            const descricaoBling = `NXT Autopropelido ${produto.modelo} ${produto.cor}`;
+            const fiscal = dadosFiscais[produto.modelo];
 
-            // Tentar buscar produto no Bling pela descrição
-            let produtoBling = null;
-            try {
-                const busca = await blingRequest(`/produtos?nome=${encodeURIComponent(descricaoBling)}`);
-                if (busca.data && busca.data.length > 0) {
-                    produtoBling = busca.data[0];
-                    console.log('Produto encontrado no Bling:', produtoBling);
+            if (fiscal) {
+                // Desdobramento fiscal: 1 moto vira múltiplos itens na NF-e
+                console.log(`Desdobramento fiscal para ${produto.modelo}:`, fiscal.itens.length, 'itens');
+
+                for (const itemFiscal of fiscal.itens) {
+                    const descricao = itemFiscal.tipo === 'quadro'
+                        ? `${itemFiscal.descricao} ${produto.cor}`
+                        : itemFiscal.descricao;
+
+                    const item = {
+                        descricao: descricao,
+                        unidade: itemFiscal.unidade,
+                        quantidade: itemFiscal.quantidade,
+                        valor: itemFiscal.valor
+                    };
+
+                    // Tentar vincular ao produto no Bling
+                    try {
+                        const busca = await blingRequest(`/produtos?nome=${encodeURIComponent(descricao)}`);
+                        if (busca.data && busca.data.length > 0) {
+                            item.produto = { id: busca.data[0].id };
+                            item.codigo = busca.data[0].codigo || '';
+                            console.log(`Vinculado ao Bling: ${descricao} -> ID ${busca.data[0].id}`);
+                        }
+                    } catch (e) {
+                        console.log(`Produto não encontrado no Bling: ${descricao}`);
+                    }
+
+                    if (!item.codigo) {
+                        item.codigo = itemFiscal.tipo === 'quadro' ? (produto.chassi || `QUADRO-${i + 1}`) : '';
+                    }
+
+                    itensPedido.push(item);
                 }
-            } catch (e) {
-                console.log('Produto não encontrado no Bling, usando descrição manual');
-            }
 
-            const itemPedido = {
-                descricao: descricaoBling,
-                unidade: 'UN',
-                quantidade: 1,
-                valor: produto.preco
-            };
+                // Capacete (se a venda inclui capacete)
+                if (produto.capacete === 'sim' && fiscal.capacete) {
+                    itensPedido.push({
+                        descricao: fiscal.capacete.descricao,
+                        unidade: fiscal.capacete.unidade,
+                        quantidade: fiscal.capacete.quantidade,
+                        valor: fiscal.capacete.valor
+                    });
+                }
 
-            // Se encontrou o produto no Bling, vincular pelo ID
-            if (produtoBling && produtoBling.id) {
-                itemPedido.produto = { id: produtoBling.id };
-                itemPedido.codigo = produtoBling.codigo || '';
-                console.log(`Vinculando ao produto Bling ID: ${produtoBling.id}`);
             } else {
-                itemPedido.codigo = produto.chassi || `MOTO-${i + 1}`;
-            }
+                // Modelo sem desdobramento fiscal: enviar como item único (comportamento original)
+                const descricaoBling = `NXT Autopropelido ${produto.modelo} ${produto.cor}`;
+                const itemPedido = {
+                    descricao: descricaoBling,
+                    unidade: 'UN',
+                    quantidade: 1,
+                    valor: produto.preco
+                };
 
-            itensPedido.push(itemPedido);
+                try {
+                    const busca = await blingRequest(`/produtos?nome=${encodeURIComponent(descricaoBling)}`);
+                    if (busca.data && busca.data.length > 0) {
+                        itemPedido.produto = { id: busca.data[0].id };
+                        itemPedido.codigo = busca.data[0].codigo || '';
+                    }
+                } catch (e) {
+                    console.log('Produto não encontrado no Bling, usando descrição manual');
+                }
+
+                if (!itemPedido.codigo) {
+                    itemPedido.codigo = produto.chassi || `MOTO-${i + 1}`;
+                }
+
+                itensPedido.push(itemPedido);
+            }
         }
 
         // 5. Adicionar frete se houver
