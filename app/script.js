@@ -36,6 +36,7 @@ const BLING_CONFIG = {
 let dadosLojas = {};
 let dadosProdutos = {};
 let dadosVendedores = [];
+let dadosMatriculas = {};
 let dadosFiscais = {};
 let produtosDaVenda = [];
 let itensInventario = [];
@@ -105,6 +106,7 @@ async function carregarDadosIniciais() {
         try {
             const vendedoresData = await vendedoresRes.json();
             dadosVendedores = vendedoresData.vendedores || [];
+            dadosMatriculas = vendedoresData.matriculas || {};
         } catch (e) {
             throw new Error("Erro de sintaxe no arquivo 'vendedores_json.json'. Verifique as vírgulas e chaves {}.");
         }
@@ -363,13 +365,19 @@ async function registrarVenda(event) {
 
         const form = event.target;
 
-        // Expandir todas as seções para validação
+        // Expandir todas as seções para que a validação funcione em campos visíveis
         document.querySelectorAll('.secao-form-nova.collapsed').forEach(secao => {
             secao.classList.remove('collapsed');
         });
 
         if (!form.checkValidity()) {
-            form.reportValidity(); // Mostra mensagens de validação nativas
+            // Encontrar o primeiro campo inválido e scrollar até ele
+            const primeiroInvalido = form.querySelector(':invalid');
+            if (primeiroInvalido) {
+                primeiroInvalido.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                primeiroInvalido.focus();
+            }
+            form.reportValidity();
             mostrarFeedback('Preencha todos os campos obrigatórios', 'erro');
             return;
         }
@@ -1023,6 +1031,13 @@ function configurarPagamentoCards() {
             const pixChecked = document.querySelector('input[name="pagamento"][value="pix"]').checked;
             if (pixInfo) {
                 pixInfo.style.display = pixChecked ? 'block' : 'none';
+            }
+
+            // Mostrar info do Dinheiro se selecionado
+            const dinheiroInfo = document.getElementById('dinheiroInfoCard');
+            const dinheiroChecked = document.querySelector('input[name="pagamento"][value="dinheiro"]').checked;
+            if (dinheiroInfo) {
+                dinheiroInfo.style.display = dinheiroChecked ? 'block' : 'none';
             }
         });
     });
@@ -1986,6 +2001,7 @@ function calcularTotalFormasPagamento() {
 function configurarBuscaVendedor() {
     const vendedorInput = document.getElementById('vendedor');
     const suggestionsDiv = document.getElementById('vendedorSuggestions');
+    const matriculaInput = document.getElementById('matriculaVendedor');
 
     if (!vendedorInput || !suggestionsDiv) {
         console.error('Elementos de vendedor não encontrados!');
@@ -1994,6 +2010,42 @@ function configurarBuscaVendedor() {
 
     let selectedIndex = -1;
 
+    // --- Busca por MATRÍCULA (campo separado) ---
+    if (matriculaInput) {
+        matriculaInput.addEventListener('input', function() {
+            const mat = this.value.trim();
+
+            // Só buscar quando tiver 4 dígitos
+            if (mat.length === 4 && dadosMatriculas[mat]) {
+                const dados = dadosMatriculas[mat];
+
+                // Se for array (matrícula duplicada), mostrar opções no suggestions
+                if (Array.isArray(dados)) {
+                    suggestionsDiv.innerHTML = '';
+                    dados.forEach(v => {
+                        const suggestionDiv = document.createElement('div');
+                        suggestionDiv.className = 'vendedor-suggestion';
+                        suggestionDiv.innerHTML = `<strong>${v.nome}</strong> <small style="opacity:0.7">(${v.loja})</small>`;
+                        suggestionDiv.addEventListener('click', () => {
+                            vendedorInput.value = v.nome;
+                            suggestionsDiv.classList.remove('show');
+                        });
+                        suggestionsDiv.appendChild(suggestionDiv);
+                    });
+                    suggestionsDiv.classList.add('show');
+                } else {
+                    // Matrícula única - preencher direto
+                    vendedorInput.value = dados.nome;
+                    suggestionsDiv.classList.remove('show');
+                }
+            } else if (mat.length === 4) {
+                // Matrícula não encontrada - não travar, deixar preencher manualmente
+                suggestionsDiv.classList.remove('show');
+            }
+        });
+    }
+
+    // --- Busca por NOME (campo vendedor) ---
     vendedorInput.addEventListener('input', function() {
         const valor = this.value.trim().toLowerCase();
         suggestionsDiv.innerHTML = '';
@@ -2010,6 +2062,25 @@ function configurarBuscaVendedor() {
             return;
         }
 
+        // Buscar por matrícula se digitou 4 números no campo de nome
+        if (/^\d{4}$/.test(valor) && dadosMatriculas[valor]) {
+            const dados = dadosMatriculas[valor];
+            const lista = Array.isArray(dados) ? dados : [dados];
+            lista.forEach(v => {
+                const suggestionDiv = document.createElement('div');
+                suggestionDiv.className = 'vendedor-suggestion';
+                suggestionDiv.innerHTML = `<strong>${v.nome}</strong> <small style="opacity:0.7">(Mat: ${valor} - ${v.loja})</small>`;
+                suggestionDiv.addEventListener('click', () => {
+                    vendedorInput.value = v.nome;
+                    if (matriculaInput) matriculaInput.value = valor;
+                    suggestionsDiv.classList.remove('show');
+                });
+                suggestionsDiv.appendChild(suggestionDiv);
+            });
+            suggestionsDiv.classList.add('show');
+            return;
+        }
+
         const vendedoresFiltrados = dadosVendedores.filter(vendedor =>
             vendedor.toLowerCase().includes(valor)
         );
@@ -2021,6 +2092,14 @@ function configurarBuscaVendedor() {
                 suggestionDiv.textContent = vendedor;
                 suggestionDiv.addEventListener('click', () => {
                     vendedorInput.value = vendedor;
+                    // Preencher matrícula automaticamente se encontrar
+                    if (matriculaInput) {
+                        const mat = Object.entries(dadosMatriculas).find(([k, v]) => {
+                            if (Array.isArray(v)) return v.some(item => item.nome === vendedor);
+                            return v.nome === vendedor;
+                        });
+                        if (mat) matriculaInput.value = mat[0];
+                    }
                     suggestionsDiv.classList.remove('show');
                 });
                 suggestionsDiv.appendChild(suggestionDiv);

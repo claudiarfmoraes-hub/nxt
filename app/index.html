@@ -49,7 +49,7 @@
                 </div>
 
                 <div class="venda-form">
-                    <form id="vendaForm">
+                    <form id="vendaForm" novalidate>
                         <!-- SEÇÃO 1: Informações da Venda -->
                         <div class="secao-form-nova" data-secao="1">
                             <div class="secao-header" onclick="toggleSecao(this)">
@@ -69,12 +69,18 @@
                                             <option value="">Selecione a loja...</option>
                                         </select>
                                     </div>
+                                    <div class="form-group form-group-small">
+                                        <label for="matriculaVendedor">
+                                            <span class="label-icon">🔢</span> Matrícula
+                                        </label>
+                                        <input type="text" id="matriculaVendedor" placeholder="0000" maxlength="4" autocomplete="off" inputmode="numeric">
+                                    </div>
                                     <div class="form-group">
                                         <label for="vendedor">
                                             <span class="label-icon">👤</span> Vendedor
                                         </label>
                                         <div class="vendedor-container">
-                                            <input type="text" id="vendedor" required placeholder="Digite para buscar..." autocomplete="off">
+                                            <input type="text" id="vendedor" required placeholder="Digite matrícula ou nome..." autocomplete="off">
                                             <div id="vendedorSuggestions" class="vendedor-suggestions"></div>
                                         </div>
                                     </div>
@@ -395,6 +401,26 @@
                                     <div class="pix-info-content">
                                         <p><strong>CNPJ:</strong> 55.099.827/0001-96</p>
                                         <p><strong>Razão Social:</strong> Ni Hao Comércio e Serviços Ltda</p>
+                                    </div>
+                                </div>
+
+                                <div class="dinheiro-info-card" id="dinheiroInfoCard" style="display: none;">
+                                    <div class="dinheiro-info-header">
+                                        <span class="dinheiro-icon">⚠️</span>
+                                        <span>ATENÇÃO — PAGAMENTO EM DINHEIRO</span>
+                                    </div>
+                                    <div class="dinheiro-info-content">
+                                        <div class="dinheiro-info-bloco">
+                                            <p class="dinheiro-info-titulo">Se VOCÊ (vendedor) for depositar, use a conta PESSOAL (PF):</p>
+                                            <p><strong>Paula Castilho Sabio</strong></p>
+                                            <p>Itaú — Ag 0596 | CC 27901-8 | PIX: 18981824164</p>
+                                            <p>Caixa Econômica Federal — Ag 1205 | CC 586279193-7 | PIX: paulasabio03@gmail.com</p>
+                                        </div>
+                                        <div class="dinheiro-info-bloco">
+                                            <p class="dinheiro-info-titulo">Se o CLIENTE for depositar, direcione para a conta da EMPRESA (PJ):</p>
+                                            <p><strong>Ni Hao Comércio e Serviços Ltda</strong> — CNPJ: 55.099.827/0001-96</p>
+                                            <p>Itaú — Ag 2434 | CC 99</p>
+                                        </div>
                                     </div>
                                 </div>
 

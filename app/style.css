@@ -1912,6 +1912,14 @@ h4, h5 {
     min-width: 80px;
 }
 
+/* Campo Matrícula Vendedor */
+#matriculaVendedor {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+}
+
 /* Endereço Section */
 .endereco-section {
     background-color: #f8f9fa;
@@ -2375,6 +2383,58 @@ h4, h5 {
     margin: 0.25rem 0;
     font-size: 0.9rem;
     color: #1b5e20;
+}
+
+/* Dinheiro Info Card */
+.dinheiro-info-card {
+    background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 1rem;
+    border: 1px solid #ffca28;
+}
+
+.dinheiro-info-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background-color: rgba(0, 0, 0, 0.05);
+    font-weight: 700;
+    color: #e65100;
+    font-size: 0.95rem;
+}
+
+.dinheiro-icon {
+    font-size: 1.25rem;
+}
+
+.dinheiro-info-content {
+    padding: 0.75rem 1rem;
+}
+
+.dinheiro-info-bloco {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px dashed #ffca28;
+}
+
+.dinheiro-info-bloco:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.dinheiro-info-titulo {
+    font-weight: 600;
+    color: #e65100;
+    margin-bottom: 0.25rem !important;
+}
+
+.dinheiro-info-content p {
+    margin: 0.2rem 0;
+    font-size: 0.88rem;
+    color: #4e342e;
 }
 
 /* Observações */
