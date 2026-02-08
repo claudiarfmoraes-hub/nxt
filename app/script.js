@@ -394,6 +394,7 @@ async function registrarVenda(event) {
         id: `VNDA-${Date.now()}`,
         loja: nomeLoja,
         vendedor: document.getElementById('vendedor').value,
+        matriculaVendedor: document.getElementById('matriculaVendedor')?.value || '',
         dataVenda: document.getElementById('dataVenda').value,
         cliente: {
             nome: document.getElementById('nomeCliente').value,
@@ -1333,7 +1334,7 @@ function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     const dataFormatada = new Date(venda.dataVenda).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
 
     let resumo = `=== SISTEMA NXT V4.2===\n🏍️ *RESUMO DA VENDA - ${venda.loja}*\n`;
-    resumo += `*Vendedor:* ${venda.vendedor}\n`;
+    resumo += `*Vendedor:* ${venda.matriculaVendedor ? venda.matriculaVendedor + ' - ' : ''}${venda.vendedor}\n`;
     resumo += `*Data:* ${dataFormatada}\n\n`;
     
     resumo += `👤 *CLIENTE*\n`;
@@ -1427,6 +1428,7 @@ function copiarResumoVenda(isFromModal) {
             const vendaTemporaria = {
                 loja: nomeLoja,
                 vendedor: document.getElementById('vendedor').value,
+                matriculaVendedor: document.getElementById('matriculaVendedor')?.value || '',
                 dataVenda: document.getElementById('dataVenda').value,
                 cliente: {
                     nome: document.getElementById('nomeCliente').value,
