@@ -363,6 +363,18 @@ async function registrarVenda(event) {
             return;
         }
 
+        // Validar forma de pagamento selecionada
+        const formasSelecionadas = document.querySelectorAll('input[name="pagamento"]:checked');
+        if (formasSelecionadas.length === 0) {
+            mostrarFeedback('Selecione pelo menos uma forma de pagamento', 'erro');
+            const secaoPagamento = document.querySelector('[data-secao="4"]');
+            if (secaoPagamento) {
+                secaoPagamento.classList.remove('collapsed');
+                secaoPagamento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+        }
+
         const form = event.target;
 
         // Expandir todas as seções para que a validação funcione em campos visíveis
@@ -1975,16 +1987,37 @@ function copiarResumoInventario() {
 
 function obterValoresFormasPagamento() {
     const valores = {};
+    const formasSelecionadas = Array.from(document.querySelectorAll('input[name="pagamento"]:checked')).map(cb => cb.value);
+
+    // Se apenas 1 forma selecionada, atribuir o total da venda automaticamente
+    if (formasSelecionadas.length === 1) {
+        const totalProdutos = produtosDaVenda.reduce((acc, produto) => acc + produto.preco, 0);
+        const valorFrete = obterValorNumerico('valorFrete');
+        const totalVenda = totalProdutos + valorFrete;
+        if (totalVenda > 0) {
+            valores[formasSelecionadas[0]] = totalVenda;
+        }
+        return valores;
+    }
+
+    // Se 2+ formas, ler os campos de valor individuais
     ['pix', 'pos', 'dinheiro', 'debito', 'credito', 'outros'].forEach(forma => {
         const input = document.getElementById(`valor${forma.charAt(0).toUpperCase() + forma.slice(1)}`);
         if (input) {
-            // Revertido para a lógica original para garantir o envio correto dos dados.
             const valorNumerico = parseFloat(input.value.replace(/[R$\s.]/g, '').replace(',', '.'));
             if (!isNaN(valorNumerico) && valorNumerico > 0) {
                 valores[forma] = valorNumerico;
             }
         }
     });
+
+    // Garantir que toda forma selecionada tenha entrada no valores (mesmo que 0)
+    formasSelecionadas.forEach(forma => {
+        if (!(forma in valores)) {
+            valores[forma] = 0;
+        }
+    });
+
     return valores;
 }
 
@@ -2380,12 +2413,88 @@ function buscarCEP() {
 
 // --- AUTOMAÇÃO ---
 
+// Sanitiza os dados antes de enviar ao Make, garantindo que nenhum campo seja null/undefined
+function sanitizarDadosParaEnvio(tipo, dados) {
+    if (tipo === 'vendas') {
+        return {
+            id: dados.id || `VNDA-${Date.now()}`,
+            loja: dados.loja || '',
+            vendedor: dados.vendedor || '',
+            matriculaVendedor: dados.matriculaVendedor || '',
+            dataVenda: dados.dataVenda || '',
+            cliente: {
+                nome: dados.cliente?.nome || '',
+                cpf: dados.cliente?.cpf || '',
+                cnpj: dados.cliente?.cnpj || '',
+                telefone: dados.cliente?.telefone || '',
+                email: dados.cliente?.email || '',
+                endereco: {
+                    cep: dados.cliente?.endereco?.cep || '',
+                    rua: dados.cliente?.endereco?.rua || '',
+                    numero: dados.cliente?.endereco?.numero || '',
+                    bairro: dados.cliente?.endereco?.bairro || '',
+                    cidade: dados.cliente?.endereco?.cidade || '',
+                    estado: dados.cliente?.endereco?.estado || ''
+                }
+            },
+            produtos: (dados.produtos || []).map(p => ({
+                id: p.id || 0,
+                modelo: p.modelo || '',
+                cor: p.cor || '',
+                chassi: p.chassi || '',
+                motor: p.motor || '',
+                preco: p.preco || 0,
+                capacete: p.capacete || 'nao',
+                corCapacete: p.corCapacete || ''
+            })),
+            pagamento: {
+                formas: dados.pagamento?.formas || [],
+                valores: dados.pagamento?.valores || {},
+                parcelas: dados.pagamento?.parcelas || '1',
+                outros: dados.pagamento?.outros || '',
+                observacoes: dados.pagamento?.observacoes || ''
+            },
+            entrega: {
+                tipo: dados.entrega?.tipo || 'retirada',
+                prazo: dados.entrega?.prazo || '',
+                origem: dados.entrega?.origem || 'propria_loja',
+                localSaida: dados.entrega?.localSaida || dados.loja || ''
+            },
+            valorFrete: dados.valorFrete || 0,
+            total: dados.total || 0
+        };
+    }
+
+    if (tipo === 'inventario') {
+        return {
+            id: dados.id || `INV-${Date.now()}`,
+            loja: dados.loja || '',
+            data: dados.data || new Date().toISOString(),
+            totalItens: dados.totalItens || 0,
+            itens: (dados.itens || []).map(item => ({
+                tipo: item.tipo || '',
+                modelo: item.modelo || '',
+                cor: item.cor || '',
+                quantidade: item.quantidade || 0,
+                chassi: item.chassi || '',
+                motor: item.motor || '',
+                observacao: item.observacao || ''
+            }))
+        };
+    }
+
+    return dados;
+}
+
 async function enviarParaAutomacao(tipo, dados) {
     const url = POWER_AUTOMATE_URLS[tipo];
     if (!url || url.includes('URL_DO_FLUXO')) {
         console.log(`Automação para '${tipo}' não configurada.`);
         return false;
     }
+
+    // Sanitizar dados para garantir que nenhum campo vai como null/undefined
+    const dadosSanitizados = sanitizarDadosParaEnvio(tipo, dados);
 
     try {
         const controller = new AbortController();
@@ -2394,7 +2503,7 @@ async function enviarParaAutomacao(tipo, dados) {
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados),
+            body: JSON.stringify(dadosSanitizados),
             signal: controller.signal
         });
 
