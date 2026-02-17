@@ -1106,6 +1106,18 @@ async function finalizarInventario() {
         return;
     }
 
+    // Alerta de conferência obrigatória
+    const conferiu = confirm(
+        '⚠️ CONFERÊNCIA OBRIGATÓRIA\n\n' +
+        'Antes de enviar, confira:\n\n' +
+        '1️⃣ Estoque de ontem − vendas + entradas − saídas = inventário de hoje?\n\n' +
+        '2️⃣ Os NOMES dos modelos estão corretos? (Não confundiu modelos parecidos?)\n\n' +
+        '3️⃣ Contou SOMENTE o que está na loja e NÃO foi vendido?\n\n' +
+        '4️⃣ Registrou TUDO que aconteceu desde o último inventário?\n\n' +
+        'Está tudo correto?'
+    );
+    if (!conferiu) return;
+
     // Desabilitar botão e mostrar loading
     const btnFinalizar = document.getElementById('finalizarInventario');
     btnFinalizar.disabled = true;
@@ -1278,7 +1290,7 @@ function exportarInventarios() {
 
     const dataExportacao = new Date().toISOString().split('T')[0];
     const dados = {
-        versao: 'NXT V4.2',
+        versao: 'NXT V4.3',
         dataExportacao: new Date().toISOString(),
         totalInventarios: inventariosSalvos.length,
         inventarios: inventariosSalvos
@@ -1345,7 +1357,7 @@ function importarInventarios(event) {
 function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     const dataFormatada = new Date(venda.dataVenda).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
 
-    let resumo = `=== SISTEMA NXT V4.2===\n🏍️ *RESUMO DA VENDA - ${venda.loja}*\n`;
+    let resumo = `=== SISTEMA NXT V4.3===\n🏍️ *RESUMO DA VENDA - ${venda.loja}*\n`;
     resumo += `*Vendedor:* ${venda.matriculaVendedor ? venda.matriculaVendedor + ' - ' : ''}${venda.vendedor}\n`;
     resumo += `*Data:* ${dataFormatada}\n\n`;
     
@@ -1629,7 +1641,7 @@ function gerarHTMLFatura(venda) {
         </div>
 
         <div class="fatura-footer">
-            <p>Esta fatura foi gerada pelo Sistema NXT V4.2</p>
+            <p>Esta fatura foi gerada pelo Sistema NXT V4.3</p>
             <p>NXT Lojas - Soluções em Mobilidade Urbana</p>
             <p><strong>Visite nosso site:</strong> <a href="https://www.nxt.eco.br/" target="_blank">www.nxt.eco.br</a></p>
             <p><small>Para dúvidas ou suporte, entre em contato através do nosso site.</small></p>
@@ -1740,7 +1752,7 @@ Observação: As garantias acima referem-se exclusivamente a defeitos de fabrica
 
 *IMPORTANTE: Este documento tem caráter informativo e não constitui documento fiscal para fins tributários. A nota fiscal eletrônica será emitida e enviada separadamente*
 
-Esta fatura foi gerada pelo Sistema NXT V4.2
+Esta fatura foi gerada pelo Sistema NXT V4.3
 NXT Lojas - Soluções em Mobilidade Urbana
 
 Visite nosso site: https://www.nxt.eco.br/
@@ -1850,149 +1862,152 @@ function copiarResumoInventario() {
         const itensInventarioOnly = itensInventario.filter(item => item.operacao === 'inventario');
         const itensMovimentacao = itensInventario.filter(item => item.operacao === 'movimentacao');
 
-        let resumo = `=== SISTEMA NXT V4.2===\n`;
+        const ordemFixa = ['Juna', 'Kay', 'Pancho', 'Luna', 'Hyphen', 'Vega', 'Gataka', 'Jaya', 'Smart-Juna', 'Shaka', 'Zilla'];
 
-        // Cabeçalho
-        if (itensInventarioOnly.length > 0 && itensMovimentacao.length > 0) {
-            resumo += `📦 *INVENTÁRIO E MOVIMENTAÇÃO - ${lojaNome}*\n`;
-        } else if (itensMovimentacao.length > 0) {
-            resumo += `📦 *MOVIMENTAÇÃO - ${lojaNome}*\n`;
-        } else {
-            resumo += `📦 *INVENTÁRIO - ${lojaNome}*\n`;
+        let resumo = '';
+
+        // ══════════════════════════════
+        // CABEÇALHO PROFISSIONAL
+        // ══════════════════════════════
+        resumo += `╔══════════════════════════════════╗\n`;
+        resumo += `   *SISTEMA NXT V4.3 - INVENTÁRIO*\n`;
+        resumo += `   Loja: *${lojaNome}*\n`;
+        resumo += `   Data: ${new Date().toLocaleDateString('pt-BR')}\n`;
+        resumo += `╚══════════════════════════════════╝\n\n`;
+
+        // ══════════════════════════════
+        // SEÇÃO: ESTOQUE ATUAL
+        // ══════════════════════════════
+        const contagemModelos = {};
+        let totalMotos = 0;
+        let totalCapacetes = 0;
+
+        itensInventarioOnly.forEach(item => {
+            if (item.tipoItem === 'capacete') {
+                totalCapacetes += item.quantidade;
+            } else {
+                if (!contagemModelos[item.modelo]) contagemModelos[item.modelo] = 0;
+                contagemModelos[item.modelo] += item.quantidade;
+                totalMotos += item.quantidade;
+            }
+        });
+
+        resumo += `▸ *ESTOQUE ATUAL (O que tem na loja)*\n`;
+        resumo += `┌──────────────────────────────────┐\n`;
+        resumo += `│ 🏍️ *Motos: ${totalMotos} unidades*\n`;
+        resumo += `│\n`;
+
+        // Grade fixa - SEMPRE mostra todos os modelos
+        ordemFixa.forEach(modelo => {
+            const qtd = contagemModelos[modelo] || 0;
+            const pontos = '.'.repeat(Math.max(1, 18 - modelo.length));
+            resumo += `│  ${modelo} ${pontos} ${qtd}\n`;
+        });
+        // Modelos fora da lista fixa (ex: Kimbo) só se tiverem contagem
+        Object.entries(contagemModelos).forEach(([modelo, qtd]) => {
+            if (!ordemFixa.includes(modelo) && qtd > 0) {
+                const pontos = '.'.repeat(Math.max(1, 18 - modelo.length));
+                resumo += `│  ${modelo} ${pontos} ${qtd}\n`;
+            }
+        });
+
+        if (totalCapacetes > 0) {
+            resumo += `│\n`;
+            resumo += `│ 🪖 *Capacetes: ${totalCapacetes} unidades*\n`;
         }
+        resumo += `└──────────────────────────────────┘\n\n`;
 
-        resumo += `*Data:* ${new Date().toLocaleDateString('pt-BR')}\n`;
-        resumo += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-
-        // ═══════════════════════════════
-        // SEÇÃO INVENTÁRIO
-        // ═══════════════════════════════
+        // ══════════════════════════════
+        // SEÇÃO: DETALHAMENTO POR UNIDADE
+        // ══════════════════════════════
         if (itensInventarioOnly.length > 0) {
-            // Calcular totais
-            const contagemModelos = {};
-            let totalMotos = 0;
-            let totalCapacetes = 0;
+            resumo += `▸ *DETALHAMENTO POR UNIDADE*\n`;
 
-            itensInventarioOnly.forEach(item => {
-                if (item.tipoItem === 'capacete') {
-                    totalCapacetes += item.quantidade;
-                } else {
-                    const modelo = item.modelo;
-                    if (!contagemModelos[modelo]) {
-                        contagemModelos[modelo] = 0;
-                    }
-                    contagemModelos[modelo] += item.quantidade;
-                    totalMotos += item.quantidade;
-                }
-            });
-
-            resumo += `📋 *INVENTÁRIO*\n\n`;
-
-            // Resumo por modelo - ordem fixa
-            const ordemFixaModelos = ['Juna', 'Kay', 'Pancho', 'Luna', 'Hyphen', 'Vega', 'Gataka', 'Jaya', 'Smart-Juna', 'Shaka', 'Zilla'];
-            if (totalMotos > 0) {
-                resumo += `🏍️ *Motos: ${totalMotos} unidades*\n`;
-                // Primeiro os modelos na ordem fixa (sempre aparecem, mesmo com 0)
-                ordemFixaModelos.forEach(modelo => {
-                    const qtd = contagemModelos[modelo] || 0;
-                    resumo += `   • ${qtd}x ${modelo}\n`;
-                });
-                // Depois modelos fora da lista fixa (ex: Kimbo) só se tiverem contagem
-                Object.entries(contagemModelos).forEach(([modelo, qtd]) => {
-                    if (!ordemFixaModelos.includes(modelo) && qtd > 0) {
-                        resumo += `   • ${qtd}x ${modelo}\n`;
-                    }
-                });
-                resumo += `\n`;
-            }
-
-            if (totalCapacetes > 0) {
-                resumo += `🪖 *Capacetes: ${totalCapacetes} unidades*\n\n`;
-            }
-
-            // Discriminação detalhada - ordem fixa por modelo
-            resumo += `*DISCRIMINAÇÃO:*\n`;
             const motosInventario = itensInventarioOnly.filter(i => i.tipoItem !== 'capacete');
             const capacetesInventario = itensInventarioOnly.filter(i => i.tipoItem === 'capacete');
+
             // Ordenar motos pela ordem fixa
-            const ordemFixaDisc = ['Juna', 'Kay', 'Pancho', 'Luna', 'Hyphen', 'Vega', 'Gataka', 'Jaya', 'Smart-Juna', 'Shaka', 'Zilla'];
             motosInventario.sort((a, b) => {
-                const idxA = ordemFixaDisc.indexOf(a.modelo);
-                const idxB = ordemFixaDisc.indexOf(b.modelo);
+                const idxA = ordemFixa.indexOf(a.modelo);
+                const idxB = ordemFixa.indexOf(b.modelo);
                 return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
             });
+
             motosInventario.forEach(item => {
-                resumo += `• ${item.quantidade}x ${item.modelo} ${item.cor}`;
-                if (item.chassi) {
-                    resumo += ` | Chassi: ${item.chassi}`;
-                }
+                resumo += `  • ${item.quantidade}x ${item.modelo} ${item.cor}`;
+                if (item.chassi) resumo += ` | Chassi: ${item.chassi}`;
                 resumo += `\n`;
             });
             capacetesInventario.forEach(item => {
-                resumo += `• ${item.quantidade}x Capacete\n`;
+                resumo += `  • ${item.quantidade}x Capacete\n`;
             });
+
+            if (motosInventario.length === 0 && capacetesInventario.length === 0) {
+                resumo += `  (nenhum item registrado)\n`;
+            }
             resumo += `\n`;
         }
 
-        // ═══════════════════════════════
-        // SEÇÃO MOVIMENTAÇÕES
-        // ═══════════════════════════════
+        // ══════════════════════════════
+        // SEÇÃO: O QUE ACONTECEU
+        // ══════════════════════════════
         if (itensMovimentacao.length > 0) {
             const itensEntrada = itensMovimentacao.filter(item => item.tipo === 'entrada');
             const itensSaida = itensMovimentacao.filter(item => item.tipo === 'saida');
             const totalEntradas = itensEntrada.reduce((acc, item) => acc + item.quantidade, 0);
             const totalSaidas = itensSaida.reduce((acc, item) => acc + item.quantidade, 0);
 
-            resumo += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            resumo += `📊 *MOVIMENTAÇÕES*\n\n`;
+            resumo += `▸ *O QUE ACONTECEU (Entradas e Saídas)*\n`;
+            resumo += `┌──────────────────────────────────┐\n`;
 
             // Entradas
             if (itensEntrada.length > 0) {
-                resumo += `📥 *ENTRADAS (${totalEntradas} unidades):*\n`;
+                resumo += `│ 📥 *ENTRADAS: ${totalEntradas} unidades*\n`;
                 itensEntrada.forEach(item => {
                     if (item.tipoItem === 'capacete') {
-                        resumo += `• ${item.quantidade}x Capacete - ${item.motivo}\n`;
+                        resumo += `│  • ${item.quantidade}x Capacete - ${item.motivo}\n`;
                     } else {
-                        resumo += `• ${item.quantidade}x ${item.modelo} ${item.cor} - ${item.motivo}`;
-                        if (item.chassi) {
-                            resumo += ` | Chassi: ${item.chassi}`;
-                        }
+                        resumo += `│  • ${item.quantidade}x ${item.modelo} ${item.cor} - ${item.motivo}`;
+                        if (item.chassi) resumo += ` | Chassi: ${item.chassi}`;
                         resumo += `\n`;
                     }
                 });
-                resumo += `\n`;
+            }
+
+            if (itensEntrada.length > 0 && itensSaida.length > 0) {
+                resumo += `│\n`;
             }
 
             // Saídas
             if (itensSaida.length > 0) {
-                resumo += `📤 *SAÍDAS (${totalSaidas} unidades):*\n`;
+                resumo += `│ 📤 *SAÍDAS: ${totalSaidas} unidades*\n`;
                 itensSaida.forEach(item => {
                     if (item.tipoItem === 'capacete') {
-                        resumo += `• ${item.quantidade}x Capacete - ${item.motivo}\n`;
+                        resumo += `│  • ${item.quantidade}x Capacete - ${item.motivo}\n`;
                     } else {
-                        resumo += `• ${item.quantidade}x ${item.modelo} ${item.cor} - ${item.motivo}`;
-                        if (item.chassi) {
-                            resumo += ` | Chassi: ${item.chassi}`;
-                        }
+                        resumo += `│  • ${item.quantidade}x ${item.modelo} ${item.cor} - ${item.motivo}`;
+                        if (item.chassi) resumo += ` | Chassi: ${item.chassi}`;
                         resumo += `\n`;
                     }
                 });
             }
+            resumo += `└──────────────────────────────────┘\n`;
+        } else {
+            resumo += `▸ *O QUE ACONTECEU (Entradas e Saídas)*\n`;
+            resumo += `  (nenhuma movimentação registrada)\n`;
         }
 
-        const tipoResumo = itensMovimentacao.length > 0 ? 'movimentação' : 'inventário';
         navigator.clipboard.writeText(resumo).then(() => {
-            alert(`Resumo do ${tipoResumo} copiado para a área de transferência!`);
+            alert('Resumo copiado para a área de transferência!');
         }).catch(err => {
             console.error('Erro ao copiar inventário:', err);
-            // Fallback para método alternativo
             const textArea = document.createElement('textarea');
             textArea.value = resumo;
             document.body.appendChild(textArea);
             textArea.select();
             document.execCommand('copy');
             document.body.removeChild(textArea);
-            alert(`Resumo do ${tipoResumo} copiado para a área de transferência!`);
+            alert('Resumo copiado para a área de transferência!');
         });
     } catch (error) {
         console.error('Erro ao gerar resumo do inventário:', error);
