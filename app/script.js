@@ -1888,11 +1888,20 @@ function copiarResumoInventario() {
 
             resumo += `📋 *INVENTÁRIO*\n\n`;
 
-            // Resumo por modelo
+            // Resumo por modelo - ordem fixa
+            const ordemFixaModelos = ['Juna', 'Kay', 'Pancho', 'Luna', 'Hyphen', 'Vega', 'Gataka', 'Jaya', 'Smart-Juna', 'Shaka', 'Zilla'];
             if (totalMotos > 0) {
                 resumo += `🏍️ *Motos: ${totalMotos} unidades*\n`;
-                Object.entries(contagemModelos).forEach(([modelo, qtd]) => {
+                // Primeiro os modelos na ordem fixa (sempre aparecem, mesmo com 0)
+                ordemFixaModelos.forEach(modelo => {
+                    const qtd = contagemModelos[modelo] || 0;
                     resumo += `   • ${qtd}x ${modelo}\n`;
+                });
+                // Depois modelos fora da lista fixa (ex: Kimbo) só se tiverem contagem
+                Object.entries(contagemModelos).forEach(([modelo, qtd]) => {
+                    if (!ordemFixaModelos.includes(modelo) && qtd > 0) {
+                        resumo += `   • ${qtd}x ${modelo}\n`;
+                    }
                 });
                 resumo += `\n`;
             }
@@ -1901,18 +1910,26 @@ function copiarResumoInventario() {
                 resumo += `🪖 *Capacetes: ${totalCapacetes} unidades*\n\n`;
             }
 
-            // Discriminação detalhada
+            // Discriminação detalhada - ordem fixa por modelo
             resumo += `*DISCRIMINAÇÃO:*\n`;
-            itensInventarioOnly.forEach(item => {
-                if (item.tipoItem === 'capacete') {
-                    resumo += `• ${item.quantidade}x Capacete\n`;
-                } else {
-                    resumo += `• ${item.quantidade}x ${item.modelo} ${item.cor}`;
-                    if (item.chassi) {
-                        resumo += ` | Chassi: ${item.chassi}`;
-                    }
-                    resumo += `\n`;
+            const motosInventario = itensInventarioOnly.filter(i => i.tipoItem !== 'capacete');
+            const capacetesInventario = itensInventarioOnly.filter(i => i.tipoItem === 'capacete');
+            // Ordenar motos pela ordem fixa
+            const ordemFixaDisc = ['Juna', 'Kay', 'Pancho', 'Luna', 'Hyphen', 'Vega', 'Gataka', 'Jaya', 'Smart-Juna', 'Shaka', 'Zilla'];
+            motosInventario.sort((a, b) => {
+                const idxA = ordemFixaDisc.indexOf(a.modelo);
+                const idxB = ordemFixaDisc.indexOf(b.modelo);
+                return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
+            });
+            motosInventario.forEach(item => {
+                resumo += `• ${item.quantidade}x ${item.modelo} ${item.cor}`;
+                if (item.chassi) {
+                    resumo += ` | Chassi: ${item.chassi}`;
                 }
+                resumo += `\n`;
+            });
+            capacetesInventario.forEach(item => {
+                resumo += `• ${item.quantidade}x Capacete\n`;
             });
             resumo += `\n`;
         }

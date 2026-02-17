@@ -915,6 +915,20 @@ h4, h5 {
    ======================================== */
 
 /* Header do Inventário */
+.inventario-instrucao-box {
+    background: linear-gradient(135deg, #1a2e1a 0%, #2d3d2d 100%);
+    border: 1px solid #28a745;
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 1.2rem;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: #c8e6c9;
+}
+.inventario-instrucao-box strong {
+    color: #66bb6a;
+}
+
 .inventario-header-card {
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
     border-radius: 12px;

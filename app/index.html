@@ -537,7 +537,7 @@
             </div>
 
             <div class="secao-inventario">
-                <h2>Inventário e Movimentação</h2>
+                <h2>Inventário da Loja</h2>
 
                 <!-- Header com seleção de loja e ações -->
                 <div class="inventario-header-card">
@@ -568,23 +568,29 @@
                     </div>
                 </div>
 
+                <!-- Caixa de instrução -->
+                <div class="inventario-instrucao-box">
+                    <strong>Como conferir:</strong> Estoque de ontem − vendas da loja + entradas − saídas = inventário de hoje.<br>
+                    Se não bater, registre na aba "O que aconteceu?" para explicar a diferença.
+                </div>
+
                 <!-- Sistema de Abas -->
                 <div class="tabs-container">
                     <div class="tabs-header">
                         <button type="button" class="tab-btn active" data-tab="contagem" onclick="mudarAbaInventario('contagem')">
                             <span class="tab-icon">📦</span>
-                            <span class="tab-text">Contagem de Estoque</span>
+                            <span class="tab-text">O que tem na loja agora</span>
                         </button>
                         <button type="button" class="tab-btn" data-tab="movimentacao" onclick="mudarAbaInventario('movimentacao')">
                             <span class="tab-icon">🔄</span>
-                            <span class="tab-text">Movimentação</span>
+                            <span class="tab-text">O que aconteceu?</span>
                         </button>
                     </div>
 
                     <!-- Aba: Contagem de Estoque -->
                     <div class="tab-content active" id="tab-contagem">
                         <div class="tab-description">
-                            <p>Registre a contagem atual do estoque da loja</p>
+                            <p>Conte SOMENTE as motos que estão na loja AGORA e que NÃO foram vendidas.<br>Se chegou moto hoje, conte. Se vendeu, NÃO conte.</p>
                         </div>
                         <form id="inventarioForm">
                             <input type="hidden" id="tipoOperacao" value="inventario">
@@ -646,7 +652,7 @@
 
                             <button type="submit" class="btn-add-item" id="btnSubmitInventario">
                                 <span class="btn-icon-left">➕</span>
-                                Adicionar ao Inventário
+                                Adicionar à Contagem
                             </button>
                         </form>
                     </div>
@@ -654,7 +660,7 @@
                     <!-- Aba: Movimentação -->
                     <div class="tab-content" id="tab-movimentacao">
                         <div class="tab-description">
-                            <p>Registre entradas e saídas de estoque</p>
+                            <p>Explique o que aconteceu desde o último inventário, EXCETO vendas da própria loja (vendas já tem baixa automática).<br>Ex: recebeu da fábrica, devolveu com defeito, transferiu para outra loja.</p>
                         </div>
                         <form id="movimentacaoForm">
                             <!-- Tipo de Movimentação com visual claro -->
@@ -662,12 +668,12 @@
                                 <button type="button" class="mov-tipo-btn entrada" data-tipo="entrada" onclick="selecionarTipoMovimentacao('entrada')">
                                     <span class="mov-icon">📥</span>
                                     <span class="mov-text">Entrada</span>
-                                    <span class="mov-desc">Recebimento de produtos</span>
+                                    <span class="mov-desc">Chegou na loja</span>
                                 </button>
                                 <button type="button" class="mov-tipo-btn saida" data-tipo="saida" onclick="selecionarTipoMovimentacao('saida')">
                                     <span class="mov-icon">📤</span>
                                     <span class="mov-text">Saída</span>
-                                    <span class="mov-desc">Transferência ou baixa</span>
+                                    <span class="mov-desc">Saiu da loja (não é venda)</span>
                                 </button>
                             </div>
                             <input type="hidden" id="tipoMovimentacaoHidden" value="">
@@ -719,7 +725,7 @@
 
                             <!-- Motivo da Movimentação -->
                             <div class="form-group motivo-group">
-                                <label for="motivoMovimentacao">Motivo da Movimentação:</label>
+                                <label for="motivoMovimentacao">Por quê? (O que aconteceu)</label>
                                 <div class="motivos-rapidos">
                                     <button type="button" class="motivo-btn" onclick="selecionarMotivo('Transferência entre lojas')">Transferência</button>
                                     <button type="button" class="motivo-btn" onclick="selecionarMotivo('Recebimento de fábrica')">Fábrica</button>
@@ -741,7 +747,7 @@
 
                             <button type="submit" class="btn-add-item movimentacao" id="btnSubmitMovimentacao" disabled>
                                 <span class="btn-icon-left">🔄</span>
-                                Registrar Movimentação
+                                Registrar Entrada/Saída
                             </button>
                         </form>
                     </div>
