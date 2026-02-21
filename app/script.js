@@ -47,6 +47,7 @@ let ultimaVendaRegistrada = null;
 let wizardEtapaAtual = 1;
 let vendaJaEnviada = false;
 let wizardEnviadoParaBling = false;
+let blingEnvioEmAndamento = false;
 let wizardOperacaoEmAndamento = false;
 
 // Variáveis para o novo sistema de inventário
@@ -459,7 +460,7 @@ async function registrarVenda(event) {
     // Evita fechamento precipitado: o usuário já vê a fatura mesmo se envios falharem
     mostrarResumoModal(venda, false);
 
-    // Enviar para automação em background (não bloqueia o wizard)
+    // Enviar para automação Make em background (não bloqueia o wizard)
     enviarParaAutomacao('vendas', venda).then(sucesso => {
         mostrarStatusAutomacao(sucesso);
     });
@@ -1142,11 +1143,7 @@ async function finalizarInventario() {
         const sucessoAutomacao = await enviarParaAutomacao('inventario', inventarioFinalizado);
         mostrarStatusAutomacao(sucessoAutomacao);
 
-        if (sucessoAutomacao) {
-            alert(`Inventário com ${totalItens} itens finalizado e enviado!`);
-        } else {
-            alert(`Inventário salvo localmente, mas houve erro ao enviar para a planilha. Tente novamente.`);
-        }
+        alert(`Inventário com ${totalItens} itens finalizado e salvo!`);
 
         limparFormularioInventario();
     } catch (error) {
@@ -1290,7 +1287,7 @@ function exportarInventarios() {
 
     const dataExportacao = new Date().toISOString().split('T')[0];
     const dados = {
-        versao: 'NXT V4.3',
+        versao: 'NXT V4.4',
         dataExportacao: new Date().toISOString(),
         totalInventarios: inventariosSalvos.length,
         inventarios: inventariosSalvos
@@ -1357,7 +1354,7 @@ function importarInventarios(event) {
 function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     const dataFormatada = new Date(venda.dataVenda).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
 
-    let resumo = `=== SISTEMA NXT V4.3===\n🏍️ *RESUMO DA VENDA - ${venda.loja}*\n`;
+    let resumo = `=== SISTEMA NXT V4.4===\n🏍️ *RESUMO DA VENDA - ${venda.loja}*\n`;
     resumo += `*Vendedor:* ${venda.matriculaVendedor ? venda.matriculaVendedor + ' - ' : ''}${venda.vendedor}\n`;
     resumo += `*Data:* ${dataFormatada}\n\n`;
     
@@ -1641,7 +1638,7 @@ function gerarHTMLFatura(venda) {
         </div>
 
         <div class="fatura-footer">
-            <p>Esta fatura foi gerada pelo Sistema NXT V4.3</p>
+            <p>Esta fatura foi gerada pelo Sistema NXT V4.4</p>
             <p>NXT Lojas - Soluções em Mobilidade Urbana</p>
             <p><strong>Visite nosso site:</strong> <a href="https://www.nxt.eco.br/" target="_blank">www.nxt.eco.br</a></p>
             <p><small>Para dúvidas ou suporte, entre em contato através do nosso site.</small></p>
@@ -1752,7 +1749,7 @@ Observação: As garantias acima referem-se exclusivamente a defeitos de fabrica
 
 *IMPORTANTE: Este documento tem caráter informativo e não constitui documento fiscal para fins tributários. A nota fiscal eletrônica será emitida e enviada separadamente*
 
-Esta fatura foi gerada pelo Sistema NXT V4.3
+Esta fatura foi gerada pelo Sistema NXT V4.4
 NXT Lojas - Soluções em Mobilidade Urbana
 
 Visite nosso site: https://www.nxt.eco.br/
@@ -1870,7 +1867,7 @@ function copiarResumoInventario() {
         // CABEÇALHO PROFISSIONAL
         // ══════════════════════════════
         resumo += `╔══════════════════════════════════╗\n`;
-        resumo += `   *SISTEMA NXT V4.3 - INVENTÁRIO*\n`;
+        resumo += `   *SISTEMA NXT V4.4 - INVENTÁRIO*\n`;
         resumo += `   Loja: *${lojaNome}*\n`;
         resumo += `   Data: ${new Date().toLocaleDateString('pt-BR')}\n`;
         resumo += `╚══════════════════════════════════╝\n\n`;
@@ -2249,6 +2246,7 @@ function limparFormularioVenda(skipConfirm = false) {
     vendaJaEnviada = false;
     wizardEtapaAtual = 1;
     wizardEnviadoParaBling = false;
+    blingEnvioEmAndamento = false;
 
     // Reabilitar botão de registrar venda
     const btnRegistrar = document.querySelector('.btn-registrar-venda');
@@ -2780,7 +2778,13 @@ async function blingRequest(endpoint, method = 'GET', body = null) {
     if (!response.ok) {
         console.error('Erro Bling API - Status:', response.status);
         console.error('Erro Bling API - Detalhes:', JSON.stringify(responseData, null, 2));
-        throw new Error(responseData.details?.error?.message || responseData.error || `Erro ${response.status}`);
+        // Extrair mensagem de erro mais detalhada do Bling
+        const blingError = responseData.details?.error;
+        const errorFields = Array.isArray(blingError?.fields)
+            ? blingError.fields.map(f => f.msg || f.message || JSON.stringify(f)).join('; ')
+            : '';
+        const errorMsg = blingError?.message || responseData.error || `Erro ${response.status}`;
+        throw new Error(errorFields ? `${errorMsg} — ${errorFields}` : errorMsg);
     }
 
     return responseData;
@@ -2791,51 +2795,86 @@ async function buscarOuCriarContato(cliente) {
     try {
         // Tentar buscar por CPF/CNPJ
         const documento = cliente.cnpj || cliente.cpf;
+        const docLimpo = documento ? documento.replace(/\D/g, '') : '';
 
-        if (documento) {
-            const docLimpo = documento.replace(/\D/g, '');
-            const busca = await blingRequest(`/contatos?numeroDocumento=${docLimpo}`);
-
-            if (busca.data && busca.data.length > 0) {
-                return busca.data[0].id;
+        if (docLimpo) {
+            try {
+                const busca = await blingRequest(`/contatos?numeroDocumento=${docLimpo}`);
+                if (busca.data && busca.data.length > 0) {
+                    console.log(`Contato encontrado: ID ${busca.data[0].id}`);
+                    return busca.data[0].id;
+                }
+            } catch (e) {
+                console.log('Busca de contato falhou, tentando criar:', e.message);
             }
         }
 
         // Criar novo contato
-        const tipoContato = cliente.cnpj ? 'J' : 'F'; // Jurídica ou Física
-        const numeroDocumento = (cliente.cnpj || cliente.cpf || '').replace(/\D/g, '');
+        const tipoContato = (cliente.cnpj && cliente.cnpj.replace(/\D/g, '').length === 14) ? 'J' : 'F';
+        const telefone = (cliente.telefone || '').replace(/\D/g, '');
+        const cep = (cliente.endereco?.cep || '').replace(/\D/g, '');
 
         const novoContato = {
-            nome: cliente.nome,
+            nome: cliente.nome || 'Cliente',
             tipo: tipoContato,
             situacao: 'A',
-            numeroDocumento: numeroDocumento,
-            telefone: cliente.telefone.replace(/\D/g, ''),
-            celular: cliente.telefone.replace(/\D/g, ''),
-            email: cliente.email || '',
-            endereco: {
-                geral: {
-                    endereco: cliente.endereco.rua,
-                    numero: cliente.endereco.numero,
-                    bairro: cliente.endereco.bairro,
-                    municipio: cliente.endereco.cidade,
-                    uf: cliente.endereco.estado,
-                    cep: cliente.endereco.cep.replace(/\D/g, '')
-                }
-            }
+            indicadorIe: 9 // 9 = Não contribuinte (padrão para PF e vendas ao consumidor)
         };
 
+        // Só incluir telefone/celular se preenchidos
+        if (telefone) {
+            novoContato.telefone = telefone;
+            novoContato.celular = telefone;
+        }
+
+        // Só incluir documento se existir e for válido
+        if (docLimpo) {
+            novoContato.numeroDocumento = docLimpo;
+        }
+
+        // Só incluir email se existir
+        if (cliente.email) {
+            novoContato.email = cliente.email;
+        }
+
+        // Só incluir endereço se tiver pelo menos rua preenchida
+        if (cliente.endereco?.rua) {
+            novoContato.endereco = {
+                geral: {
+                    endereco: cliente.endereco.rua || '',
+                    numero: cliente.endereco.numero || 'S/N',
+                    bairro: cliente.endereco.bairro || '',
+                    municipio: cliente.endereco.cidade || '',
+                    uf: cliente.endereco.estado || '',
+                    cep: cep || ''
+                }
+            };
+        }
+
+        console.log('Criando contato no Bling:', JSON.stringify(novoContato, null, 2));
         const resultado = await blingRequest('/contatos', 'POST', novoContato);
+        console.log('Contato criado com sucesso:', resultado.data?.id);
         return resultado.data.id;
 
     } catch (error) {
         console.error('Erro ao buscar/criar contato:', error);
-        throw error;
+        throw new Error(`Erro ao salvar contato: ${error.message}`);
     }
 }
 
 // Enviar venda para o Bling
 async function enviarVendaParaBling(venda) {
+    // Proteção contra envio duplicado ao Bling
+    if (wizardEnviadoParaBling) {
+        console.log('Venda já enviada ao Bling, ignorando envio duplicado');
+        return;
+    }
+    if (blingEnvioEmAndamento) {
+        console.log('Envio ao Bling já em andamento, ignorando');
+        return;
+    }
+    blingEnvioEmAndamento = true;
+
     try {
         mostrarFeedback('Enviando para emissão...', 'sucesso');
 
@@ -2851,60 +2890,105 @@ async function enviarVendaParaBling(venda) {
         const cfopSugerido = isInterestadual ? '6102' : '5102';
         console.log(`Estado cliente: ${estadoCliente}, Interestadual: ${isInterestadual}, CFOP: ${cfopSugerido}`);
 
-        // 4. Montar itens do pedido - desdobramento fiscal se disponível
+        // 4. Montar itens do pedido - mapeamento fiscal por modelo
         const itensPedido = [];
         for (let i = 0; i < venda.produtos.length; i++) {
             const produto = venda.produtos[i];
             const fiscal = dadosFiscais[produto.modelo];
 
             if (fiscal) {
-                // Desdobramento fiscal: 1 moto vira múltiplos itens na NF-e
-                console.log(`Desdobramento fiscal para ${produto.modelo}:`, fiscal.itens.length, 'itens');
+                // Modelo com mapeamento fiscal - distribuição por percentual do valor total
+                const precoBase = produto.preco; // Preço total do produto (sem frete)
+                console.log(`Mapeamento fiscal para ${produto.modelo}: ${fiscal.itens.length} itens, preço base R$${precoBase}`);
 
-                for (const itemFiscal of fiscal.itens) {
-                    const descricao = itemFiscal.tipo === 'quadro'
-                        ? `${itemFiscal.descricao} ${produto.cor}`
-                        : itemFiscal.descricao;
+                // Capacete: R$0,01 simbólico sai do valor total do produto
+                const valorCapacete = (produto.capacete === 'sim' && fiscal.capacete) ? (fiscal.capacete.valor || 0.01) : 0;
+                const precoItens = Math.round((precoBase - valorCapacete) * 100) / 100;
 
+                // Calcular valor unitário de cada item pelo percentual (sobre preço sem capacete)
+                let indicePrincipal = 0;
+                const itensCalculados = fiscal.itens.map((itemFiscal, j) => {
+                    const valorUnitario = Math.round(precoItens * itemFiscal.percentual * 100) / 100;
+                    if (itemFiscal.principal) indicePrincipal = j;
+                    return { ...itemFiscal, valorCalculado: valorUnitario };
+                });
+
+                // Somar total e ajustar diferença de arredondamento no item principal
+                const totalCalculado = itensCalculados.reduce((sum, ic) => {
+                    return sum + Math.round(ic.valorCalculado * ic.quantidade * 100) / 100;
+                }, 0);
+                const diferenca = Math.round((precoItens - totalCalculado) * 100) / 100;
+                if (diferenca !== 0) {
+                    itensCalculados[indicePrincipal].valorCalculado =
+                        Math.round((itensCalculados[indicePrincipal].valorCalculado + diferenca) * 100) / 100;
+                    console.log(`Ajuste de arredondamento: R$${diferenca.toFixed(2)} no item principal`);
+                }
+
+                // Criar itens do pedido com valores calculados
+                for (const itemCalc of itensCalculados) {
                     const item = {
-                        descricao: descricao,
-                        unidade: itemFiscal.unidade,
-                        quantidade: itemFiscal.quantidade,
-                        valor: itemFiscal.valor
+                        descricao: itemCalc.descricao,
+                        unidade: itemCalc.unidade,
+                        quantidade: itemCalc.quantidade,
+                        valor: itemCalc.valorCalculado
                     };
 
-                    // Tentar vincular ao produto no Bling
-                    try {
-                        const busca = await blingRequest(`/produtos?nome=${encodeURIComponent(descricao)}`);
-                        if (busca.data && busca.data.length > 0) {
-                            item.produto = { id: busca.data[0].id };
-                            item.codigo = busca.data[0].codigo || '';
-                            console.log(`Vinculado ao Bling: ${descricao} -> ID ${busca.data[0].id}`);
+                    // Vincular ao produto no Bling por código ou nome
+                    if (itemCalc.codigo) {
+                        item.codigo = itemCalc.codigo;
+                        try {
+                            const busca = await blingRequest(`/produtos?codigo=${encodeURIComponent(itemCalc.codigo)}`);
+                            if (busca.data && busca.data.length > 0) {
+                                item.produto = { id: busca.data[0].id };
+                                console.log(`Vinculado por código: ${itemCalc.codigo} -> ID ${busca.data[0].id}`);
+                            }
+                        } catch (e) {
+                            console.log(`Produto não encontrado no Bling por código: ${itemCalc.codigo}`);
                         }
-                    } catch (e) {
-                        console.log(`Produto não encontrado no Bling: ${descricao}`);
-                    }
-
-                    if (!item.codigo) {
-                        item.codigo = itemFiscal.tipo === 'quadro' ? (produto.chassi || `QUADRO-${i + 1}`) : '';
+                    } else {
+                        try {
+                            const busca = await blingRequest(`/produtos?nome=${encodeURIComponent(itemCalc.descricao)}`);
+                            if (busca.data && busca.data.length > 0) {
+                                item.produto = { id: busca.data[0].id };
+                                item.codigo = busca.data[0].codigo || '';
+                                console.log(`Vinculado por nome: ${itemCalc.descricao} -> ID ${busca.data[0].id}`);
+                            }
+                        } catch (e) {
+                            console.log(`Produto não encontrado no Bling: ${itemCalc.descricao}`);
+                        }
                     }
 
                     itensPedido.push(item);
+                    console.log(`  ${itemCalc.descricao}: ${itemCalc.quantidade}x R$${itemCalc.valorCalculado.toFixed(2)} (${(itemCalc.percentual * 100).toFixed(2)}%)`);
                 }
 
                 // Capacete (se a venda inclui capacete)
                 if (produto.capacete === 'sim' && fiscal.capacete) {
-                    itensPedido.push({
+                    const capItem = {
                         descricao: fiscal.capacete.descricao,
                         unidade: fiscal.capacete.unidade,
                         quantidade: fiscal.capacete.quantidade,
-                        valor: fiscal.capacete.valor
-                    });
+                        valor: fiscal.capacete.valor || 0.01
+                    };
+
+                    // Buscar capacete no Bling pelo nome exato
+                    try {
+                        const busca = await blingRequest(`/produtos?nome=${encodeURIComponent(fiscal.capacete.descricao)}`);
+                        if (busca.data && busca.data.length > 0) {
+                            capItem.produto = { id: busca.data[0].id };
+                            capItem.codigo = busca.data[0].codigo || '';
+                            console.log(`Capacete vinculado: ${fiscal.capacete.descricao} -> ID ${busca.data[0].id}`);
+                        }
+                    } catch (e) {
+                        console.log('Capacete não encontrado no Bling');
+                    }
+
+                    itensPedido.push(capItem);
                 }
 
             } else {
-                // Modelo sem desdobramento fiscal: enviar como item único (comportamento original)
-                const descricaoBling = `NXT Autopropelido ${produto.modelo} ${produto.cor}`;
+                // Modelo sem mapeamento fiscal: enviar como item único SEM cor no nome
+                const descricaoBling = `NXT Autopropelido ${produto.modelo}`;
                 const itemPedido = {
                     descricao: descricaoBling,
                     unidade: 'UN',
@@ -2927,19 +3011,30 @@ async function enviarVendaParaBling(venda) {
                 }
 
                 itensPedido.push(itemPedido);
+
+                // Capacete para modelos sem mapeamento fiscal
+                if (produto.capacete === 'sim') {
+                    const capItem = {
+                        descricao: 'CAPACETE DE PLASTICO PVC',
+                        unidade: 'UN',
+                        quantidade: 1,
+                        valor: 0.01
+                    };
+                    try {
+                        const busca = await blingRequest(`/produtos?nome=${encodeURIComponent('CAPACETE DE PLASTICO PVC')}`);
+                        if (busca.data && busca.data.length > 0) {
+                            capItem.produto = { id: busca.data[0].id };
+                            capItem.codigo = busca.data[0].codigo || '';
+                        }
+                    } catch (e) {
+                        console.log('Capacete não encontrado no Bling');
+                    }
+                    itensPedido.push(capItem);
+                }
             }
         }
 
-        // 5. Adicionar frete se houver
-        if (venda.valorFrete > 0) {
-            itensPedido.push({
-                codigo: 'FRETE',
-                descricao: 'Frete',
-                unidade: 'UN',
-                quantidade: 1,
-                valor: venda.valorFrete
-            });
-        }
+        // 5. Frete NÃO vai como item - vai apenas no campo transporte.valorFrete
 
         // 6. Montar informações adicionais com dados dos produtos e garantia
         let infoProdutos = '';
@@ -2963,12 +3058,17 @@ Bateria: Garantia de 6 (seis) meses contra defeitos de fabricação, contados a 
 
 Observação: As garantias acima referem-se exclusivamente a defeitos de fabricação. Danos causados por uso inadequado, acidentes ou desgaste natural não estão cobertos.
 
-Loja: ${venda.loja}
-Vendedor: ${venda.vendedor}
-${venda.cliente.email ? 'E-mail: ' + venda.cliente.email : ''}
 ${venda.pagamento.observacoes ? 'Obs: ' + venda.pagamento.observacoes : ''}`;
 
-        // 7. Montar pedido de venda
+        // 7. Calcular total real dos itens + frete
+        // Parcelas = itens + frete (Bling exige que parcelas = total da venda)
+        const totalItens = itensPedido.reduce((sum, item) => {
+            return sum + Math.round(item.valor * item.quantidade * 100) / 100;
+        }, 0);
+        const valorFrete = venda.valorFrete || 0;
+        const totalPedido = Math.round((totalItens + valorFrete) * 100) / 100;
+
+        // 8. Montar pedido de venda
         const pedido = {
             contato: { id: contatoId },
             data: venda.dataVenda,
@@ -2977,18 +3077,20 @@ ${venda.pagamento.observacoes ? 'Obs: ' + venda.pagamento.observacoes : ''}`;
             vendedor: { nome: venda.vendedor },
             naturezaOperacao: { id: 15105967674 }, // Venda de mercadoria Interestadual
             itens: itensPedido,
+            formaPagamento: { id: formaPagamentoBling },
             parcelas: [{
                 dataVencimento: venda.dataVenda,
-                valor: venda.total
+                valor: totalPedido
             }],
             transporte: {
                 fretePorConta: venda.entrega.tipo === 'domicilio' ? 1 : 0, // 0=Emitente, 1=Destinatário
-                valorFrete: venda.valorFrete || 0
+                frete: valorFrete
             },
             observacoes: observacoesCompletas
         };
 
-        // 7. Criar pedido de venda
+        // 8. Criar pedido de venda
+        console.log('Enviando pedido ao Bling:', JSON.stringify(pedido, null, 2));
         const resultadoPedido = await blingRequest('/pedidos/vendas', 'POST', pedido);
         const pedidoId = resultadoPedido.data.id;
 
@@ -2999,6 +3101,7 @@ ${venda.pagamento.observacoes ? 'Obs: ' + venda.pagamento.observacoes : ''}`;
     } catch (error) {
         console.error('Erro ao enviar para Bling:', error);
         mostrarFeedback(`Erro: ${error.message}`, 'erro');
+        blingEnvioEmAndamento = false;
         throw error;
     }
 }

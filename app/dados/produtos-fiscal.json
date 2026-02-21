@@ -1,0 +1,423 @@
+{
+  "_info": "Mapeamento fiscal por modelo. Cada item usa 'percentual' do valor total do produto (sem frete). O item 'principal: true' absorve diferença de arredondamento para fechar 100%.",
+  "Kay": {
+    "itens": [
+      {
+        "tipo": "quadro",
+        "codigo": "K001",
+        "descricao": "NXT Autopropelido",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.20,
+        "principal": true
+      },
+      {
+        "tipo": "motor",
+        "codigo": "K002",
+        "descricao": "MOTOR DE CORRENTE CONTINUA, POTENCIA 1000W",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.40
+      },
+      {
+        "tipo": "bateria",
+        "codigo": "K003",
+        "descricao": "BATERIA DE GRAFENO PARA AUTOPROPELIDO ELETRICO - TENSAO 12V - 20ah (35ah) DE PESO INFERIOR A 1000KG",
+        "unidade": "UN",
+        "quantidade": 6,
+        "percentual": 0.0666666666666667
+      }
+    ],
+    "capacete": {
+      "descricao": "CAPACETE DE PLASTICO PVC",
+      "unidade": "UN",
+      "quantidade": 1,
+      "valor": 0.01
+    }
+  },
+  "Kimbo": {
+    "itens": [
+      {
+        "tipo": "quadro",
+        "codigo": "KI001",
+        "descricao": "NXT Autopropelido",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.20,
+        "principal": true
+      },
+      {
+        "tipo": "motor",
+        "codigo": "KI002",
+        "descricao": "MOTOR DE CORRENTE CONTINUA, POTENCIA 1000W",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.40
+      },
+      {
+        "tipo": "bateria",
+        "codigo": "KI003",
+        "descricao": "BATERIA DE CHUMBO- ACIDO/GRAFENO PARA DE SCOOTER ELETRICA - TENSAO 12V- 20ah (32ah) DE PESO INFERIOR A 1000KG",
+        "unidade": "UN",
+        "quantidade": 6,
+        "percentual": 0.0666666666666667
+      }
+    ],
+    "capacete": {
+      "descricao": "CAPACETE DE PLASTICO PVC",
+      "unidade": "UN",
+      "quantidade": 1,
+      "valor": 0.01
+    }
+  },
+  "Jaya": {
+    "itens": [
+      {
+        "tipo": "quadro",
+        "codigo": "JA001",
+        "descricao": "NXT Autopropelido",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.20,
+        "principal": true
+      },
+      {
+        "tipo": "motor",
+        "codigo": "JA002",
+        "descricao": "MOTOR DE CORRENTE CONTINUA, POTENCIA 1000W",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.40
+      },
+      {
+        "tipo": "bateria",
+        "codigo": "JA003",
+        "descricao": "BATERIA DE CHUMBO- ACIDO/GRAFENO PARA DE SCOOTER ELETRICA - TENSAO 12V- 20ah (32ah) DE PESO INFERIOR A 1000KG",
+        "unidade": "UN",
+        "quantidade": 4,
+        "percentual": 0.10
+      }
+    ],
+    "capacete": {
+      "descricao": "CAPACETE DE PLASTICO PVC",
+      "unidade": "UN",
+      "quantidade": 1,
+      "valor": 0.01
+    }
+  },
+  "Juna": {
+    "itens": [
+      {
+        "tipo": "quadro",
+        "codigo": "JU25001",
+        "descricao": "NXT Autopropelido",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.20,
+        "principal": true
+      },
+      {
+        "tipo": "motor",
+        "codigo": "JU25002",
+        "descricao": "MOTOR DE CORRENTE CONTINUA, POTENCIA 1000W",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.40
+      },
+      {
+        "tipo": "bateria",
+        "codigo": "JU25003",
+        "descricao": "BATERIA DE CHUMBO- ACIDO/GRAFENO PARA DE SCOOTER ELETRICA - TENSAO 12V- 20ah (32ah) DE PESO INFERIOR A 1000KG",
+        "unidade": "UN",
+        "quantidade": 5,
+        "percentual": 0.08
+      }
+    ],
+    "capacete": {
+      "descricao": "CAPACETE DE PLASTICO PVC",
+      "unidade": "UN",
+      "quantidade": 1,
+      "valor": 0.01
+    }
+  },
+  "Smart-Juna": {
+    "itens": [
+      {
+        "tipo": "quadro",
+        "codigo": "JUS001",
+        "descricao": "NXT Autopropelido",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.20,
+        "principal": true
+      },
+      {
+        "tipo": "motor",
+        "codigo": "JUS002",
+        "descricao": "MOTOR DE CORRENTE CONTINUA, POTENCIA 1000W",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.40
+      },
+      {
+        "tipo": "bateria",
+        "codigo": "JUS003",
+        "descricao": "BATERIA DE CHUMBO- ACIDO/GRAFENO PARA DE SCOOTER ELETRICA - TENSAO 12V- 20ah (32ah) DE PESO INFERIOR A 1000KG",
+        "unidade": "UN",
+        "quantidade": 5,
+        "percentual": 0.08
+      }
+    ],
+    "capacete": {
+      "descricao": "CAPACETE DE PLASTICO PVC",
+      "unidade": "UN",
+      "quantidade": 1,
+      "valor": 0.01
+    }
+  },
+  "Gataka": {
+    "itens": [
+      {
+        "tipo": "quadro",
+        "codigo": "GA001",
+        "descricao": "NXT Autopropelido",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.20,
+        "principal": true
+      },
+      {
+        "tipo": "motor",
+        "codigo": "GA002",
+        "descricao": "MOTOR DE CORRENTE CONTINUA, POTENCIA 1000W",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.40
+      },
+      {
+        "tipo": "bateria",
+        "codigo": "GA003",
+        "descricao": "BATERIA DE GRAFENO PARA AUTOPROPELIDO ELETRICO - TENSAO 12V - 20ah (35ah) DE PESO INFERIOR A 1000KG",
+        "unidade": "UN",
+        "quantidade": 6,
+        "percentual": 0.0666666666666667
+      }
+    ],
+    "capacete": {
+      "descricao": "CAPACETE DE PLASTICO PVC",
+      "unidade": "UN",
+      "quantidade": 1,
+      "valor": 0.01
+    }
+  },
+  "Pancho": {
+    "itens": [
+      {
+        "tipo": "quadro",
+        "codigo": "PA001",
+        "descricao": "NXT Autopropelido",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.20,
+        "principal": true
+      },
+      {
+        "tipo": "motor",
+        "codigo": "PA002",
+        "descricao": "MOTOR DE CORRENTE CONTINUA, POTENCIA 1000W",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.40
+      },
+      {
+        "tipo": "bateria",
+        "codigo": "PA003",
+        "descricao": "BATERIA DE CHUMBO- ACIDO/GRAFENO PARA DE SCOOTER ELETRICA - TENSAO 12V- 20ah (32ah) DE PESO INFERIOR A 1000KG",
+        "unidade": "UN",
+        "quantidade": 5,
+        "percentual": 0.08
+      }
+    ],
+    "capacete": {
+      "descricao": "CAPACETE DE PLASTICO PVC",
+      "unidade": "UN",
+      "quantidade": 1,
+      "valor": 0.01
+    }
+  },
+  "Vega": {
+    "itens": [
+      {
+        "tipo": "quadro",
+        "codigo": "VE001",
+        "descricao": "NXT Autopropelido",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.20,
+        "principal": true
+      },
+      {
+        "tipo": "motor",
+        "codigo": "VE002",
+        "descricao": "MOTOR DE CORRENTE CONTINUA, POTENCIA 800W",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.40
+      },
+      {
+        "tipo": "bateria",
+        "codigo": "VE003",
+        "descricao": "BATERIA DE CHUMBO- ACIDO/GRAFENO, PARA DE SCOOTER ELETRICA 6-DZF-12 AGM - TENSAO 48V- 12AH, DE PESO INFERIOR A 1000KG",
+        "unidade": "UN",
+        "quantidade": 4,
+        "percentual": 0.10
+      }
+    ],
+    "capacete": {
+      "descricao": "CAPACETE DE PLASTICO PVC",
+      "unidade": "UN",
+      "quantidade": 1,
+      "valor": 0.01
+    }
+  },
+  "Luna": {
+    "itens": [
+      {
+        "tipo": "quadro",
+        "codigo": "LU001",
+        "descricao": "NXT Autopropelido",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.20,
+        "principal": true
+      },
+      {
+        "tipo": "motor",
+        "codigo": "LU002",
+        "descricao": "MOTOR DE CORRENTE CONTINUA, POTENCIA 800W",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.40
+      },
+      {
+        "tipo": "bateria",
+        "codigo": "LU003",
+        "descricao": "BATERIA DE LITIO 48V - 24Ah, PARA USO EM SCOOTER ELETRICA /VEICULOS LEVES ELETRICOS",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.40
+      }
+    ],
+    "capacete": {
+      "descricao": "CAPACETE DE PLASTICO PVC",
+      "unidade": "UN",
+      "quantidade": 1,
+      "valor": 0.01
+    }
+  },
+  "Hyphen": {
+    "itens": [
+      {
+        "tipo": "quadro",
+        "codigo": "HY001",
+        "descricao": "NXT Autopropelido",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.20,
+        "principal": true
+      },
+      {
+        "tipo": "motor",
+        "codigo": "HY002",
+        "descricao": "MOTOR DE CORRENTE CONTINUA, POTENCIA 1000W",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.40
+      },
+      {
+        "tipo": "bateria",
+        "codigo": "HY003",
+        "descricao": "BATERIA DE GRAFENO PARA AUTOPROPELIDO ELETRICO - TENSAO 12V - 20ah (35ah) DE PESO INFERIOR A 1000KG",
+        "unidade": "UN",
+        "quantidade": 6,
+        "percentual": 0.0666666666666667
+      }
+    ],
+    "capacete": {
+      "descricao": "CAPACETE DE PLASTICO PVC",
+      "unidade": "UN",
+      "quantidade": 1,
+      "valor": 0.01
+    }
+  },
+  "Shaka": {
+    "itens": [
+      {
+        "tipo": "quadro",
+        "codigo": "SH001",
+        "descricao": "NXT Autopropelido",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.20,
+        "principal": true
+      },
+      {
+        "tipo": "motor",
+        "codigo": "SH002",
+        "descricao": "MOTOR DE CORRENTE CONTINUA, POTENCIA 1000W",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.40
+      },
+      {
+        "tipo": "bateria",
+        "codigo": "SH003",
+        "descricao": "BATERIA DE CHUMBO- ACIDO/GRAFENO PARA DE SCOOTER ELETRICA - TENSAO 12V- 20ah (32ah) DE PESO INFERIOR A 1000KG",
+        "unidade": "UN",
+        "quantidade": 5,
+        "percentual": 0.08
+      }
+    ],
+    "capacete": {
+      "descricao": "CAPACETE DE PLASTICO PVC",
+      "unidade": "UN",
+      "quantidade": 1,
+      "valor": 0.01
+    }
+  },
+  "Zilla": {
+    "itens": [
+      {
+        "tipo": "quadro",
+        "codigo": "ZI26001",
+        "descricao": "NXT Autopropelido",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.20,
+        "principal": true
+      },
+      {
+        "tipo": "motor",
+        "codigo": "ZI26002",
+        "descricao": "MOTOR DE CORRENTE CONTINUA, POTENCIA 800W",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.40
+      },
+      {
+        "tipo": "bateria",
+        "codigo": "ZI26003",
+        "descricao": "BATERIA DE CHUMBO- ACIDO/GRAFENO, PARA DE SCOOTER ELETRICA 6-DZF-12 AGM - TENSAO 48V- 12AH, DE PESO INFERIOR A 1000KG",
+        "unidade": "UN",
+        "quantidade": 4,
+        "percentual": 0.10
+      }
+    ],
+    "capacete": {
+      "descricao": "CAPACETE DE PLASTICO PVC",
+      "unidade": "UN",
+      "quantidade": 1,
+      "valor": 0.01
+    }
+  }
+}
