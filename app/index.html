@@ -529,6 +529,10 @@
                                         <span class="btn-icon">⚙️</span>
                                         Status Emissão
                                     </button>
+                                    <button type="button" class="btn-faturas-dia" onclick="abrirModalFaturasDoDia()">
+                                        <span class="btn-icon">📋</span>
+                                        Faturas do Dia
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -968,6 +972,20 @@
             </div>
             <div class="modal-actions">
                 <button class="btn-secondary" onclick="fecharModalHistorico()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalFaturasDoDia" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close-btn" onclick="fecharModalFaturasDoDia()">&times;</span>
+            <h3>📋 Faturas do Dia</h3>
+            <p style="color:#666; font-size:0.9rem;">Vendas registradas nas últimas 24 horas neste dispositivo.</p>
+            <div id="listaFaturasDoDia" style="max-height: 60vh; overflow-y: auto; margin: 1rem 0;">
+                <!-- Conteúdo gerado dinamicamente -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="fecharModalFaturasDoDia()">Fechar</button>
             </div>
         </div>
     </div>

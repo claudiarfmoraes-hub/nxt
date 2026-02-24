@@ -444,6 +444,7 @@ async function registrarVenda(event) {
         total: produtosDaVenda.reduce((acc, produto) => acc + produto.preco, 0) + obterValorNumerico('valorFrete')
     };
 
+    venda._savedAt = Date.now();
     const vendasSalvas = JSON.parse(localStorage.getItem('vendas') || '[]');
     vendasSalvas.push(venda);
     localStorage.setItem('vendas', JSON.stringify(vendasSalvas));
@@ -1841,6 +1842,81 @@ async function gerarPDF() {
         console.error('Erro ao gerar PDF:', error);
         mostrarFeedback('Erro ao gerar PDF. Tente novamente ou use a função de impressão.', 'erro');
     }
+}
+
+// === FATURAS DO DIA ===
+
+function abrirModalFaturasDoDia() {
+    document.getElementById('modalFaturasDoDia').style.display = 'flex';
+    renderizarListaFaturasDoDia();
+}
+
+function fecharModalFaturasDoDia() {
+    document.getElementById('modalFaturasDoDia').style.display = 'none';
+}
+
+function renderizarListaFaturasDoDia() {
+    const vendasSalvas = JSON.parse(localStorage.getItem('vendas') || '[]');
+    const limite24h = Date.now() - (24 * 60 * 60 * 1000);
+    const hojeISO = new Date().toISOString().split('T')[0];
+
+    const vendasRecentes = vendasSalvas.filter(v => {
+        if (v._savedAt) return v._savedAt >= limite24h;
+        return v.dataVenda === hojeISO; // fallback para vendas antigas sem timestamp
+    }).slice().reverse(); // mais recentes primeiro
+
+    const lista = document.getElementById('listaFaturasDoDia');
+    if (vendasRecentes.length === 0) {
+        lista.innerHTML = '<div class="empty-state"><p>Nenhuma venda registrada nas últimas 24 horas neste dispositivo.</p></div>';
+        return;
+    }
+
+    lista.innerHTML = vendasRecentes.map(venda => {
+        const ts = venda._savedAt ? new Date(venda._savedAt) : null;
+        const hora = ts ? ts.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+        const produtos = (venda.produtos || []).map(p => p.modelo).join(', ');
+        const total = `R$ ${formatarValorMonetario(venda.total || 0)}`;
+        const temTelefone = (venda.cliente?.telefone || '').replace(/\D/g, '').length >= 10;
+        const idEscapado = venda.id.replace(/'/g, "\\'");
+        return `
+        <div class="fatura-dia-item">
+            <div class="fatura-dia-info">
+                <span class="fatura-dia-hora">${hora}</span>
+                <div class="fatura-dia-detalhes">
+                    <strong>${venda.cliente?.nome || 'Cliente'}</strong>
+                    <span class="fatura-dia-modelos">${produtos}</span>
+                    <span class="fatura-dia-total">${total}</span>
+                </div>
+            </div>
+            <div class="fatura-dia-acoes">
+                <button class="btn-fatura-ver" onclick="reabrirFaturaDoDia('${idEscapado}')">📄 Ver Fatura</button>
+                ${temTelefone ? `<button class="btn-fatura-whats" onclick="enviarFaturaDiaWhatsApp('${idEscapado}')">📲 WhatsApp</button>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function reabrirFaturaDoDia(vendaId) {
+    const vendasSalvas = JSON.parse(localStorage.getItem('vendas') || '[]');
+    const venda = vendasSalvas.find(v => v.id === vendaId);
+    if (!venda) {
+        alert('Fatura não encontrada.');
+        return;
+    }
+    fecharModalFaturasDoDia();
+    ultimaVendaRegistrada = venda;
+    gerarHTMLFatura(venda);
+    document.getElementById('modalFatura').style.display = 'block';
+}
+
+function enviarFaturaDiaWhatsApp(vendaId) {
+    const vendasSalvas = JSON.parse(localStorage.getItem('vendas') || '[]');
+    const venda = vendasSalvas.find(v => v.id === vendaId);
+    if (!venda) return;
+    const texto = gerarTextoFatura(venda);
+    const telefone = (venda.cliente?.telefone || '').replace(/\D/g, '');
+    const telefoneCompleto = telefone.startsWith('55') ? telefone : '55' + telefone;
+    window.open(`https://wa.me/${telefoneCompleto}?text=${encodeURIComponent(texto)}`, '_blank');
 }
 
 function copiarResumoInventario() {
