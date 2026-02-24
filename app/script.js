@@ -1287,7 +1287,7 @@ function exportarInventarios() {
 
     const dataExportacao = new Date().toISOString().split('T')[0];
     const dados = {
-        versao: 'NXT V4.4',
+        versao: 'NXT V4.5',
         dataExportacao: new Date().toISOString(),
         totalInventarios: inventariosSalvos.length,
         inventarios: inventariosSalvos
@@ -1354,7 +1354,7 @@ function importarInventarios(event) {
 function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     const dataFormatada = new Date(venda.dataVenda).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
 
-    let resumo = `=== SISTEMA NXT V4.4===\n🏍️ *RESUMO DA VENDA - ${venda.loja}*\n`;
+    let resumo = `=== SISTEMA NXT V4.5===\n🏍️ *RESUMO DA VENDA - ${venda.loja}*\n`;
     resumo += `*Vendedor:* ${venda.matriculaVendedor ? venda.matriculaVendedor + ' - ' : ''}${venda.vendedor}\n`;
     resumo += `*Data:* ${dataFormatada}\n\n`;
     
@@ -1638,7 +1638,7 @@ function gerarHTMLFatura(venda) {
         </div>
 
         <div class="fatura-footer">
-            <p>Esta fatura foi gerada pelo Sistema NXT V4.4</p>
+            <p>Esta fatura foi gerada pelo Sistema NXT V4.5</p>
             <p>NXT Lojas - Soluções em Mobilidade Urbana</p>
             <p><strong>Visite nosso site:</strong> <a href="https://www.nxt.eco.br/" target="_blank">www.nxt.eco.br</a></p>
             <p><small>Para dúvidas ou suporte, entre em contato através do nosso site.</small></p>
@@ -1749,7 +1749,7 @@ Observação: As garantias acima referem-se exclusivamente a defeitos de fabrica
 
 *IMPORTANTE: Este documento tem caráter informativo e não constitui documento fiscal para fins tributários. A nota fiscal eletrônica será emitida e enviada separadamente*
 
-Esta fatura foi gerada pelo Sistema NXT V4.4
+Esta fatura foi gerada pelo Sistema NXT V4.5
 NXT Lojas - Soluções em Mobilidade Urbana
 
 Visite nosso site: https://www.nxt.eco.br/
@@ -1867,7 +1867,7 @@ function copiarResumoInventario() {
         // CABEÇALHO PROFISSIONAL
         // ══════════════════════════════
         resumo += `╔══════════════════════════════════╗\n`;
-        resumo += `   *SISTEMA NXT V4.4 - INVENTÁRIO*\n`;
+        resumo += `   *SISTEMA NXT V4.5 - INVENTÁRIO*\n`;
         resumo += `   Loja: *${lojaNome}*\n`;
         resumo += `   Data: ${new Date().toLocaleDateString('pt-BR')}\n`;
         resumo += `╚══════════════════════════════════╝\n\n`;
@@ -2815,7 +2815,7 @@ async function buscarOuCriarContato(cliente) {
         const cep = (cliente.endereco?.cep || '').replace(/\D/g, '');
 
         const novoContato = {
-            nome: cliente.nome || 'Cliente',
+            nome: (cliente.nome || 'Cliente').toUpperCase(),
             tipo: tipoContato,
             situacao: 'A',
             indicadorIe: 9 // 9 = Não contribuinte (padrão para PF e vendas ao consumidor)
@@ -2881,10 +2881,7 @@ async function enviarVendaParaBling(venda) {
         // 1. Buscar ou criar contato
         const contatoId = await buscarOuCriarContato(venda.cliente);
 
-        // 2. Mapear formas de pagamento do Bling
-        const formaPagamentoBling = mapearFormaPagamento(venda.pagamento.formas);
-
-        // 3. Detectar se é operação interestadual (cliente fora de SC - matriz em Santa Catarina)
+        // 2. Detectar se é operação interestadual (cliente fora de SC - matriz em Santa Catarina)
         const estadoCliente = venda.cliente?.endereco?.estado?.toUpperCase() || '';
         const isInterestadual = estadoCliente && estadoCliente !== 'SC';
         const cfopSugerido = isInterestadual ? '6102' : '5102';
@@ -3043,6 +3040,9 @@ async function enviarVendaParaBling(venda) {
 Cor: ${produto.cor}
 Chassi: ${produto.chassi || 'N/A'}
 Motor: ${produto.motor || 'N/A'}`;
+            if (produto.capacete === 'sim') {
+                infoProdutos += `\nCor do Capacete: ${produto.corCapacete || 'Não informada'}`;
+            }
             if (index < venda.produtos.length - 1) infoProdutos += '\n---';
         });
 
@@ -3056,17 +3056,10 @@ Quadro: Garantia de 2 (dois) anos contra defeitos de fabricação, contados a pa
 Motor: Garantia de 2 (dois) anos contra defeitos de fabricação, contados a partir da data da nota fiscal.
 Bateria: Garantia de 6 (seis) meses contra defeitos de fabricação, contados a partir da data da nota fiscal.
 
-Observação: As garantias acima referem-se exclusivamente a defeitos de fabricação. Danos causados por uso inadequado, acidentes ou desgaste natural não estão cobertos.
+Observação: As garantias acima referem-se exclusivamente a defeitos de fabricação. Danos causados por uso inadequado, acidentes ou desgaste natural não estão cobertos.`;
 
-${venda.pagamento.observacoes ? 'Obs: ' + venda.pagamento.observacoes : ''}`;
-
-        // 7. Calcular total real dos itens + frete
-        // Parcelas = itens + frete (Bling exige que parcelas = total da venda)
-        const totalItens = itensPedido.reduce((sum, item) => {
-            return sum + Math.round(item.valor * item.quantidade * 100) / 100;
-        }, 0);
+        // 7. Calcular frete para transporte
         const valorFrete = venda.valorFrete || 0;
-        const totalPedido = Math.round((totalItens + valorFrete) * 100) / 100;
 
         // 8. Montar pedido de venda
         const pedido = {
@@ -3075,13 +3068,8 @@ ${venda.pagamento.observacoes ? 'Obs: ' + venda.pagamento.observacoes : ''}`;
             numero: venda.id.replace('VNDA-', ''),
             numeroLoja: venda.id,
             vendedor: { nome: venda.vendedor },
-            naturezaOperacao: { id: 15105967674 }, // Venda de mercadoria Interestadual
+            naturezaOperacao: { id: 15105967674 }, // Venda de mercadoria interestadual PF
             itens: itensPedido,
-            formaPagamento: { id: formaPagamentoBling },
-            parcelas: [{
-                dataVencimento: venda.dataVenda,
-                valor: totalPedido
-            }],
             transporte: {
                 fretePorConta: venda.entrega.tipo === 'domicilio' ? 1 : 0, // 0=Emitente, 1=Destinatário
                 frete: valorFrete
