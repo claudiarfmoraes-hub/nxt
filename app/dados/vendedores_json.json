@@ -254,6 +254,11 @@
       "loja": "NI HAO MATRIZ( GALPAO(MOTORISTA/ESTOQ)",
       "funcao": "MOTORISTA II"
     },
+    "1899": {
+      "nome": "FERNANDO MARQUES BRAZ FLORÊNCIO",
+      "loja": "NI HAO INDAIATUBA POLO",
+      "funcao": "VENDEDOR(A)"
+    },
     "4827": {
       "nome": "LEONARDO NASCIMENTO CRISPIM",
       "loja": "NI HAO MATRIZ (SHOPP BUTANTA)",
@@ -377,6 +382,7 @@
     "ELLEN CRISTINA GOMES",
     "FELIPE ASSUNCAO CARDOSO",
     "FELIPE SIMOES LOURENÇO",
+    "FERNANDO MARQUES BRAZ FLORÊNCIO",
     "FERNANDO VERONEZ FERREIRA",
     "FLAVIA ALESSANDRA CAZALINI",
     "GABRIEL BATISTA MACEDO",
@@ -433,5 +439,5 @@
     "WESLEY PINEDA DA SILVA",
     "WILLIANS SACRAMENTO SOARES"
   ],
-  "total_vendedores": 69
+  "total_vendedores": 70
 }
