@@ -363,10 +363,26 @@
       "nome": "WALLAKCE DA SILVA E SILVA",
       "loja": "NI HAO BLUMENAU (SHOPP NEUMARKT)",
       "funcao": "VENDEDOR(A)"
+    },
+    "1836": {
+      "nome": "ANA LARA LIMA SILVA",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
+    },
+    "7899": {
+      "nome": "SAMIRES DA SILVA FERNANDES VIDAL",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
+    },
+    "2830": {
+      "nome": "ROSELAINE APARECIDA MENEGASSO",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
     }
   },
   "vendedores": [
     "ALERSON GEAN DE MELO FAGUNDES",
+    "ANA LARA LIMA SILVA",
     "ARIANE NATALIA PEREIRA",
     "BIANCA IASMIN BARROS MARANHAO",
     "BRENO DAMACENA DE OLIVEIRA",
@@ -428,8 +444,10 @@
     "ROBSON DONIZETE RIBEIRO",
     "RODRIGO HAHNEMANN",
     "RODRIGO VINICIUS CORREA",
+    "ROSELAINE APARECIDA MENEGASSO",
     "RYAN VIGORITO OLIVEIRA",
     "SAMARA NOGUEIRA",
+    "SAMIRES DA SILVA FERNANDES VIDAL",
     "TAYNA JULIA DE ALVARENGA SOUSA",
     "VANESSA CRISTINA BUENO PITELI",
     "VANESSA DO CARMO SANTOS",
@@ -439,5 +457,5 @@
     "WESLEY PINEDA DA SILVA",
     "WILLIANS SACRAMENTO SOARES"
   ],
-  "total_vendedores": 70
+  "total_vendedores": 73
 }
