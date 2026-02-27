@@ -1384,12 +1384,12 @@ function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     if (venda.pagamento.valores && Object.keys(venda.pagamento.valores).length > 0) {
         const formasPagamento = [];
         for (const [forma, valor] of Object.entries(venda.pagamento.valores)) {
-            const nomeForma = forma === 'pos' ? 'PIX POS' : forma === 'pix' ? 'PIX' : forma === 'debito' ? 'DÉBITO' : forma === 'credito' ? 'CRÉDITO' : forma.toUpperCase();
+            const nomeForma = forma === 'pos' ? 'PIX POS' : forma === 'pix' ? 'PIX' : forma === 'debito' ? 'DÉBITO' : forma === 'credito' ? 'CRÉDITO' : forma === 'crediario' ? 'CREDIÁRIO' : forma.toUpperCase();
             formasPagamento.push(`${nomeForma}: R$ ${formatarValorMonetario(valor)}`);
         }
         resumo += formasPagamento.join(' | ') + '\n';
     } else {
-        resumo += `*Formas:* ${venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f.toUpperCase()).join(', ')}\n`;
+        resumo += `*Formas:* ${venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f === 'crediario' ? 'CREDIÁRIO' : f.toUpperCase()).join(', ')}\n`;
     }
     
     if (venda.pagamento.formas.includes('credito')) {
@@ -1532,12 +1532,12 @@ function gerarHTMLFatura(venda) {
     if (venda.pagamento.valores && Object.keys(venda.pagamento.valores).length > 0) {
         const formasPagamento = [];
         for (const [forma, valor] of Object.entries(venda.pagamento.valores)) {
-            const nomeForma = forma === 'pos' ? 'PIX POS' : forma === 'pix' ? 'PIX' : forma === 'debito' ? 'DÉBITO' : forma === 'credito' ? 'CRÉDITO' : forma.toUpperCase();
+            const nomeForma = forma === 'pos' ? 'PIX POS' : forma === 'pix' ? 'PIX' : forma === 'debito' ? 'DÉBITO' : forma === 'credito' ? 'CRÉDITO' : forma === 'crediario' ? 'CREDIÁRIO' : forma.toUpperCase();
             formasPagamento.push(`${nomeForma}: R$ ${formatarValorMonetario(valor)}`);
         }
         formasPagamentoTexto = formasPagamento.join(', ');
     } else {
-        formasPagamentoTexto = venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f.toUpperCase()).join(', ');
+        formasPagamentoTexto = venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f === 'crediario' ? 'CREDIÁRIO' : f.toUpperCase()).join(', ');
     }
 
     if (venda.pagamento.formas.includes('credito')) {
@@ -1672,12 +1672,12 @@ function gerarTextoFatura(venda) {
     if (venda.pagamento.valores && Object.keys(venda.pagamento.valores).length > 0) {
         const formasPagamento = [];
         for (const [forma, valor] of Object.entries(venda.pagamento.valores)) {
-            const nomeForma = forma === 'pos' ? 'PIX POS' : forma === 'pix' ? 'PIX' : forma === 'debito' ? 'DÉBITO' : forma === 'credito' ? 'CRÉDITO' : forma.toUpperCase();
+            const nomeForma = forma === 'pos' ? 'PIX POS' : forma === 'pix' ? 'PIX' : forma === 'debito' ? 'DÉBITO' : forma === 'credito' ? 'CRÉDITO' : forma === 'crediario' ? 'CREDIÁRIO' : forma.toUpperCase();
             formasPagamento.push(`${nomeForma}: R$ ${formatarValorMonetario(valor)}`);
         }
         formasPagamentoTexto = formasPagamento.join(', ');
     } else {
-        formasPagamentoTexto = venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f.toUpperCase()).join(', ');
+        formasPagamentoTexto = venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f === 'crediario' ? 'CREDIÁRIO' : f.toUpperCase()).join(', ');
     }
 
     if (venda.pagamento.formas.includes('credito')) {
@@ -2106,7 +2106,7 @@ function obterValoresFormasPagamento() {
     }
 
     // Se 2+ formas, ler os campos de valor individuais
-    ['pix', 'pos', 'dinheiro', 'debito', 'credito', 'outros'].forEach(forma => {
+    ['pix', 'pos', 'dinheiro', 'debito', 'credito', 'crediario', 'outros'].forEach(forma => {
         const input = document.getElementById(`valor${forma.charAt(0).toUpperCase() + forma.slice(1)}`);
         if (input) {
             const valorNumerico = parseFloat(input.value.replace(/[R$\s.]/g, '').replace(',', '.'));
@@ -2409,7 +2409,7 @@ function handlePagamentoChange() {
     const valoresGroup = document.getElementById('valoresFormasPagamento');
     valoresGroup.style.display = checkedForms.length > 1 ? 'block' : 'none';
     
-    ['pix', 'pos', 'dinheiro', 'debito', 'credito', 'outros'].forEach(forma => {
+    ['pix', 'pos', 'dinheiro', 'debito', 'credito', 'crediario', 'outros'].forEach(forma => {
         const isChecked = document.querySelector(`input[name="pagamento"][value="${forma}"]`).checked;
         const group = document.getElementById(`${forma}ValorGroup`);
         if (group) {
@@ -3180,6 +3180,7 @@ function mapearFormaPagamento(formas) {
         'debito': 4,        // Cartão de Débito
         'credito': 3,       // Cartão de Crédito
         'boleto': 15,       // Boleto
+        'crediario': 99,    // Crediário
         'outros': 99        // Outros
     };
 
@@ -3530,12 +3531,12 @@ function enviarFaturaWhatsApp() {
     if (venda.pagamento.valores && Object.keys(venda.pagamento.valores).length > 0) {
         const formas = [];
         for (const [forma, valor] of Object.entries(venda.pagamento.valores)) {
-            const nome = forma === 'pos' ? 'PIX POS' : forma === 'pix' ? 'PIX' : forma === 'debito' ? 'DÉBITO' : forma === 'credito' ? 'CRÉDITO' : forma.toUpperCase();
+            const nome = forma === 'pos' ? 'PIX POS' : forma === 'pix' ? 'PIX' : forma === 'debito' ? 'DÉBITO' : forma === 'credito' ? 'CRÉDITO' : forma === 'crediario' ? 'CREDIÁRIO' : forma.toUpperCase();
             formas.push(`${nome}: R$ ${formatarValorMonetario(valor)}`);
         }
         pagamentoTexto = formas.join('\n');
     } else {
-        pagamentoTexto = venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f.toUpperCase()).join(', ');
+        pagamentoTexto = venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f === 'crediario' ? 'CREDIÁRIO' : f.toUpperCase()).join(', ');
     }
     if (venda.pagamento.formas.includes('credito')) {
         pagamentoTexto += ` (${venda.pagamento.parcelas}x)`;

@@ -323,6 +323,13 @@
                                                 <span class="pagamento-nome">Crédito</span>
                                             </div>
                                         </label>
+                                        <label class="pagamento-card" data-forma="crediario">
+                                            <input type="checkbox" name="pagamento" value="crediario">
+                                            <div class="pagamento-card-content">
+                                                <span class="pagamento-icon">📋</span>
+                                                <span class="pagamento-nome">Crediário</span>
+                                            </div>
+                                        </label>
                                         <label class="pagamento-card" data-forma="outros">
                                             <input type="checkbox" name="pagamento" value="outros">
                                             <div class="pagamento-card-content">
@@ -355,6 +362,10 @@
                                         <div id="creditoValorGroup" class="valor-group" style="display: none;">
                                             <label for="valorCredito">Crédito (R$):</label>
                                             <input type="text" id="valorCredito" class="currency-input valor-forma-pagamento" placeholder="R$ 0,00">
+                                        </div>
+                                        <div id="crediarioValorGroup" class="valor-group" style="display: none;">
+                                            <label for="valorCrediario">Crediário (R$):</label>
+                                            <input type="text" id="valorCrediario" class="currency-input valor-forma-pagamento" placeholder="R$ 0,00">
                                         </div>
                                         <div id="outrosValorGroup" class="valor-group" style="display: none;">
                                             <label for="valorOutros">Outros (R$):</label>
