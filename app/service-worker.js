@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nxt-lojas-cache-v14';
+const CACHE_NAME = 'nxt-lojas-cache-v15';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -6,7 +6,8 @@ const urlsToCache = [
   '/script.js',
   '/logo nxt.png',
   '/dados/lojas.json',
-  '/dados/produtos.json'
+  '/dados/produtos.json',
+  '/dados/vendedores_json.json'
 ];
 
 self.addEventListener('install', event => {

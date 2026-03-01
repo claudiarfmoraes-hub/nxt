@@ -155,22 +155,26 @@ function preencherDropdowns() {
     for (const id in dadosLojas) {
         if (dadosLojas[id].tipo === 'loja') {
             const option = new Option(dadosLojas[id].nome, id);
-            lojaVendaSelect.add(option.cloneNode(true));
-            lojaInventarioSelect.add(option.cloneNode(true));
-            lojaSaidaSelect.add(option);
+            if (lojaVendaSelect) lojaVendaSelect.add(option.cloneNode(true));
+            if (lojaInventarioSelect) lojaInventarioSelect.add(option.cloneNode(true));
+            if (lojaSaidaSelect) lojaSaidaSelect.add(option);
         }
     }
 
-    dadosProdutos.modelos.forEach(modelo => {
-        modeloProdutoSelect.add(new Option(modelo, modelo));
-        modeloInventarioSelect.add(new Option(modelo, modelo));
-        if (modeloMovimentacaoSelect) modeloMovimentacaoSelect.add(new Option(modelo, modelo));
-    });
-    dadosProdutos.cores.forEach(cor => {
-        corProdutoSelect.add(new Option(cor, cor));
-        corInventarioSelect.add(new Option(cor, cor));
-        if (corMovimentacaoSelect) corMovimentacaoSelect.add(new Option(cor, cor));
-    });
+    if (dadosProdutos.modelos) {
+        dadosProdutos.modelos.forEach(modelo => {
+            if (modeloProdutoSelect) modeloProdutoSelect.add(new Option(modelo, modelo));
+            if (modeloInventarioSelect) modeloInventarioSelect.add(new Option(modelo, modelo));
+            if (modeloMovimentacaoSelect) modeloMovimentacaoSelect.add(new Option(modelo, modelo));
+        });
+    }
+    if (dadosProdutos.cores) {
+        dadosProdutos.cores.forEach(cor => {
+            if (corProdutoSelect) corProdutoSelect.add(new Option(cor, cor));
+            if (corInventarioSelect) corInventarioSelect.add(new Option(cor, cor));
+            if (corMovimentacaoSelect) corMovimentacaoSelect.add(new Option(cor, cor));
+        });
+    }
 }
 
 function configurarFormularios() {
