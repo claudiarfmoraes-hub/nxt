@@ -15,7 +15,7 @@
     <header class="header">
         <div class="header-content">
             <img src="logo nxt.png" alt="NXT Lojas Logo" style="width: 120px;">
-            <h1>SISTEMA NXT V4.5</h1>
+            <h1>SISTEMA NXT V4.6</h1>
             <div id="statusAutomacao"></div>
         </div>
     </header>
@@ -590,6 +590,14 @@
                     <strong>Atenção nos modelos:</strong> Confira o NOME do modelo antes de adicionar! Não confunda modelos de nome parecido.
                 </div>
 
+                <!-- Caixa de cuidados com motos -->
+                <div class="inventario-instrucao-box" style="border-left: 4px solid #ff9800; background: #fff8e1;">
+                    <strong>Cuidados com as motos em estoque:</strong><br><br>
+                    ⚡ <strong>Manter TODAS as motos carregadas</strong> — baterias descarregadas sofrem dano permanente<br>
+                    ☀️ <strong>Não deixar motos expostas ao sol ou chuva</strong><br>
+                    🔧 <strong>Verificar pneus e freios periodicamente</strong>
+                </div>
+
                 <!-- Sistema de Abas -->
                 <div class="tabs-container">
                     <div class="tabs-header">
@@ -761,6 +769,31 @@
                                 </div>
                             </div>
 
+                            <!-- Conferência de Entrada (visível apenas quando tipo = entrada) -->
+                            <div id="conferenciaEntrada" style="display: none;">
+                                <div class="inventario-instrucao-box" style="border-left: 4px solid #4caf50; background: #e8f5e9; margin: 12px 0;">
+                                    <strong>Conferência de Recebimento</strong>
+                                </div>
+                                <div class="form-group">
+                                    <label for="recebidoPor">Recebido por: <span style="color: red;">*</span></label>
+                                    <input type="text" id="recebidoPor" placeholder="Nome de quem recebeu fisicamente...">
+                                </div>
+                                <div class="checklist-conferencia" style="display: flex; flex-direction: column; gap: 10px; margin: 10px 0;">
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="inspecaoVisualOk">
+                                        <span>Inspeção visual OK? (riscos, amassados, avarias)</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="carregadorOk">
+                                        <span>Carregador entregue junto?</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="acessoriosOk">
+                                        <span>Peças e acessórios conferidos?</span>
+                                    </label>
+                                </div>
+                            </div>
+
                             <button type="submit" class="btn-add-item movimentacao" id="btnSubmitMovimentacao" disabled>
                                 <span class="btn-icon-left">🔄</span>
                                 Registrar Entrada/Saída
@@ -778,6 +811,10 @@
                     <button id="copiarResumoInventario" class="btn-copiar" disabled>
                         <span class="btn-icon-left">📋</span>
                         Copiar Resumo
+                    </button>
+                    <button type="button" class="btn-copiar" onclick="abrirModalHistoricoResumos()" style="background: #6c757d;">
+                        <span class="btn-icon-left">📜</span>
+                        Histórico Resumos
                     </button>
                 </div>
 
@@ -997,6 +1034,22 @@
             </div>
             <div class="modal-actions">
                 <button class="btn-secondary" onclick="fecharModalFaturasDoDia()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Histórico de Resumos de Inventário -->
+    <div id="modalHistoricoResumos" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close-btn" onclick="fecharModalHistoricoResumos()">&times;</span>
+            <h3>📜 Histórico de Resumos</h3>
+            <p style="color:#666; font-size:0.9rem;">Resumos de inventário copiados nos últimos 7 dias.</p>
+            <div id="listaHistoricoResumos" style="max-height: 60vh; overflow-y: auto; margin: 1rem 0;">
+                <!-- Conteúdo gerado dinamicamente -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="limparHistoricoResumos()">Limpar Histórico</button>
+                <button class="btn-secondary" onclick="fecharModalHistoricoResumos()">Fechar</button>
             </div>
         </div>
     </div>

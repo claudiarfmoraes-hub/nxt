@@ -50,6 +50,22 @@ let wizardEnviadoParaBling = false;
 let blingEnvioEmAndamento = false;
 let wizardOperacaoEmAndamento = false;
 
+// Mapeamento de manuais por modelo (links Google Drive)
+const MANUAIS_MOTOS = {
+    'Gataka': 'https://drive.google.com/file/d/1llarKG95Xf2YGci-LwCpEQ5exmjhmoep/view?usp=drive_link',
+    'Pancho': 'https://drive.google.com/file/d/1C7BfTaWY48poRtaqybZzIZQJl9G7mAVw/view?usp=drive_link',
+    'Luna': 'https://drive.google.com/file/d/1sDLyZY0VIVGBf1bF5gLMSlRKjbFJrxHT/view?usp=drive_link',
+    'Smart-Juna': 'https://drive.google.com/file/d/1zweOMU1B16YOINTS3UYo6yVhLTe-U8vm/view?usp=drive_link',
+    'Hyphen': 'https://drive.google.com/file/d/1PMQdDqnWdIOhC8L95HjvJeq5bS3hKA0V/view?usp=drive_link',
+    'Vega': 'https://drive.google.com/file/d/1ucn5U4Ovjbh8QRSxt5wsAJ0Vk1kQCdhK/view?usp=drive_link',
+    'Zilla': 'https://drive.google.com/file/d/14fd_EPwoz7vaALeyAVEA-iOGvAeJ4IRa/view?usp=drive_link',
+    'Shaka': 'https://drive.google.com/file/d/1RUpPIUyvX1ij2GwH_NxkQaHvwWpScsow/view?usp=drive_link',
+    'Jaya': 'https://drive.google.com/file/d/1egTizGVR1M3lqsNoZlLZV785TUWzwcdP/view?usp=drive_link',
+    'Kay': 'https://drive.google.com/file/d/1QWG34X483sOxoByXPB9E22EuSew7QxOm/view?usp=drive_link',
+    'Kimbo': 'https://drive.google.com/file/d/1WN78PntxDv5Mz2V27l7frOxiWtxd42P1/view?usp=drive_link',
+    'Juna': 'https://drive.google.com/file/d/1iK7Ks-JznS__btmtAtkUh6hFwx2bIeQg/view?usp=drive_link',
+};
+
 // Variáveis para o novo sistema de inventário
 let abaAtualInventario = 'contagem';
 let tipoMovimentacaoSelecionado = '';
@@ -468,6 +484,9 @@ async function registrarVenda(event) {
     // Enviar para automação Make em background (não bloqueia o wizard)
     enviarParaAutomacao('vendas', venda).then(sucesso => {
         mostrarStatusAutomacao(sucesso);
+    }).catch(error => {
+        console.error('Erro no envio ao Make:', error);
+        mostrarStatusAutomacao(false);
     });
 
     // Enviar para Bling em background (se conectado)
@@ -742,6 +761,12 @@ function selecionarTipoMovimentacao(tipo) {
     // Atualizar campo hidden
     document.getElementById('tipoMovimentacaoHidden').value = tipo;
 
+    // Mostrar/ocultar campos de conferência de entrada
+    const conferenciaDiv = document.getElementById('conferenciaEntrada');
+    if (conferenciaDiv) {
+        conferenciaDiv.style.display = tipo === 'entrada' ? 'block' : 'none';
+    }
+
     // Habilitar botão de submit
     const btnSubmit = document.getElementById('btnSubmitMovimentacao');
     if (btnSubmit) {
@@ -816,6 +841,36 @@ function adicionarItemMovimentacao(event) {
         }
     }
 
+    // Se for entrada, validar e capturar dados de conferência
+    if (tipoMovimentacao === 'entrada') {
+        const recebidoPor = document.getElementById('recebidoPor').value.trim();
+        if (!recebidoPor) {
+            mostrarFeedback('Informe quem recebeu fisicamente a moto (campo "Recebido por")', 'erro');
+            return;
+        }
+
+        const inspecaoVisual = document.getElementById('inspecaoVisualOk').checked;
+        const carregadorOk = document.getElementById('carregadorOk').checked;
+        const acessoriosOk = document.getElementById('acessoriosOk').checked;
+
+        // Alerta de conferência
+        const confirma = confirm(
+            'ATENÇÃO - CONFERÊNCIA DE ENTRADA\n\n' +
+            'Todas as motos recebidas foram:\n' +
+            `${inspecaoVisual ? '✅' : '❌'} Avaliadas visualmente? (riscos, amassados)\n` +
+            `${carregadorOk ? '✅' : '❌'} Carregador conferido?\n` +
+            `${acessoriosOk ? '✅' : '❌'} Peças e acessórios verificados?\n\n` +
+            'Confirma que tudo foi conferido?'
+        );
+
+        if (!confirma) return;
+
+        item.recebidoPor = recebidoPor;
+        item.inspecaoVisual = inspecaoVisual;
+        item.carregadorOk = carregadorOk;
+        item.acessoriosOk = acessoriosOk;
+    }
+
     itensInventario.push(item);
     atualizarListaInventarioUI();
     limparFormularioMovimentacao();
@@ -837,6 +892,20 @@ function limparFormularioMovimentacao() {
     if (btnSubmit) {
         btnSubmit.disabled = true;
     }
+
+    // Ocultar e resetar campos de conferência
+    const conferenciaDiv = document.getElementById('conferenciaEntrada');
+    if (conferenciaDiv) {
+        conferenciaDiv.style.display = 'none';
+    }
+    const recebidoPor = document.getElementById('recebidoPor');
+    if (recebidoPor) recebidoPor.value = '';
+    const inspecaoVisualOk = document.getElementById('inspecaoVisualOk');
+    if (inspecaoVisualOk) inspecaoVisualOk.checked = false;
+    const carregadorOk = document.getElementById('carregadorOk');
+    if (carregadorOk) carregadorOk.checked = false;
+    const acessoriosOk = document.getElementById('acessoriosOk');
+    if (acessoriosOk) acessoriosOk.checked = false;
 
     // Resetar tipo de item para moto
     selecionarTipoItemMov('moto');
@@ -1292,7 +1361,7 @@ function exportarInventarios() {
 
     const dataExportacao = new Date().toISOString().split('T')[0];
     const dados = {
-        versao: 'NXT V4.5',
+        versao: 'NXT V4.6',
         dataExportacao: new Date().toISOString(),
         totalInventarios: inventariosSalvos.length,
         inventarios: inventariosSalvos
@@ -1359,7 +1428,7 @@ function importarInventarios(event) {
 function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     const dataFormatada = new Date(venda.dataVenda).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
 
-    let resumo = `=== SISTEMA NXT V4.5===\n🏍️ *RESUMO DA VENDA - ${venda.loja}*\n`;
+    let resumo = `=== SISTEMA NXT V4.6===\n🏍️ *RESUMO DA VENDA - ${venda.loja}*\n`;
     resumo += `*Vendedor:* ${venda.matriculaVendedor ? venda.matriculaVendedor + ' - ' : ''}${venda.vendedor}\n`;
     resumo += `*Data:* ${dataFormatada}\n\n`;
     
@@ -1431,6 +1500,17 @@ function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
         resumo += `*Local de Retirada:* ${lojaRetirada}\n`;
     }
     resumo += `\n`;
+
+    // Adicionar links dos manuais
+    const modelosVendidos = [...new Set(venda.produtos.map(p => p.modelo))];
+    const manuaisDisponiveis = modelosVendidos.filter(m => MANUAIS_MOTOS[m]);
+    if (manuaisDisponiveis.length > 0) {
+        resumo += `📖 *MANUAIS*\n`;
+        manuaisDisponiveis.forEach(m => {
+            resumo += `- ${m}: ${MANUAIS_MOTOS[m]}\n`;
+        });
+        resumo += `\n`;
+    }
 
     if (enviadoParaBling) {
         resumo += `✅ *Venda enviada ao sistema Bling para emissão da NF-e*\n`;
@@ -1643,7 +1723,7 @@ function gerarHTMLFatura(venda) {
         </div>
 
         <div class="fatura-footer">
-            <p>Esta fatura foi gerada pelo Sistema NXT V4.5</p>
+            <p>Esta fatura foi gerada pelo Sistema NXT V4.6</p>
             <p>NXT Lojas - Soluções em Mobilidade Urbana</p>
             <p><strong>Visite nosso site:</strong> <a href="https://www.nxt.eco.br/" target="_blank">www.nxt.eco.br</a></p>
             <p><small>Para dúvidas ou suporte, entre em contato através do nosso site.</small></p>
@@ -1754,7 +1834,7 @@ Observação: As garantias acima referem-se exclusivamente a defeitos de fabrica
 
 *IMPORTANTE: Este documento tem caráter informativo e não constitui documento fiscal para fins tributários. A nota fiscal eletrônica será emitida e enviada separadamente*
 
-Esta fatura foi gerada pelo Sistema NXT V4.5
+Esta fatura foi gerada pelo Sistema NXT V4.6
 NXT Lojas - Soluções em Mobilidade Urbana
 
 Visite nosso site: https://www.nxt.eco.br/
@@ -1947,7 +2027,7 @@ function copiarResumoInventario() {
         // CABEÇALHO PROFISSIONAL
         // ══════════════════════════════
         resumo += `╔══════════════════════════════════╗\n`;
-        resumo += `   *SISTEMA NXT V4.5 - INVENTÁRIO*\n`;
+        resumo += `   *SISTEMA NXT V4.6 - INVENTÁRIO*\n`;
         resumo += `   Loja: *${lojaNome}*\n`;
         resumo += `   Data: ${new Date().toLocaleDateString('pt-BR')}\n`;
         resumo += `╚══════════════════════════════════╝\n\n`;
@@ -2048,6 +2128,13 @@ function copiarResumoInventario() {
                         if (item.chassi) resumo += ` | Chassi: ${item.chassi}`;
                         resumo += `\n`;
                     }
+                    if (item.recebidoPor) {
+                        resumo += `│    ✓ Recebido por: ${item.recebidoPor}`;
+                        resumo += ` | Inspeção: ${item.inspecaoVisual ? 'OK' : '—'}`;
+                        resumo += ` | Carregador: ${item.carregadorOk ? 'OK' : '—'}`;
+                        resumo += ` | Acessórios: ${item.acessoriosOk ? 'OK' : '—'}`;
+                        resumo += `\n`;
+                    }
                 });
             }
 
@@ -2074,6 +2161,17 @@ function copiarResumoInventario() {
             resumo += `  (nenhuma movimentação registrada)\n`;
         }
 
+        // ══════════════════════════════
+        // SEÇÃO: CUIDADOS COM O ESTOQUE
+        // ══════════════════════════════
+        resumo += `\n▸ *CUIDADOS COM O ESTOQUE*\n`;
+        resumo += `  ⚡ Manter TODAS as motos carregadas (baterias descarregadas = dano permanente)\n`;
+        resumo += `  ☀️ Não deixar motos expostas ao sol ou chuva\n`;
+        resumo += `  🔧 Verificar pneus e freios periodicamente\n`;
+
+        // Salvar resumo no histórico
+        salvarResumoNoHistorico(lojaNome, resumo);
+
         navigator.clipboard.writeText(resumo).then(() => {
             alert('Resumo copiado para a área de transferência!');
         }).catch(err => {
@@ -2089,6 +2187,96 @@ function copiarResumoInventario() {
     } catch (error) {
         console.error('Erro ao gerar resumo do inventário:', error);
         alert('Erro ao copiar resumo. Tente novamente.');
+    }
+}
+
+// === HISTÓRICO DE RESUMOS DE INVENTÁRIO ===
+
+function salvarResumoNoHistorico(lojaNome, resumo) {
+    const historico = JSON.parse(localStorage.getItem('historicoResumos') || '[]');
+    historico.push({
+        id: `RES-${Date.now()}`,
+        loja: lojaNome,
+        data: new Date().toISOString(),
+        texto: resumo
+    });
+    // Manter apenas os últimos 50 resumos
+    if (historico.length > 50) historico.splice(0, historico.length - 50);
+    localStorage.setItem('historicoResumos', JSON.stringify(historico));
+}
+
+function abrirModalHistoricoResumos() {
+    document.getElementById('modalHistoricoResumos').style.display = 'flex';
+    renderizarListaHistoricoResumos();
+}
+
+function fecharModalHistoricoResumos() {
+    document.getElementById('modalHistoricoResumos').style.display = 'none';
+}
+
+function renderizarListaHistoricoResumos() {
+    const historico = JSON.parse(localStorage.getItem('historicoResumos') || '[]');
+    const limite7dias = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    const resumosRecentes = historico
+        .filter(r => new Date(r.data).getTime() >= limite7dias)
+        .slice()
+        .reverse();
+
+    const lista = document.getElementById('listaHistoricoResumos');
+    if (resumosRecentes.length === 0) {
+        lista.innerHTML = '<div class="empty-state"><p>Nenhum resumo salvo nos últimos 7 dias.</p></div>';
+        return;
+    }
+
+    lista.innerHTML = resumosRecentes.map(resumo => {
+        const data = new Date(resumo.data);
+        const dataStr = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const horaStr = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const idEscapado = resumo.id.replace(/'/g, "\\'");
+        const previewTexto = resumo.texto.substring(0, 100).replace(/\n/g, ' ') + '...';
+        return `
+        <div class="fatura-dia-item" style="margin-bottom: 8px;">
+            <div class="fatura-dia-info">
+                <span class="fatura-dia-hora">${horaStr}</span>
+                <div class="fatura-dia-detalhes">
+                    <strong>${resumo.loja}</strong>
+                    <span class="fatura-dia-modelos">${dataStr}</span>
+                    <span style="color:#888; font-size:0.8rem;">${previewTexto}</span>
+                </div>
+            </div>
+            <div class="fatura-dia-acoes">
+                <button class="btn-fatura-ver" onclick="copiarResumoDoHistorico('${idEscapado}')">📋 Copiar</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function copiarResumoDoHistorico(resumoId) {
+    const historico = JSON.parse(localStorage.getItem('historicoResumos') || '[]');
+    const resumo = historico.find(r => r.id === resumoId);
+    if (!resumo) {
+        alert('Resumo não encontrado.');
+        return;
+    }
+
+    navigator.clipboard.writeText(resumo.texto).then(() => {
+        mostrarFeedback('Resumo copiado para a área de transferência!', 'sucesso');
+    }).catch(() => {
+        const textArea = document.createElement('textarea');
+        textArea.value = resumo.texto;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        mostrarFeedback('Resumo copiado para a área de transferência!', 'sucesso');
+    });
+}
+
+function limparHistoricoResumos() {
+    if (confirm('Tem certeza que deseja limpar todo o histórico de resumos?')) {
+        localStorage.removeItem('historicoResumos');
+        renderizarListaHistoricoResumos();
+        mostrarFeedback('Histórico de resumos limpo.', 'sucesso');
     }
 }
 
@@ -2596,11 +2784,62 @@ function sanitizarDadosParaEnvio(tipo, dados) {
     return dados;
 }
 
+// Gera fingerprint baseado no CONTEÚDO da venda (não no ID/timestamp)
+function gerarFingerprintVenda(dados) {
+    const partes = [
+        dados.cliente?.nome || '',
+        dados.cliente?.cpf || dados.cliente?.cnpj || '',
+        dados.dataVenda || '',
+        String(dados.total || 0),
+        (dados.produtos || []).map(p => `${p.modelo}-${p.cor}`).sort().join('|')
+    ];
+    // Hash simples mas eficaz
+    const str = partes.join('::');
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return 'FP' + Math.abs(hash).toString(36);
+}
+
+// Verifica se uma venda com mesmo conteúdo já foi enviada recentemente
+function vendaJaEnviadaAoWebhook(dados) {
+    if (!dados || !dados.cliente) return false;
+    const fingerprint = gerarFingerprintVenda(dados);
+    const enviadas = JSON.parse(localStorage.getItem('webhookEnviados') || '{}');
+    const agora = Date.now();
+    // Limpar entradas com mais de 24h
+    for (const fp in enviadas) {
+        if (agora - enviadas[fp] > 24 * 60 * 60 * 1000) {
+            delete enviadas[fp];
+        }
+    }
+    localStorage.setItem('webhookEnviados', JSON.stringify(enviadas));
+    return !!enviadas[fingerprint];
+}
+
+// Marca a venda como enviada ao webhook
+function marcarVendaEnviadaWebhook(dados) {
+    if (!dados || !dados.cliente) return;
+    const fingerprint = gerarFingerprintVenda(dados);
+    const enviadas = JSON.parse(localStorage.getItem('webhookEnviados') || '{}');
+    enviadas[fingerprint] = Date.now();
+    localStorage.setItem('webhookEnviados', JSON.stringify(enviadas));
+}
+
 async function enviarParaAutomacao(tipo, dados) {
     const url = POWER_AUTOMATE_URLS[tipo];
     if (!url || url.includes('URL_DO_FLUXO')) {
         console.log(`Automação para '${tipo}' não configurada.`);
         return false;
+    }
+
+    // Proteção anti-duplicidade: verificar se venda com mesmo conteúdo já foi enviada
+    if (tipo === 'vendas' && vendaJaEnviadaAoWebhook(dados)) {
+        console.warn('Venda duplicada bloqueada pelo fingerprint:', dados.id);
+        return true; // Retorna true pois a venda original já foi enviada
     }
 
     // Sanitizar dados para garantir que nenhum campo vai como null/undefined
@@ -2618,10 +2857,17 @@ async function enviarParaAutomacao(tipo, dados) {
         });
 
         clearTimeout(timeoutId);
+
+        if (response.ok && tipo === 'vendas') {
+            marcarVendaEnviadaWebhook(dados);
+        }
+
         return response.ok;
     } catch (error) {
         if (error.name === 'AbortError') {
             console.error(`Timeout ao enviar dados para automação (${tipo})`);
+            // Em caso de timeout, marcar como enviada pois o Make pode ter recebido
+            if (tipo === 'vendas') marcarVendaEnviadaWebhook(dados);
         } else {
             console.error(`Erro ao enviar dados para automação (${tipo}):`, error);
         }
@@ -3598,7 +3844,14 @@ _Danos por uso inadequado, acidentes ou desgaste natural não são cobertos pela
 📅 Data da Venda: ${dataVenda}
 📅 Emissão: ${dataEmissao}
 🏪 Loja: ${venda.loja}
-
+${(() => {
+    const modelos = [...new Set(venda.produtos.map(p => p.modelo))];
+    const manuaisTexto = modelos
+        .filter(m => MANUAIS_MOTOS[m])
+        .map(m => `📖 Manual ${m}: ${MANUAIS_MOTOS[m]}`)
+        .join('\n');
+    return manuaisTexto ? '\n' + manuaisTexto + '\n' : '';
+})()}
 ⚠️ _Este documento tem caráter informativo e não substitui a nota fiscal. A nota fiscal eletrônica será emitida e enviada separadamente._
 
 _*NXT Lojas - Mobilidade Urbana*_
