@@ -1592,6 +1592,9 @@ function copiarResumoVenda(isFromModal) {
 function mostrarResumoModal(venda, enviadoParaBling = false) {
     ultimoResumoVenda = gerarTextoResumoVenda(venda, enviadoParaBling);
 
+    // Salvar resumo de venda no histórico
+    salvarResumoVendaNoHistorico(venda, ultimoResumoVenda);
+
     // Usar o novo wizard de pós-venda
     iniciarWizardPosVenda(venda, enviadoParaBling);
 }
@@ -2277,6 +2280,100 @@ function limparHistoricoResumos() {
         localStorage.removeItem('historicoResumos');
         renderizarListaHistoricoResumos();
         mostrarFeedback('Histórico de resumos limpo.', 'sucesso');
+    }
+}
+
+// === HISTÓRICO DE RESUMOS DE VENDAS ===
+
+function salvarResumoVendaNoHistorico(venda, textoResumo) {
+    const historico = JSON.parse(localStorage.getItem('historicoResumoVendas') || '[]');
+    const modelos = (venda.produtos || []).map(p => p.modelo).join(', ');
+    historico.push({
+        id: `RESV-${Date.now()}`,
+        loja: venda.loja || '',
+        cliente: venda.cliente?.nome || 'Cliente',
+        modelos: modelos,
+        total: venda.total || 0,
+        data: new Date().toISOString(),
+        texto: textoResumo
+    });
+    if (historico.length > 50) historico.splice(0, historico.length - 50);
+    localStorage.setItem('historicoResumoVendas', JSON.stringify(historico));
+}
+
+function abrirModalHistoricoResumoVendas() {
+    document.getElementById('modalHistoricoResumoVendas').style.display = 'flex';
+    renderizarListaHistoricoResumoVendas();
+}
+
+function fecharModalHistoricoResumoVendas() {
+    document.getElementById('modalHistoricoResumoVendas').style.display = 'none';
+}
+
+function renderizarListaHistoricoResumoVendas() {
+    const historico = JSON.parse(localStorage.getItem('historicoResumoVendas') || '[]');
+    const limite7dias = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    const resumosRecentes = historico
+        .filter(r => new Date(r.data).getTime() >= limite7dias)
+        .slice()
+        .reverse();
+
+    const lista = document.getElementById('listaHistoricoResumoVendas');
+    if (resumosRecentes.length === 0) {
+        lista.innerHTML = '<div class="empty-state"><p>Nenhum resumo de venda nos últimos 7 dias.</p></div>';
+        return;
+    }
+
+    lista.innerHTML = resumosRecentes.map(resumo => {
+        const data = new Date(resumo.data);
+        const dataStr = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const horaStr = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const idEscapado = resumo.id.replace(/'/g, "\\'");
+        const totalStr = `R$ ${formatarValorMonetario(resumo.total)}`;
+        return `
+        <div class="fatura-dia-item" style="margin-bottom: 8px;">
+            <div class="fatura-dia-info">
+                <span class="fatura-dia-hora">${horaStr}</span>
+                <div class="fatura-dia-detalhes">
+                    <strong>${resumo.cliente}</strong>
+                    <span class="fatura-dia-modelos">${resumo.modelos}</span>
+                    <span class="fatura-dia-total">${totalStr}</span>
+                    <span style="color:#888; font-size:0.8rem;">${dataStr} • ${resumo.loja}</span>
+                </div>
+            </div>
+            <div class="fatura-dia-acoes">
+                <button class="btn-fatura-ver" onclick="copiarResumoVendaDoHistorico('${idEscapado}')">📋 Copiar</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function copiarResumoVendaDoHistorico(resumoId) {
+    const historico = JSON.parse(localStorage.getItem('historicoResumoVendas') || '[]');
+    const resumo = historico.find(r => r.id === resumoId);
+    if (!resumo) {
+        alert('Resumo não encontrado.');
+        return;
+    }
+
+    navigator.clipboard.writeText(resumo.texto).then(() => {
+        mostrarFeedback('Resumo de venda copiado!', 'sucesso');
+    }).catch(() => {
+        const textArea = document.createElement('textarea');
+        textArea.value = resumo.texto;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        mostrarFeedback('Resumo de venda copiado!', 'sucesso');
+    });
+}
+
+function limparHistoricoResumoVendas() {
+    if (confirm('Tem certeza que deseja limpar todo o histórico de resumos de vendas?')) {
+        localStorage.removeItem('historicoResumoVendas');
+        renderizarListaHistoricoResumoVendas();
+        mostrarFeedback('Histórico de resumos de vendas limpo.', 'sucesso');
     }
 }
 
