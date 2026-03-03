@@ -1501,17 +1501,6 @@ function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     }
     resumo += `\n`;
 
-    // Adicionar links dos manuais
-    const modelosVendidos = [...new Set(venda.produtos.map(p => p.modelo))];
-    const manuaisDisponiveis = modelosVendidos.filter(m => MANUAIS_MOTOS[m]);
-    if (manuaisDisponiveis.length > 0) {
-        resumo += `📖 *MANUAIS*\n`;
-        manuaisDisponiveis.forEach(m => {
-            resumo += `- ${m}: ${MANUAIS_MOTOS[m]}\n`;
-        });
-        resumo += `\n`;
-    }
-
     if (enviadoParaBling) {
         resumo += `✅ *Venda enviada ao sistema Bling para emissão da NF-e*\n`;
     }
