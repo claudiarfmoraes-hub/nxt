@@ -378,6 +378,11 @@
       "nome": "ROSELAINE APARECIDA MENEGASSO",
       "loja": "",
       "funcao": "VENDEDOR(A)"
+    },
+    "2889": {
+      "nome": "SERGIO PEREIRA DE GODOY",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
     }
   },
   "vendedores": [
@@ -448,6 +453,7 @@
     "RYAN VIGORITO OLIVEIRA",
     "SAMARA NOGUEIRA",
     "SAMIRES DA SILVA FERNANDES VIDAL",
+    "SERGIO PEREIRA DE GODOY",
     "TAYNA JULIA DE ALVARENGA SOUSA",
     "VANESSA CRISTINA BUENO PITELI",
     "VANESSA DO CARMO SANTOS",
@@ -457,5 +463,5 @@
     "WESLEY PINEDA DA SILVA",
     "WILLIANS SACRAMENTO SOARES"
   ],
-  "total_vendedores": 73
+  "total_vendedores": 74
 }
