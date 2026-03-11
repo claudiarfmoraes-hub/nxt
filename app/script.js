@@ -1060,6 +1060,97 @@ function aplicarMascaras() {
     }
 }
 
+// ========== VALIDAÇÃO INLINE CPF E TELEFONE ==========
+
+// Validar CPF pelo algoritmo dos dígitos verificadores
+function validarCPF(cpf) {
+    cpf = cpf.replace(/\D/g, '');
+    if (cpf.length !== 11) return false;
+    // Rejeitar sequências repetidas (000.000.000-00, 111.111.111-11, etc.)
+    if (/^(\d)\1{10}$/.test(cpf)) return false;
+    // Calcular dígitos verificadores
+    for (let t = 9; t < 11; t++) {
+        let soma = 0;
+        for (let i = 0; i < t; i++) {
+            soma += parseInt(cpf[i]) * ((t + 1) - i);
+        }
+        let resto = (soma * 10) % 11;
+        if (resto === 10) resto = 0;
+        if (resto !== parseInt(cpf[t])) return false;
+    }
+    return true;
+}
+
+// Validar telefone (precisa ter DDD + número = 10 ou 11 dígitos)
+function validarTelefone(tel) {
+    const digitos = tel.replace(/\D/g, '');
+    return digitos.length >= 10 && digitos.length <= 11;
+}
+
+// Aplicar validação visual inline nos campos
+function aplicarValidacaoInline() {
+    const cpfInput = document.getElementById('cpfCliente');
+    const telInput = document.getElementById('telefoneCliente');
+    const avisoCpf = document.getElementById('avisoCpf');
+    const avisoTel = document.getElementById('avisoTelefone');
+
+    if (cpfInput && avisoCpf) {
+        cpfInput.addEventListener('blur', function() {
+            const valor = this.value.replace(/\D/g, '');
+            if (valor.length === 0) {
+                // Campo vazio — sem aviso (é opcional)
+                this.classList.remove('campo-invalido', 'campo-valido');
+                avisoCpf.classList.remove('visivel');
+            } else if (valor.length < 11) {
+                // Incompleto
+                this.classList.add('campo-invalido');
+                this.classList.remove('campo-valido');
+                avisoCpf.textContent = 'CPF incompleto — faltam números';
+                avisoCpf.classList.add('visivel');
+            } else if (!validarCPF(valor)) {
+                // Inválido
+                this.classList.add('campo-invalido');
+                this.classList.remove('campo-valido');
+                avisoCpf.textContent = 'CPF inválido — verifique os números';
+                avisoCpf.classList.add('visivel');
+            } else {
+                // Válido
+                this.classList.remove('campo-invalido');
+                this.classList.add('campo-valido');
+                avisoCpf.classList.remove('visivel');
+            }
+        });
+        // Limpar aviso ao digitar
+        cpfInput.addEventListener('input', function() {
+            this.classList.remove('campo-invalido', 'campo-valido');
+            avisoCpf.classList.remove('visivel');
+        });
+    }
+
+    if (telInput && avisoTel) {
+        telInput.addEventListener('blur', function() {
+            const digitos = this.value.replace(/\D/g, '');
+            if (digitos.length === 0) {
+                // Vazio — a validação do required já cuida
+                this.classList.remove('campo-invalido', 'campo-valido');
+                avisoTel.classList.remove('visivel');
+            } else if (!validarTelefone(this.value)) {
+                this.classList.add('campo-invalido');
+                this.classList.remove('campo-valido');
+                avisoTel.classList.add('visivel');
+            } else {
+                this.classList.remove('campo-invalido');
+                this.classList.add('campo-valido');
+                avisoTel.classList.remove('visivel');
+            }
+        });
+        telInput.addEventListener('input', function() {
+            this.classList.remove('campo-invalido', 'campo-valido');
+            avisoTel.classList.remove('visivel');
+        });
+    }
+}
+
 // Toggle Capacete Visual
 function toggleCapaceteVisual() {
     const checkbox = document.getElementById('acompanhaCapaceteCheck');
@@ -1155,6 +1246,7 @@ function atualizarContadorProdutos() {
 // Inicializar funcionalidades do formulário de vendas
 function inicializarVendasNovo() {
     aplicarMascaras();
+    aplicarValidacaoInline();
     configurarPagamentoCards();
 
     // Listeners para atualizar progresso
@@ -2596,6 +2688,14 @@ function limparFormularioVenda(skipConfirm = false) {
     handlePagamentoChange();
     definirDataAtual();
 
+    // Limpar estados de validação inline
+    document.querySelectorAll('.campo-invalido, .campo-valido').forEach(el => {
+        el.classList.remove('campo-invalido', 'campo-valido');
+    });
+    document.querySelectorAll('.campo-aviso').forEach(el => {
+        el.classList.remove('visivel');
+    });
+
     // Resetar proteção anti-duplicidade
     vendaJaEnviada = false;
     wizardEtapaAtual = 1;
@@ -3205,9 +3305,21 @@ async function blingRequest(endpoint, method = 'GET', body = null) {
 // Buscar ou criar contato no Bling
 async function buscarOuCriarContato(cliente) {
     try {
-        // Tentar buscar por CPF/CNPJ
+        // Tentar buscar por CPF/CNPJ (com validação preventiva)
         const documento = cliente.cnpj || cliente.cpf;
-        const docLimpo = documento ? documento.replace(/\D/g, '') : '';
+        let docLimpo = documento ? documento.replace(/\D/g, '') : '';
+
+        // Se for CPF (11 dígitos), validar antes de enviar ao Bling
+        if (docLimpo.length === 11 && !validarCPF(docLimpo)) {
+            console.warn('CPF inválido removido antes do envio ao Bling:', docLimpo);
+            docLimpo = '';
+        }
+
+        // Validar telefone — se incompleto, não enviar
+        const telLimpo = (cliente.telefone || '').replace(/\D/g, '');
+        if (telLimpo && telLimpo.length < 10) {
+            console.warn('Telefone incompleto removido antes do envio ao Bling:', telLimpo);
+        }
 
         if (docLimpo) {
             try {
@@ -3233,8 +3345,8 @@ async function buscarOuCriarContato(cliente) {
             indicadorIe: 9 // 9 = Não contribuinte (padrão para PF e vendas ao consumidor)
         };
 
-        // Só incluir telefone/celular se preenchidos
-        if (telefone) {
+        // Só incluir telefone/celular se preenchidos e com tamanho válido (10-11 dígitos)
+        if (telefone && telefone.length >= 10) {
             novoContato.telefone = telefone;
             novoContato.celular = telefone;
         }

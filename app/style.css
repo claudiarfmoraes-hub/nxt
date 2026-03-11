@@ -130,6 +130,24 @@ h4, h5 {
     box-shadow: 0 0 0 2px rgba(198, 255, 0, 0.3);
 }
 
+/* Validação inline de campos */
+.form-group input.campo-invalido {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.15);
+}
+.form-group input.campo-valido {
+    border-color: #28a745;
+}
+.campo-aviso {
+    font-size: 0.75rem;
+    color: #dc3545;
+    margin-top: 0.25rem;
+    display: none;
+}
+.campo-aviso.visivel {
+    display: block;
+}
+
 /* Checkbox Group */
 .checkbox-group {
     display: flex;
