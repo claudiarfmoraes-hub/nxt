@@ -431,6 +431,50 @@ main {
     opacity: 1;
 }
 
+/* ========== CHECKBOX GROUP ========== */
+.checkbox-group {
+    display: flex;
+    gap: 1.5rem;
+    padding: 0.5rem 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--cor-primaria);
+    cursor: pointer;
+}
+
+/* ========== SUBTOTAL DISPLAY ========== */
+.subtotal-display {
+    padding: 0.7rem;
+    background: var(--cor-fundo);
+    border: 1px solid var(--cor-borda);
+    border-radius: 4px;
+    font-weight: 700;
+    color: var(--cor-primaria);
+    font-size: 0.95rem;
+}
+
+/* ========== TOTAL GERAL ========== */
+.total-bar-final {
+    border-color: #ff9800;
+    margin-top: 1rem;
+}
+
+.total-bar-final #totalGeral {
+    color: #ff9800;
+    font-size: 1.3rem;
+}
+
 /* ========== RESPONSIVO ========== */
 @media (max-width: 600px) {
     .form-row {

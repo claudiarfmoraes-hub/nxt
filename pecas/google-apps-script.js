@@ -174,11 +174,12 @@ function buscarOuCriarContato(cliente) {
   }
 
   // Criar novo contato
+  var tipoPessoa = cliente.tipo === 'J' ? 'J' : 'F';
   var novoContato = {
     nome: cliente.nome.toUpperCase(),
-    tipo: 'F',
+    tipo: tipoPessoa,
     situacao: 'A',
-    indicadorIe: 9
+    indicadorIe: tipoPessoa === 'J' ? 1 : 9
   };
 
   if (telefone && telefone.length >= 10) {
@@ -186,12 +187,27 @@ function buscarOuCriarContato(cliente) {
     novoContato.celular = telefone;
   }
 
-  if (cpf && cpf.length === 11 && validarCPF(cpf)) {
+  if (cpf && ((cpf.length === 11 && validarCPF(cpf)) || cpf.length === 14)) {
     novoContato.numeroDocumento = cpf;
+  }
+
+  if (cliente.ie) {
+    novoContato.ie = cliente.ie;
   }
 
   if (cliente.email) {
     novoContato.email = cliente.email;
+  }
+
+  // Endereço
+  if (cliente.endereco) {
+    novoContato.endereco = {
+      endereco: cliente.endereco,
+      bairro: cliente.bairro || '',
+      municipio: cliente.cidade || '',
+      uf: cliente.uf || '',
+      cep: cliente.cep || ''
+    };
   }
 
   var resultado = blingRequest('/contatos', 'post', novoContato);
@@ -202,9 +218,16 @@ function enviarPedidoBling(dados) {
   // 1. Buscar ou criar contato
   var contatoId = buscarOuCriarContato({
     nome: dados.nomeCliente,
-    cpf: dados.cpfCliente,
+    cpf: dados.cpfCnpjCliente,
     telefone: dados.telefoneCliente,
-    email: dados.emailCliente
+    email: '',
+    tipo: dados.tipoCliente || 'F',
+    ie: dados.ieCliente || '',
+    endereco: dados.enderecoCliente || '',
+    bairro: dados.bairroCliente || '',
+    cidade: dados.cidadeCliente || '',
+    uf: dados.ufCliente || '',
+    cep: dados.cepCliente || ''
   });
 
   // 2. Montar itens do pedido
@@ -258,7 +281,7 @@ function enviarPedidoBling(dados) {
     vendedor: { nome: dados.vendedor },
     naturezaOperacao: { id: 15105967674 },
     itens: itens,
-    observacoes: 'Venda de peças/acessórios - ' + dados.loja + (dados.observacoes ? '\n' + dados.observacoes : '')
+    observacoes: 'SAC - ' + (dados.tipoAtendimento || 'Peças') + (dados.protocoloSac ? ' | Protocolo: ' + dados.protocoloSac : '') + (dados.observacoes ? '\n' + dados.observacoes : '')
   };
 
   var resultado = blingRequest('/pedidos/vendas', 'post', pedido);
@@ -274,64 +297,83 @@ function gravarNaPlanilha(dados) {
   // Criar cabeçalho se a planilha estiver vazia
   if (sheet.getLastRow() === 0) {
     sheet.appendRow([
-      'ID', 'Data Registro', 'Data Venda', 'Loja', 'Vendedor', 'Matrícula',
-      'Cliente', 'Telefone', 'CPF', 'E-mail',
-      'Peças', 'Qtd Total', 'Total (R$)',
+      'ID', 'Data Registro', 'Data Venda', 'Tipo Atendimento', 'Origem SAC', 'Protocolo SAC',
+      'Vendedor', 'Prev. Embarque',
+      'Cliente', 'Tipo', 'CPF/CNPJ', 'IE', 'Telefone',
+      'Endereço', 'Bairro', 'Cidade', 'UF', 'CEP',
+      'Peças', 'Qtd Total', 'Total Peças (R$)',
+      'Transportadora', 'Frete (R$)', 'Total Geral (R$)',
       'Forma Pagamento', 'Parcelas', 'Observações',
       'Bling Status', 'Bling Pedido ID'
     ]);
-    var headerRange = sheet.getRange(1, 1, 1, 18);
+    var headerRange = sheet.getRange(1, 1, 1, 29);
     headerRange.setFontWeight('bold');
     headerRange.setBackground('#1a1a2e');
     headerRange.setFontColor('#c6ff00');
   }
 
   // Montar descrição das peças
-  var pecasDesc = '';
-  var qtdTotal = 0;
   var pecas = dados.pecas || [];
-  pecasDesc = pecas.map(function(p) {
-    return p.descricao + (p.codigo ? ' (' + p.codigo + ')' : '') +
+  var pecasDesc = pecas.map(function(p) {
+    return p.descricao + ' (' + p.modelo + ')' +
            ' - ' + p.quantidade + 'x R$' + Number(p.precoUnitario).toFixed(2).replace('.', ',');
   }).join(' | ');
-  qtdTotal = pecas.reduce(function(sum, p) { return sum + (p.quantidade || 0); }, 0);
+  var qtdTotal = pecas.reduce(function(sum, p) { return sum + (p.quantidade || 0); }, 0);
 
   // Formatar forma de pagamento
   var formaLabels = {
     'dinheiro': 'Dinheiro', 'pix': 'PIX', 'debito': 'Débito',
-    'credito': 'Crédito', 'boleto': 'Boleto', 'transferencia': 'Transferência'
+    'credito': 'Crédito', 'boleto': 'Boleto', 'link': 'Link de Pagamento', 'transferencia': 'Transferência'
   };
   var formaPag = formaLabels[dados.formaPagamento] || dados.formaPagamento || '';
-  if (dados.formaPagamento === 'credito' && dados.parcelas) {
+  if ((dados.formaPagamento === 'credito' || dados.formaPagamento === 'link') && dados.parcelas) {
     formaPag += ' (' + dados.parcelas + 'x)';
   }
 
-  // Inserir linha (Bling status será atualizado depois)
+  var transpLabels = {
+    'correios': 'Correios', 'rodonaves': 'Rodonaves',
+    'em_maos': 'Em Mãos', 'loja': 'Loja', 'outro': 'Outro'
+  };
+
+  // Inserir linha
   sheet.appendRow([
     dados.id || '',
     new Date(),
     dados.dataVenda || '',
-    dados.loja || '',
+    dados.tipoAtendimento || '',
+    dados.origemSac || '',
+    dados.protocoloSac || '',
     dados.vendedor || '',
-    dados.matriculaVendedor || '',
+    dados.prevEmbarque || '',
     dados.nomeCliente || '',
+    dados.tipoCliente === 'J' ? 'PJ' : 'PF',
+    dados.cpfCnpjCliente || '',
+    dados.ieCliente || '',
     dados.telefoneCliente || '',
-    dados.cpfCliente || '',
-    dados.emailCliente || '',
+    dados.enderecoCliente || '',
+    dados.bairroCliente || '',
+    dados.cidadeCliente || '',
+    dados.ufCliente || '',
+    dados.cepCliente || '',
     pecasDesc,
     qtdTotal,
-    dados.total || 0,
+    dados.totalPecas || 0,
+    transpLabels[dados.transportadora] || dados.transportadora || '',
+    dados.valorFrete || 0,
+    dados.totalGeral || 0,
     formaPag,
     dados.parcelas || '1',
     dados.observacoes || '',
-    '', // Bling Status (preenchido depois)
-    ''  // Bling Pedido ID (preenchido depois)
+    '',  // Bling Status
+    ''   // Bling Pedido ID
   ]);
 
   var lastRow = sheet.getLastRow();
 
-  // Formatar coluna de valor como moeda
-  sheet.getRange(lastRow, 13).setNumberFormat('R$ #.##0,00');
+  // Formatar colunas de valor como moeda
+  sheet.getRange(lastRow, 21).setNumberFormat('R$ #.##0,00');
+  sheet.getRange(lastRow, 23).setNumberFormat('R$ #.##0,00');
+  sheet.getRange(lastRow, 24).setNumberFormat('R$ #.##0,00');
 
   return lastRow;
 }
@@ -339,8 +381,8 @@ function gravarNaPlanilha(dados) {
 function atualizarBlingStatus(row, status, pedidoId) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Pecas') || ss.getSheets()[0];
-  sheet.getRange(row, 17).setValue(status);
-  sheet.getRange(row, 18).setValue(pedidoId || '');
+  sheet.getRange(row, 28).setValue(status);
+  sheet.getRange(row, 29).setValue(pedidoId || '');
 }
 
 // ========== ENDPOINT PRINCIPAL ==========

@@ -11,30 +11,49 @@
 <body>
     <header>
         <h1>NXT PEÇAS V1.0</h1>
-        <p class="subtitle">Venda de Peças e Acessórios</p>
+        <p class="subtitle">SAC - Venda de Peças e Garantia</p>
     </header>
 
     <main>
         <form id="vendaPecaForm" novalidate>
 
-            <!-- SEÇÃO 1: LOJA E VENDEDOR -->
+            <!-- SEÇÃO 1: TIPO DE ATENDIMENTO -->
             <section class="secao-form">
-                <h2><span class="secao-icon">🏪</span> Loja e Vendedor</h2>
+                <h2><span class="secao-icon">📋</span> Atendimento</h2>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="lojaVenda">
-                            <span class="label-icon">🏬</span> Loja
+                        <label>Tipo de Atendimento</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="tipoVenda" value="venda"> Venda de Peça
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="tipoGarantia" value="garantia"> Garantia
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="origemSac">
+                            <span class="label-icon">📞</span> Origem SAC
                         </label>
-                        <select id="lojaVenda" required>
-                            <option value="">Selecione a loja...</option>
+                        <select id="origemSac">
+                            <option value="">Selecione...</option>
+                            <option value="telefone">Telefone</option>
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="email">E-mail</option>
+                            <option value="reclameaqui">Reclame Aqui</option>
+                            <option value="procon">Procon</option>
+                            <option value="loja">Loja</option>
+                            <option value="outro">Outro</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="vendedor">
-                            <span class="label-icon">👤</span> Vendedor
+                        <label for="protocoloSac">
+                            <span class="label-icon">🔖</span> Protocolo SAC
                         </label>
-                        <input type="text" id="vendedor" required placeholder="Nome do vendedor..." autocomplete="off">
-                        <div id="vendedorSuggestions" class="suggestions-box"></div>
+                        <input type="text" id="protocoloSac" placeholder="Número do protocolo...">
                     </div>
                 </div>
                 <div class="form-row">
@@ -44,6 +63,18 @@
                         </label>
                         <input type="date" id="dataVenda" required>
                     </div>
+                    <div class="form-group">
+                        <label for="vendedor">
+                            <span class="label-icon">👤</span> Vendedor (SAC)
+                        </label>
+                        <input type="text" id="vendedor" required placeholder="Nome do atendente...">
+                    </div>
+                    <div class="form-group form-group-small">
+                        <label for="prevEmbarque">
+                            <span class="label-icon">📦</span> Prev. Embarque
+                        </label>
+                        <input type="date" id="prevEmbarque">
+                    </div>
                 </div>
             </section>
 
@@ -51,33 +82,92 @@
             <section class="secao-form">
                 <h2><span class="secao-icon">👥</span> Cliente</h2>
                 <div class="form-row">
-                    <div class="form-group">
+                    <div class="form-group form-group-large">
                         <label for="nomeCliente">
-                            <span class="label-icon">✏️</span> Nome Completo
+                            <span class="label-icon">✏️</span> Nome / Razão Social
                         </label>
                         <input type="text" id="nomeCliente" required placeholder="Nome do cliente...">
+                    </div>
+                    <div class="form-group form-group-small">
+                        <label for="tipoCliente">
+                            <span class="label-icon">🏷️</span> Tipo
+                        </label>
+                        <select id="tipoCliente">
+                            <option value="F">Pessoa Física</option>
+                            <option value="J">Pessoa Jurídica</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cpfCnpjCliente">
+                            <span class="label-icon">🪪</span> CPF / CNPJ
+                        </label>
+                        <input type="text" id="cpfCnpjCliente" placeholder="000.000.000-00" maxlength="18">
+                        <div id="avisoDocumento" class="campo-aviso">Documento inválido</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ieCliente">
+                            <span class="label-icon">📄</span> IE <span class="opcional-badge">Opcional</span>
+                        </label>
+                        <input type="text" id="ieCliente" placeholder="Inscrição Estadual...">
                     </div>
                     <div class="form-group">
                         <label for="telefoneCliente">
                             <span class="label-icon">📱</span> Telefone
                         </label>
-                        <input type="tel" id="telefoneCliente" required placeholder="(00) 00000-0000" maxlength="15" class="mask-telefone">
-                        <div id="avisoTelefone" class="campo-aviso">Telefone incompleto — precisa ter DDD + número</div>
+                        <input type="tel" id="telefoneCliente" required placeholder="(00) 00000-0000" maxlength="15">
+                        <div id="avisoTelefone" class="campo-aviso">Telefone incompleto</div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group form-group-large">
+                        <label for="enderecoCliente">
+                            <span class="label-icon">📍</span> Endereço
+                        </label>
+                        <input type="text" id="enderecoCliente" placeholder="Rua, número...">
+                    </div>
+                    <div class="form-group">
+                        <label for="bairroCliente">
+                            <span class="label-icon">🏘️</span> Bairro
+                        </label>
+                        <input type="text" id="bairroCliente" placeholder="Bairro...">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="cpfCliente">
-                            <span class="label-icon">🪪</span> CPF <span class="opcional-badge">Opcional</span>
+                        <label for="cidadeCliente">
+                            <span class="label-icon">🏙️</span> Cidade
                         </label>
-                        <input type="text" id="cpfCliente" placeholder="000.000.000-00" maxlength="14" class="mask-cpf">
-                        <div id="avisoCpf" class="campo-aviso">CPF inválido — verifique os números</div>
+                        <input type="text" id="cidadeCliente" placeholder="Cidade...">
                     </div>
-                    <div class="form-group">
-                        <label for="emailCliente">
-                            <span class="label-icon">📧</span> E-mail <span class="opcional-badge">Opcional</span>
+                    <div class="form-group form-group-small">
+                        <label for="ufCliente">
+                            <span class="label-icon">🗺️</span> UF
                         </label>
-                        <input type="email" id="emailCliente" placeholder="cliente@email.com">
+                        <select id="ufCliente">
+                            <option value="">UF</option>
+                            <option value="AC">AC</option><option value="AL">AL</option>
+                            <option value="AP">AP</option><option value="AM">AM</option>
+                            <option value="BA">BA</option><option value="CE">CE</option>
+                            <option value="DF">DF</option><option value="ES">ES</option>
+                            <option value="GO">GO</option><option value="MA">MA</option>
+                            <option value="MT">MT</option><option value="MS">MS</option>
+                            <option value="MG">MG</option><option value="PA">PA</option>
+                            <option value="PB">PB</option><option value="PR">PR</option>
+                            <option value="PE">PE</option><option value="PI">PI</option>
+                            <option value="RJ">RJ</option><option value="RN">RN</option>
+                            <option value="RS">RS</option><option value="RO">RO</option>
+                            <option value="RR">RR</option><option value="SC">SC</option>
+                            <option value="SP">SP</option><option value="SE">SE</option>
+                            <option value="TO">TO</option>
+                        </select>
+                    </div>
+                    <div class="form-group form-group-small">
+                        <label for="cepCliente">
+                            <span class="label-icon">📮</span> CEP
+                        </label>
+                        <input type="text" id="cepCliente" placeholder="00000-000" maxlength="9">
                     </div>
                 </div>
             </section>
@@ -88,20 +178,43 @@
 
                 <div class="adicionar-peca-box">
                     <div class="form-row">
+                        <div class="form-group">
+                            <label for="categoriaPeca">
+                                <span class="label-icon">📂</span> Categoria
+                            </label>
+                            <select id="categoriaPeca" onchange="filtrarPecas()">
+                                <option value="">Selecione a categoria...</option>
+                            </select>
+                        </div>
                         <div class="form-group form-group-large">
                             <label for="descricaoPeca">
-                                <span class="label-icon">📦</span> Descrição da Peça
+                                <span class="label-icon">📦</span> Peça
                             </label>
-                            <input type="text" id="descricaoPeca" placeholder="Ex: Pastilha de freio, Filtro de óleo...">
+                            <select id="descricaoPeca" onchange="preencherPreco()">
+                                <option value="">Selecione a peça...</option>
+                            </select>
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group form-group-small">
-                            <label for="codigoPeca">
-                                <span class="label-icon">🏷️</span> Código <span class="opcional-badge">Opcional</span>
+                        <div class="form-group">
+                            <label for="modeloMoto">
+                                <span class="label-icon">🏍️</span> Modelo da Moto
                             </label>
-                            <input type="text" id="codigoPeca" placeholder="Código...">
+                            <select id="modeloMoto">
+                                <option value="">Selecione o modelo...</option>
+                            </select>
                         </div>
+                        <div class="form-group form-group-small">
+                            <label for="tipoPrecoPeca">
+                                <span class="label-icon">🏷️</span> Tipo Preço
+                            </label>
+                            <select id="tipoPrecoPeca" onchange="preencherPreco()">
+                                <option value="cliente">Cliente Final</option>
+                                <option value="revenda">Revenda</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
                         <div class="form-group form-group-small">
                             <label for="qtdPeca">
                                 <span class="label-icon">🔢</span> Qtd
@@ -114,6 +227,10 @@
                             </label>
                             <input type="text" id="precoPeca" placeholder="0,00" class="mask-moeda">
                         </div>
+                        <div class="form-group form-group-small">
+                            <label>Subtotal</label>
+                            <div class="subtotal-display" id="subtotalPeca">R$ 0,00</div>
+                        </div>
                     </div>
                     <button type="button" class="btn-adicionar-peca" onclick="adicionarPeca()">
                         <span>➕</span> Adicionar Peça
@@ -123,12 +240,38 @@
                 <div id="listaPecas" class="lista-pecas"></div>
 
                 <div class="total-bar">
-                    <span>Total:</span>
+                    <span>Total Peças:</span>
                     <span id="totalVenda">R$ 0,00</span>
                 </div>
             </section>
 
-            <!-- SEÇÃO 4: PAGAMENTO -->
+            <!-- SEÇÃO 4: FRETE -->
+            <section class="secao-form">
+                <h2><span class="secao-icon">🚚</span> Frete</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="transportadora">
+                            <span class="label-icon">🏢</span> Transportadora
+                        </label>
+                        <select id="transportadora">
+                            <option value="">Selecione...</option>
+                            <option value="correios">Correios</option>
+                            <option value="rodonaves">Rodonaves</option>
+                            <option value="em_maos">Em Mãos</option>
+                            <option value="loja">Loja</option>
+                            <option value="outro">Outro</option>
+                        </select>
+                    </div>
+                    <div class="form-group form-group-small">
+                        <label for="valorFrete">
+                            <span class="label-icon">💲</span> Valor Frete (R$)
+                        </label>
+                        <input type="text" id="valorFrete" placeholder="0,00" class="mask-moeda">
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 5: PAGAMENTO -->
             <section class="secao-form">
                 <h2><span class="secao-icon">💳</span> Pagamento</h2>
                 <div class="form-row">
@@ -143,6 +286,7 @@
                             <option value="debito">Cartão Débito</option>
                             <option value="credito">Cartão Crédito</option>
                             <option value="boleto">Boleto</option>
+                            <option value="link">Link de Pagamento</option>
                             <option value="transferencia">Transferência</option>
                         </select>
                     </div>
@@ -171,14 +315,19 @@
                         <label for="observacoes">
                             <span class="label-icon">📝</span> Observações <span class="opcional-badge">Opcional</span>
                         </label>
-                        <textarea id="observacoes" rows="2" placeholder="Alguma observação sobre a venda..."></textarea>
+                        <textarea id="observacoes" rows="2" placeholder="Alguma observação..."></textarea>
                     </div>
+                </div>
+
+                <div class="total-bar total-bar-final">
+                    <span>TOTAL GERAL (Peças + Frete):</span>
+                    <span id="totalGeral">R$ 0,00</span>
                 </div>
             </section>
 
             <!-- BOTÃO REGISTRAR -->
             <button type="submit" class="btn-registrar-venda">
-                <span class="btn-icon">✅</span> Registrar Venda de Peças
+                <span class="btn-icon">✅</span> Registrar Atendimento
             </button>
 
         </form>
@@ -187,7 +336,7 @@
     <!-- MODAL RESUMO -->
     <div id="resumoModal" class="modal-overlay" style="display:none;">
         <div class="modal-content">
-            <h3>Venda Registrada!</h3>
+            <h3>Atendimento Registrado!</h3>
             <div class="checklist-resumo">
                 <div class="checklist-item" id="checkPlanilha">
                     <span class="checklist-icon">⏳</span>
@@ -198,13 +347,13 @@
                     <span>Enviando para Bling...</span>
                 </div>
             </div>
-            <textarea id="textoResumoModal" class="resumo-textarea" rows="10" readonly></textarea>
+            <textarea id="textoResumoModal" class="resumo-textarea" rows="12" readonly></textarea>
             <div class="modal-actions">
                 <button type="button" class="btn-copiar" onclick="copiarResumo()">
                     📋 Copiar Resumo
                 </button>
                 <button type="button" class="btn-nova-venda" onclick="novaVenda()">
-                    🔄 Nova Venda
+                    🔄 Novo Atendimento
                 </button>
             </div>
         </div>

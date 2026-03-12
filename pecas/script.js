@@ -1,142 +1,131 @@
 // ========================================
 // NXT PEÇAS V1.0 - Script Principal
+// SAC - Venda de Peças e Garantia
 // ========================================
 
-// URL do Google Apps Script (Web App) para gravar na planilha
-// Após implantar o Apps Script, cole a URL aqui:
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytZgFvvhTvYRgufyvFTGbMb27sxHnIQp256XQ6r7VZuX2B0RTdO3MIpbf4EcF8KgnYlw/exec';
 
-// Tudo é enviado ao Google Apps Script (planilha + Bling em um só lugar)
-
 // ========================================
-// DADOS: LOJAS E VENDEDORES
+// CATÁLOGO DE PEÇAS
 // ========================================
 
-const LOJAS = [
-    "Araraquara",
-    "Balneário Camboriú - Carrefour",
-    "Balneário Camboriú - Frente Mar",
-    "Blumenau - Neumarkt",
-    "Blumenau - Norte",
-    "Bragança Pta. - Centro",
-    "Campinas - Norte Sul",
-    "Fábrica Jaraguá",
-    "Florianópolis Lagoa",
-    "Galpão Sumaré",
-    "Holambra - Centro",
-    "Hortolândia - Shopping",
-    "Indaiatuba - Polo",
-    "Jaguariúna - Centro",
-    "Jaraguá - Loja da Fábrica",
-    "Joinville - Garten",
-    "Joinville - Loja",
-    "Limeira Shopping",
-    "Mogi Guaçu - Buriti",
-    "Mogi-Guaçu - Boulevard",
-    "Patio Limeira Shopping",
-    "Piracicaba",
-    "Poços de Caldas",
-    "Pouso Alegre",
-    "Ribeirão Preto",
-    "Rio Claro",
-    "Santo André - ABC",
-    "Santo André - Grand Plaza",
-    "Santos",
-    "São Bernardo - Golden",
-    "São José - Continente",
-    "São Paulo - Butantã",
-    "São Paulo - Nações Unidas",
-    "São Paulo - Santana Shopping",
-    "Sorocaba - Iguatemi",
-    "Sumaré Shopping",
-    "Tivoli - Shopping",
-    "Valinhos - Shopping"
-];
-
-const VENDEDORES_DATA = {
-    "7882": { nome: "RAPHAEL TADEU DO NASCIMENTO", loja: "NI HAO HOLAMBRA" },
-    "5812": { nome: "LUAN LUCAS SPROVIERI IODETTTE", loja: "NI HAO HOLAMBRA" },
-    "3851": { nome: "RAFAELA CRISTINA ABRAHAO", loja: "NI HAO BRAGANCA" },
-    "8923": { nome: "JAQUELINE TAIOKI MOREIRA MONTENEGRO", loja: "NI HAO BALNEARIO(ATLANTICA)" },
-    "9785": { nome: "IGOR RANGEL GONCALVES", loja: "NI HAO JOINVILLE" },
-    "1811": { nome: "LUCIANO MARCON DE CARVALHO", loja: "NI HAO BALNEARIO(ATLANTICA)" },
-    "2805": { nome: "MICHEL FRANK DE OLIVEIRA", loja: "NI HAO CAMPINAS (SHOPP LIMEIRA)" },
-    "3805": { nome: "DIEGO AMERICO DE SOUZA", loja: "NI HAO CAMPINAS (SHOPP INDAIATUBA)" },
-    "7847": { nome: "BIANCA IASMIN BARROS MARANHAO", loja: "NI HAO CAMPINAS (SHOPP SANTANA)" },
-    "0620": { nome: "MATHEUS SANTOS DA SILVA", loja: "NI HAO MINAS GERAIS(POÇOS DE CALDAS)" },
-    "2664": { nome: "FELIPE ASSUNCAO CARDOSO", loja: "NI HAO MINAS GERAIS(POÇOS DE CALDAS)" },
-    "8816": { nome: "GABRIELE BIANCHI DANTAS", loja: "NI HAO CAMPINAS (SHOPP GRAND PLAZA)" },
-    "8896": { nome: "VANESSA CRISTINA BUENO PITELI", loja: "NI HAO CAMPINAS (SUMARE PARK CITY)" },
-    "1810": { nome: "JOYCE FORESTE FERREIRA", loja: "NI HAO CAMPINAS (SUMARE PARK CITY)" },
-    "1846": { nome: "BRUNO CARDOSO GOMES", loja: "NI HAO CAMPINAS (SHOPP SANTANA)" },
-    "3803": { nome: "VINICIUS GONCALVES FRANCO", loja: "NI HAO CAMPINAS (SHOPP TIVOLLI)" },
-    "4800": { nome: "DANIEL FELIPE COSTA DE OLIVEIRA", loja: "NI HAO CAMPINAS (SHOPP GOLDEN)" },
-    "5810": { nome: "KATHLLEEN PEREIRA LIMA", loja: "NI HAO BALNEARIO(CARREFOUR)" },
-    "3821": { nome: "VITORIA GABRIELI GUIMARAES SILVA", loja: "NI HAO (SANTOS)" },
-    "2936": { nome: "JONAS HONORATO GONÇALVES DOS SANTOS", loja: "NI HAO BLUMENAU(SHOPP NORTE)" },
-    "3974": { nome: "CELSO VITORIA WEBER JUNIOR", loja: "NI HAO FLORIPA" },
-    "0808": { nome: "BRYAN KELVIN LOPES CARDOSO", loja: "NI HAO CAMPINAS (SHOPP VALINHOS)" },
-    "2895": { nome: "RAISSA EMY OGAWA SAKAMOTO", loja: "NI HAO CAMPINAS (SHOPP ARARAQUARA)" },
-    "1889": { nome: "VANESSA DO CARMO SANTOS", loja: "NI HAO CAMPINAS (SHOPP ABC)" },
-    "6894": { nome: "HELIOMAR ARAUJO JUNIOR", loja: "NI HAO MATRIZ" },
-    "1821": { nome: "CLAUDIA APARECIDA DA SILVA", loja: "NI HAO MATRIZ (SHOPP HORTOLANDIA)" },
-    "7873": { nome: "DIEGO HENRIQUE DOS SANTOS", loja: "NI HAO CAMPINAS (LOJA NORTE/SUL CAMPINAS)" },
-    "5808": { nome: "EDSON OLIVEIRA CAMPOS", loja: "NI HAO MATRIZ (SHOPPING BUTANTA)" },
-    "0801": { nome: "FLAVIA ALESSANDRA CAZALINI", loja: "NI HAO MATRIZ (SHOPP BUTANTA)" },
-    "6879": { nome: "GABRIELA CRISTINA ANTONIO", loja: "NI HAO MATRIZ (SHOPPING BOULEVARD)" },
-    "8870": { nome: "HELOISA GOMES DE OLIVEIRA", loja: "NI HAO MATRIZ (SHOPP HORTOLANDIA)" },
-    "4847": { nome: "INGRID KAYANE VIEIRA DE MORAES", loja: "NI HAO MATRIZ (SHOPP HORTOLANDIA)" },
-    "3832": { nome: "JESSICA DE SOUZA PEREIRA", loja: "NI HAO MATRIZ (SHOPP HORTOLANDIA)" },
-    "1219": { nome: "JOAO ROBERTO CARDIAS FERREIRA", loja: "NI HAO BLUMENAU(SHOPP NORTE)" },
-    "6697": { nome: "JULIA BEATRIZ SANTANA PIERINI", loja: "NI HAO MATRIZ (SHOPP BURITI)" },
-    "9071": { nome: "LUANA BIASI LEITE", loja: "NI HAO SAO JOSE(SHOPP CONTINENTE)" },
-    "5040": { nome: "LUCAS MACHADO WITZOREKE", loja: "NI HAO FLORIPA (FLORIPA SHOPP/CONT)" },
-    "2814": { nome: "PAOLA PONTEL", loja: "NI HAO MATRIZ (SHOPP VALINHOS)" },
-    "1840": { nome: "PAULO DANILO COSTA FERREIRA", loja: "NI HAO MATRIZ (SHOPP GRAND PLAZA)" },
-    "8898": { nome: "WILLIANS SACRAMENTO SOARES", loja: "NI HAO MATRIZ (SHOPP ABC)" },
-    "5803": { nome: "EDGAR MELARATO SILVA", loja: "NI HAO CAMPINAS (LOJA NORTE/SUL CAMPINAS)" },
-    "6880": { nome: "JESSICA VICTORIA POSSOLINO", loja: "NI HAO MATRIZ (SHOPP BURITI)" },
-    "7861": { nome: "TAYNA JULIA DE ALVARENGA SOUSA", loja: "NI HAO MATRIZ (SHOPP BOULEVARD)" },
-    "6800": { nome: "RYAN VIGORITO OLIVEIRA", loja: "NI HAO MATRIZ (SHOPP DAS NAÇÕES)" },
-    "8235": { nome: "GIOVANNI MENDES FRANCO", loja: "NI HAO MATRIZ (SHOPP INDAIATUBA)" },
-    "8809": { nome: "FERNANDO VERONEZ FERREIRA", loja: "NI HAO MATRIZ( GALPAO(MOTORISTA/ESTOQ)" },
-    "1899": { nome: "FERNANDO MARQUES BRAZ FLORÊNCIO", loja: "NI HAO INDAIATUBA POLO" },
-    "4827": { nome: "LEONARDO NASCIMENTO CRISPIM", loja: "NI HAO MATRIZ (SHOPP BUTANTA)" },
-    "8888": { nome: "PATRICIA HELOISA DE MOURA OLIVEIRA LOPES", loja: "NI HAO MATRIZ (SHOPP GOLDEN)" },
-    "4605": { nome: "JOAO GABRIEL DA SILVA RODRIGUES", loja: "NI HAO JOINVILLE" },
-    "8957": { nome: "ALERSON GEAN DE MELO FAGUNDES", loja: "NI HAO BALNEARIO(ATLANTICA)" },
-    "7821": { nome: "GUILHERME MITSUYUKI", loja: "NI HAO CAMPINAS (SHOPP ARARAQUARA)" },
-    "6866": { nome: "RODRIGO VINICIUS CORREA", loja: "NI HAO JAGUARIUNA" },
-    "6804": { nome: "JHULYA CAUANE MACHADO DA SILVA", loja: "NI HAO MATRIZ (SHOPP BURITI)" },
-    "4878": { nome: "FELIPE SIMOES LOURENÇO", loja: "NI HAO CAMPINAS (SHOPP SOROCABA)" },
-    "5958": { nome: "SAMARA NOGUEIRA", loja: "NI HAO JOINVILLE (SHOPP GARTEN)" },
-    "9941": { nome: "RODRIGO HAHNEMANN", loja: "NI HAO BLUMENAU (SHOPP NEUMARKT)" },
-    "4874": { nome: "BRENO DAMACENA DE OLIVEIRA", loja: "NI HAO CAMPINAS (SHOPP PATIO LIMEIRA)" },
-    "4587": { nome: "RENE GOMES CARDOSO", loja: "NI HAO BALNEARIO(CARREFOUR)" },
-    "6978": { nome: "ARIANE NATALIA PEREIRA", loja: "NI HAO SAO JOSE(SHOPP CONTINENTE)" },
-    "7893": { nome: "ROBSON DONIZETE RIBEIRO", loja: "NI HAO MATRIZ (SHOPP BUTANTA)" },
-    "2660": { nome: "LEONARDO DIAS DE SOUZA", loja: "NI HAO CAMPINAS (LOJA NORTE/SUL CAMPINAS)" },
-    "1510": { nome: "LUIZ VITOR PORTO SANTOS", loja: "NI HAO JOINVILLE (SHOPP GARTEN)" },
-    "0877": { nome: "GABRIEL BATISTA MACEDO", loja: "NI HAO (SANTOS)" },
-    "1898": { nome: "ELLEN CRISTINA GOMES", loja: "NI HAO CAMPINAS (SHOPP SÃO CARLOS)" },
-    "0802": { nome: "MELYSSA ALVES DA SILVA", loja: "NI HAO CAMPINAS (SHOPP RIO CLARO)" },
-    "4820": { nome: "JOAO CANDIDO PEREIRA DA SILVA", loja: "NI HAO CAMPINAS (SHOPP RIO CLARO)" },
-    "6253": { nome: "WALLAKCE DA SILVA E SILVA", loja: "NI HAO BLUMENAU (SHOPP NEUMARKT)" },
-    "1836": { nome: "ANA LARA LIMA SILVA", loja: "" },
-    "7899": { nome: "SAMIRES DA SILVA FERNANDES VIDAL", loja: "" },
-    "2830": { nome: "ROSELAINE APARECIDA MENEGASSO", loja: "" },
-    "2889": { nome: "SERGIO PEREIRA DE GODOY", loja: "" }
+const CATALOGO_PECAS = {
+    "Baterias e Elétrico": [
+        { nome: "Bateria 12v 12ah chumbo ácido", cliente: 298.80, revenda: 270.00 },
+        { nome: "Bateria 12v 20ah chumbo ácido", cliente: 358.80, revenda: 322.80 },
+        { nome: "Bateria 12v 20ah grafeno", cliente: 450.00, revenda: 382.50 },
+        { nome: "Bateria 12v 35ah grafeno", cliente: 600.00, revenda: 510.00 },
+        { nome: "Bateria 48v lítio", cliente: 0, revenda: 0 },
+        { nome: "Carregador 60v / 48v", cliente: 346.80, revenda: 318.00 },
+        { nome: "Chicote", cliente: 0, revenda: 0 },
+        { nome: "Conjunto cabos de bateria", cliente: 25.00, revenda: 21.25 },
+        { nome: "Fonte do carregador", cliente: 0, revenda: 0 },
+        { nome: "Fuzível", cliente: 0, revenda: 0 },
+        { nome: "Maleta de bateria", cliente: 0, revenda: 0 },
+        { nome: "Módulo controlador", cliente: 354.00, revenda: 300.90 },
+        { nome: "Módulo controlador 48v", cliente: 334.00, revenda: 283.90 },
+        { nome: "Tomada carregador", cliente: 0, revenda: 0 },
+        { nome: "Tomada maleta", cliente: 0, revenda: 0 }
+    ],
+    "Pneus e Rodas": [
+        { nome: "Aro 10 dianteiro", cliente: 206.00, revenda: 175.10 },
+        { nome: "Bico ventil", cliente: 0, revenda: 0 },
+        { nome: "Camara de ar", cliente: 54.00, revenda: 26.40 },
+        { nome: "Calota", cliente: 0, revenda: 0 },
+        { nome: "Olho de gato", cliente: 0, revenda: 0 },
+        { nome: "Pneu 10 2.75", cliente: 346.80, revenda: 226.80 },
+        { nome: "Pneu 12 2.50", cliente: 358.80, revenda: 238.80 }
+    ],
+    "Motor e Transmissão": [
+        { nome: "Coroa de transmissão", cliente: 0, revenda: 0 },
+        { nome: "Motor 1000w", cliente: 1250.00, revenda: 1062.50 },
+        { nome: "Protetor de motor", cliente: 0, revenda: 0 }
+    ],
+    "Freios": [
+        { nome: "Alavanca do freio", cliente: 0, revenda: 0 },
+        { nome: "Cabo de freio diant / traseiro", cliente: 106.80, revenda: 96.00 },
+        { nome: "Disco de freio", cliente: 52.00, revenda: 44.20 },
+        { nome: "Freio hidráulico completo", cliente: 125.00, revenda: 106.25 },
+        { nome: "Freio tambor", cliente: 118.80, revenda: 106.80 },
+        { nome: "Par protetor de balança", cliente: 144.00, revenda: 86.40 },
+        { nome: "Pastilha freio par", cliente: 50.00, revenda: 42.50 },
+        { nome: "Reservatório de óleo", cliente: 0, revenda: 0 }
+    ],
+    "Suspensão, Direção e Estrutura": [
+        { nome: "Amortecedor", cliente: 0, revenda: 0 },
+        { nome: "Canote", cliente: 0, revenda: 0 },
+        { nome: "Conjunto de direção", cliente: 57.00, revenda: 48.45 },
+        { nome: "Garfo completo", cliente: 350.00, revenda: 297.50 },
+        { nome: "Manivela", cliente: 0, revenda: 0 },
+        { nome: "Mesa inferior", cliente: 211.00, revenda: 179.35 },
+        { nome: "Mesa superior", cliente: 0, revenda: 0 },
+        { nome: "Miolo trava", cliente: 0, revenda: 0 },
+        { nome: "Par suspensão traseira", cliente: 165.00, revenda: 140.25 },
+        { nome: "Pedaleira com chapa", cliente: 57.00, revenda: 48.45 },
+        { nome: "Pezinho de descanso", cliente: 0, revenda: 0 },
+        { nome: "Quadro chassi", cliente: 450.00, revenda: 382.50 },
+        { nome: "Rabeta", cliente: 0, revenda: 0 },
+        { nome: "Suspensão dianteira", cliente: 0, revenda: 0 }
+    ],
+    "Carenagens e Plásticos": [
+        { nome: "Assoalho", cliente: 125.00, revenda: 106.25 },
+        { nome: "Carenagem bau", cliente: 89.00, revenda: 75.65 },
+        { nome: "Carenagem escudo", cliente: 189.00, revenda: 160.65 },
+        { nome: "Carenagem frontal farol", cliente: 269.00, revenda: 228.65 },
+        { nome: "Carenagem lateral", cliente: 56.00, revenda: 47.60 },
+        { nome: "Para-brisa", cliente: 0, revenda: 0 },
+        { nome: "Paralamas dianteiro", cliente: 190.80, revenda: 171.60 },
+        { nome: "Paralamas traseiro", cliente: 166.80, revenda: 150.00 },
+        { nome: "Plástico lateral", cliente: 45.00, revenda: 38.25 },
+        { nome: "Plástico peito", cliente: 0, revenda: 0 },
+        { nome: "Tapete", cliente: 0, revenda: 0 }
+    ],
+    "Iluminação": [
+        { nome: "Bico dianteiro", cliente: 0, revenda: 0 },
+        { nome: "Farol dianteiro", cliente: 145.00, revenda: 123.25 },
+        { nome: "Iluminação", cliente: 0, revenda: 0 },
+        { nome: "Lanterna traseira", cliente: 75.00, revenda: 63.75 },
+        { nome: "Par pisca punho led", cliente: 66.00, revenda: 54.00 },
+        { nome: "Relê", cliente: 0, revenda: 0 }
+    ],
+    "Controles e Painel": [
+        { nome: "Acelerador de dedo", cliente: 118.80, revenda: 106.80 },
+        { nome: "Acelerador de punho", cliente: 125.00, revenda: 106.25 },
+        { nome: "Alarme completo", cliente: 126.00, revenda: 107.10 },
+        { nome: "Conjunto botões (buzina, luz alta)", cliente: 58.80, revenda: 52.80 },
+        { nome: "Display lcd", cliente: 145.00, revenda: 123.25 },
+        { nome: "Ignição", cliente: 0, revenda: 0 },
+        { nome: "Manopla", cliente: 0, revenda: 0 },
+        { nome: "Painel display com acelerador", cliente: 186.00, revenda: 162.00 },
+        { nome: "Par manete com sensor", cliente: 214.80, revenda: 193.20 },
+        { nome: "Punho", cliente: 0, revenda: 0 }
+    ],
+    "Banco e Conforto": [
+        { nome: "Banco de encosto", cliente: 0, revenda: 0 },
+        { nome: "Banco passageiro", cliente: 0, revenda: 0 },
+        { nome: "Banco traseiro", cliente: 0, revenda: 0 },
+        { nome: "Encosto com alça", cliente: 126.00, revenda: 107.10 }
+    ],
+    "Acessórios": [
+        { nome: "Cesto", cliente: 0, revenda: 0 },
+        { nome: "Guidão ferro", cliente: 115.00, revenda: 97.75 },
+        { nome: "Par bengala", cliente: 165.60, revenda: 150.00 },
+        { nome: "Porta treco", cliente: 0, revenda: 0 },
+        { nome: "Retrovisor", cliente: 0, revenda: 0 },
+        { nome: "Suporte de celular", cliente: 0, revenda: 0 }
+    ]
 };
 
-const LISTA_VENDEDORES = Object.values(VENDEDORES_DATA).map(v => v.nome).sort();
+const MODELOS_MOTO = [
+    "Gataka", "Pancho", "Luna", "Smart-Juna", "Hyphen", "Vega",
+    "Zilla", "Shaka", "Jaya", "Kay", "Kimbo", "Juna"
+];
 
 // ========================================
 // ESTADO DA APLICAÇÃO
 // ========================================
 
 let pecasAdicionadas = [];
-let vendedorSelecionado = null;
-let matriculaSelecionada = null;
 let ultimoResumo = '';
 let envioEmAndamento = false;
 
@@ -145,30 +134,86 @@ let envioEmAndamento = false;
 // ========================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    carregarLojas();
     configurarDataHoje();
+    carregarCategorias();
+    carregarModelos();
     configurarMascaras();
-    configurarAutoCompleteVendedor();
     configurarFormaPagamento();
+    configurarTipoCliente();
+    configurarSubtotalCalc();
     document.getElementById('vendaPecaForm').addEventListener('submit', registrarVenda);
-
     console.log('NXT Peças V1.0 inicializado');
 });
 
-function carregarLojas() {
-    const select = document.getElementById('lojaVenda');
-    LOJAS.forEach(loja => {
+function configurarDataHoje() {
+    const hoje = new Date().toISOString().split('T')[0];
+    document.getElementById('dataVenda').value = hoje;
+}
+
+function carregarCategorias() {
+    const select = document.getElementById('categoriaPeca');
+    Object.keys(CATALOGO_PECAS).forEach(cat => {
         const opt = document.createElement('option');
-        opt.value = loja;
-        opt.textContent = loja;
+        opt.value = cat;
+        opt.textContent = cat;
         select.appendChild(opt);
     });
 }
 
-function configurarDataHoje() {
-    const dataInput = document.getElementById('dataVenda');
-    const hoje = new Date().toISOString().split('T')[0];
-    dataInput.value = hoje;
+function carregarModelos() {
+    const select = document.getElementById('modeloMoto');
+    MODELOS_MOTO.forEach(modelo => {
+        const opt = document.createElement('option');
+        opt.value = modelo;
+        opt.textContent = modelo;
+        select.appendChild(opt);
+    });
+}
+
+function filtrarPecas() {
+    const categoria = document.getElementById('categoriaPeca').value;
+    const select = document.getElementById('descricaoPeca');
+    select.innerHTML = '<option value="">Selecione a peça...</option>';
+
+    if (!categoria || !CATALOGO_PECAS[categoria]) return;
+
+    CATALOGO_PECAS[categoria].forEach(peca => {
+        const opt = document.createElement('option');
+        opt.value = peca.nome;
+        opt.textContent = peca.nome;
+        select.appendChild(opt);
+    });
+}
+
+function preencherPreco() {
+    const categoria = document.getElementById('categoriaPeca').value;
+    const pecaNome = document.getElementById('descricaoPeca').value;
+    const tipoPreco = document.getElementById('tipoPrecoPeca').value;
+    const precoInput = document.getElementById('precoPeca');
+
+    if (!categoria || !pecaNome) return;
+
+    const peca = CATALOGO_PECAS[categoria].find(p => p.nome === pecaNome);
+    if (!peca) return;
+
+    const preco = tipoPreco === 'revenda' ? peca.revenda : peca.cliente;
+    if (preco > 0) {
+        precoInput.value = preco.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    } else {
+        precoInput.value = '';
+    }
+    calcularSubtotal();
+}
+
+function configurarSubtotalCalc() {
+    document.getElementById('qtdPeca').addEventListener('input', calcularSubtotal);
+    document.getElementById('precoPeca').addEventListener('input', calcularSubtotal);
+}
+
+function calcularSubtotal() {
+    const qtd = parseInt(document.getElementById('qtdPeca').value) || 0;
+    const preco = parseMoeda(document.getElementById('precoPeca').value);
+    document.getElementById('subtotalPeca').textContent = `R$ ${formatarValor(qtd * preco)}`;
 }
 
 // ========================================
@@ -194,28 +239,89 @@ function configurarMascaras() {
         validarCampoTelefone();
     });
 
-    // Máscara de CPF
-    const cpfInput = document.getElementById('cpfCliente');
-    cpfInput.addEventListener('input', () => {
-        let v = cpfInput.value.replace(/\D/g, '');
-        if (v.length > 11) v = v.substring(0, 11);
-        v = v.replace(/(\d{3})(\d)/, '$1.$2');
-        v = v.replace(/(\d{3})(\d)/, '$1.$2');
-        v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-        cpfInput.value = v;
-        validarCampoCpf();
+    // Máscara de CPF/CNPJ
+    const docInput = document.getElementById('cpfCnpjCliente');
+    docInput.addEventListener('input', () => {
+        let v = docInput.value.replace(/\D/g, '');
+        const tipo = document.getElementById('tipoCliente').value;
+        if (tipo === 'J') {
+            if (v.length > 14) v = v.substring(0, 14);
+            v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+            v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+            v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+            v = v.replace(/(\d{4})(\d)/, '$1-$2');
+            docInput.maxLength = 18;
+            docInput.placeholder = '00.000.000/0000-00';
+        } else {
+            if (v.length > 11) v = v.substring(0, 11);
+            v = v.replace(/(\d{3})(\d)/, '$1.$2');
+            v = v.replace(/(\d{3})(\d)/, '$1.$2');
+            v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            docInput.maxLength = 14;
+            docInput.placeholder = '000.000.000-00';
+        }
+        docInput.value = v;
     });
 
-    // Máscara de moeda
-    const precoInput = document.getElementById('precoPeca');
-    precoInput.addEventListener('input', (e) => {
-        let v = e.target.value.replace(/\D/g, '');
-        if (v) {
-            v = (parseInt(v) / 100).toLocaleString('pt-BR', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-            e.target.value = v;
+    // Máscara de CEP
+    const cepInput = document.getElementById('cepCliente');
+    cepInput.addEventListener('input', () => {
+        let v = cepInput.value.replace(/\D/g, '');
+        if (v.length > 8) v = v.substring(0, 8);
+        if (v.length > 5) {
+            v = v.replace(/^(\d{5})(\d)/, '$1-$2');
+        }
+        cepInput.value = v;
+    });
+
+    // Buscar endereço por CEP
+    cepInput.addEventListener('blur', async () => {
+        const cep = cepInput.value.replace(/\D/g, '');
+        if (cep.length === 8) {
+            try {
+                const resp = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await resp.json();
+                if (!data.erro) {
+                    document.getElementById('enderecoCliente').value = data.logradouro || '';
+                    document.getElementById('bairroCliente').value = data.bairro || '';
+                    document.getElementById('cidadeCliente').value = data.localidade || '';
+                    document.getElementById('ufCliente').value = data.uf || '';
+                }
+            } catch (e) {
+                console.log('Erro ao buscar CEP:', e);
+            }
+        }
+    });
+
+    // Máscara de moeda nos campos de preço e frete
+    document.querySelectorAll('.mask-moeda').forEach(input => {
+        input.addEventListener('input', (e) => {
+            let v = e.target.value.replace(/\D/g, '');
+            if (v) {
+                v = (parseInt(v) / 100).toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                e.target.value = v;
+            }
+        });
+    });
+
+    // Atualizar total geral quando frete mudar
+    document.getElementById('valorFrete').addEventListener('input', atualizarTotalGeral);
+}
+
+function configurarTipoCliente() {
+    document.getElementById('tipoCliente').addEventListener('change', () => {
+        const docInput = document.getElementById('cpfCnpjCliente');
+        docInput.value = '';
+        const tipo = document.getElementById('tipoCliente').value;
+        if (tipo === 'J') {
+            docInput.placeholder = '00.000.000/0000-00';
+            docInput.maxLength = 18;
+        } else {
+            docInput.placeholder = '000.000.000-00';
+            docInput.maxLength = 14;
         }
     });
 }
@@ -259,85 +365,6 @@ function validarCampoTelefone() {
     }
 }
 
-function validarCampoCpf() {
-    const input = document.getElementById('cpfCliente');
-    const aviso = document.getElementById('avisoCpf');
-    const digitos = input.value.replace(/\D/g, '');
-    if (digitos.length === 11) {
-        if (validarCPF(digitos)) {
-            input.classList.remove('campo-invalido');
-            input.classList.add('campo-valido');
-            aviso.classList.remove('visivel');
-        } else {
-            input.classList.add('campo-invalido');
-            input.classList.remove('campo-valido');
-            aviso.classList.add('visivel');
-        }
-    } else if (digitos.length > 0) {
-        input.classList.remove('campo-valido');
-        aviso.classList.remove('visivel');
-    } else {
-        input.classList.remove('campo-invalido', 'campo-valido');
-        aviso.classList.remove('visivel');
-    }
-}
-
-// ========================================
-// AUTOCOMPLETE VENDEDOR
-// ========================================
-
-function configurarAutoCompleteVendedor() {
-    const input = document.getElementById('vendedor');
-    const sugBox = document.getElementById('vendedorSuggestions');
-
-    input.addEventListener('input', () => {
-        const termo = input.value.toUpperCase().trim();
-        sugBox.innerHTML = '';
-        vendedorSelecionado = null;
-        matriculaSelecionada = null;
-
-        if (termo.length < 2) {
-            sugBox.classList.remove('show');
-            return;
-        }
-
-        const matches = LISTA_VENDEDORES.filter(v => v.includes(termo));
-
-        if (matches.length === 0) {
-            sugBox.classList.remove('show');
-            return;
-        }
-
-        matches.slice(0, 8).forEach(nome => {
-            const div = document.createElement('div');
-            div.className = 'suggestion-item';
-            div.textContent = nome;
-            div.addEventListener('click', () => {
-                input.value = nome;
-                vendedorSelecionado = nome;
-                // Buscar matrícula
-                for (const [mat, dados] of Object.entries(VENDEDORES_DATA)) {
-                    if (dados.nome === nome) {
-                        matriculaSelecionada = mat;
-                        break;
-                    }
-                }
-                sugBox.classList.remove('show');
-            });
-            sugBox.appendChild(div);
-        });
-
-        sugBox.classList.add('show');
-    });
-
-    // Fechar suggestions ao clicar fora
-    document.addEventListener('click', (e) => {
-        if (!input.contains(e.target) && !sugBox.contains(e.target)) {
-            sugBox.classList.remove('show');
-        }
-    });
-}
-
 // ========================================
 // FORMA DE PAGAMENTO
 // ========================================
@@ -347,7 +374,7 @@ function configurarFormaPagamento() {
     const parcelasContainer = document.getElementById('parcelasContainer');
 
     select.addEventListener('change', () => {
-        parcelasContainer.style.display = select.value === 'credito' ? 'block' : 'none';
+        parcelasContainer.style.display = (select.value === 'credito' || select.value === 'link') ? 'block' : 'none';
     });
 }
 
@@ -356,32 +383,35 @@ function configurarFormaPagamento() {
 // ========================================
 
 function adicionarPeca() {
-    const descricao = document.getElementById('descricaoPeca').value.trim();
-    const codigo = document.getElementById('codigoPeca').value.trim();
+    const categoria = document.getElementById('categoriaPeca').value;
+    const descricao = document.getElementById('descricaoPeca').value;
+    const modelo = document.getElementById('modeloMoto').value;
     const qtd = parseInt(document.getElementById('qtdPeca').value) || 1;
     const precoTexto = document.getElementById('precoPeca').value;
+    const tipoPreco = document.getElementById('tipoPrecoPeca').value;
 
     if (!descricao) {
-        mostrarFeedback('Informe a descrição da peça', 'erro');
+        mostrarFeedback('Selecione a peça', 'erro');
         return;
     }
 
-    if (!precoTexto) {
-        mostrarFeedback('Informe o preço da peça', 'erro');
+    if (!modelo) {
+        mostrarFeedback('Selecione o modelo da moto', 'erro');
         return;
     }
 
-    // Converter preço de formato brasileiro para número
     const preco = parseMoeda(precoTexto);
     if (preco <= 0) {
-        mostrarFeedback('Preço inválido', 'erro');
+        mostrarFeedback('Informe o preço da peça', 'erro');
         return;
     }
 
     const peca = {
         id: Date.now(),
+        categoria,
         descricao,
-        codigo,
+        modelo,
+        tipoPreco,
         quantidade: qtd,
         precoUnitario: preco,
         total: preco * qtd
@@ -391,12 +421,11 @@ function adicionarPeca() {
     renderizarPecas();
     atualizarTotal();
 
-    // Limpar campos
+    // Limpar campos de peça
     document.getElementById('descricaoPeca').value = '';
-    document.getElementById('codigoPeca').value = '';
     document.getElementById('qtdPeca').value = '1';
     document.getElementById('precoPeca').value = '';
-    document.getElementById('descricaoPeca').focus();
+    document.getElementById('subtotalPeca').textContent = 'R$ 0,00';
 }
 
 function removerPeca(id) {
@@ -416,7 +445,7 @@ function renderizarPecas() {
         <div class="peca-item">
             <div class="peca-info">
                 <div class="peca-nome">${p.descricao}</div>
-                <div class="peca-detalhe">${p.codigo ? `Cód: ${p.codigo} | ` : ''}${p.quantidade}x R$ ${formatarValor(p.precoUnitario)}</div>
+                <div class="peca-detalhe">${p.modelo} | ${p.categoria} | ${p.quantidade}x R$ ${formatarValor(p.precoUnitario)} (${p.tipoPreco})</div>
             </div>
             <span class="peca-preco">R$ ${formatarValor(p.total)}</span>
             <button type="button" class="btn-remover-peca" onclick="removerPeca(${p.id})">✕</button>
@@ -427,6 +456,13 @@ function renderizarPecas() {
 function atualizarTotal() {
     const total = pecasAdicionadas.reduce((sum, p) => sum + p.total, 0);
     document.getElementById('totalVenda').textContent = `R$ ${formatarValor(total)}`;
+    atualizarTotalGeral();
+}
+
+function atualizarTotalGeral() {
+    const totalPecas = pecasAdicionadas.reduce((sum, p) => sum + p.total, 0);
+    const frete = parseMoeda(document.getElementById('valorFrete').value);
+    document.getElementById('totalGeral').textContent = `R$ ${formatarValor(totalPecas + frete)}`;
 }
 
 // ========================================
@@ -434,19 +470,27 @@ function atualizarTotal() {
 // ========================================
 
 function formatarValor(valor) {
-    return valor.toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
+    return valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function parseMoeda(texto) {
-    // Remove tudo exceto dígitos, vírgula e ponto
+    if (!texto) return 0;
     let limpo = texto.replace(/[R$\s]/g, '').trim();
-    // Formato brasileiro: 1.234,56
     limpo = limpo.replace(/\./g, '').replace(',', '.');
     const valor = parseFloat(limpo);
     return isNaN(valor) ? 0 : valor;
+}
+
+function formatarData(dataISO) {
+    const [ano, mes, dia] = dataISO.split('-');
+    return `${dia}/${mes}/${ano}`;
+}
+
+function formatarTelefoneExibicao(digitos) {
+    if (digitos.length === 11) {
+        return digitos.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+    }
+    return digitos.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3');
 }
 
 // ========================================
@@ -459,64 +503,96 @@ async function registrarVenda(event) {
     if (envioEmAndamento) return;
 
     // Validações
-    const loja = document.getElementById('lojaVenda').value;
-    const vendedor = document.getElementById('vendedor').value.trim();
+    const tipoVenda = document.getElementById('tipoVenda').checked;
+    const tipoGarantia = document.getElementById('tipoGarantia').checked;
+    const origemSac = document.getElementById('origemSac').value;
+    const protocoloSac = document.getElementById('protocoloSac').value.trim();
     const data = document.getElementById('dataVenda').value;
+    const vendedor = document.getElementById('vendedor').value.trim();
+    const prevEmbarque = document.getElementById('prevEmbarque').value;
     const nomeCliente = document.getElementById('nomeCliente').value.trim();
+    const tipoCliente = document.getElementById('tipoCliente').value;
+    const cpfCnpj = document.getElementById('cpfCnpjCliente').value.trim();
+    const ie = document.getElementById('ieCliente').value.trim();
     const telefone = document.getElementById('telefoneCliente').value.trim();
-    const cpf = document.getElementById('cpfCliente').value.trim();
-    const email = document.getElementById('emailCliente').value.trim();
+    const endereco = document.getElementById('enderecoCliente').value.trim();
+    const bairro = document.getElementById('bairroCliente').value.trim();
+    const cidade = document.getElementById('cidadeCliente').value.trim();
+    const uf = document.getElementById('ufCliente').value;
+    const cep = document.getElementById('cepCliente').value.trim();
+    const transportadora = document.getElementById('transportadora').value;
+    const valorFrete = parseMoeda(document.getElementById('valorFrete').value);
     const formaPagamento = document.getElementById('formaPagamento').value;
     const parcelas = document.getElementById('parcelas').value;
     const observacoes = document.getElementById('observacoes').value.trim();
 
-    if (!loja) { mostrarFeedback('Selecione a loja', 'erro'); return; }
-    if (!vendedor) { mostrarFeedback('Informe o vendedor', 'erro'); return; }
+    if (!tipoVenda && !tipoGarantia) { mostrarFeedback('Selecione o tipo de atendimento', 'erro'); return; }
     if (!data) { mostrarFeedback('Informe a data', 'erro'); return; }
+    if (!vendedor) { mostrarFeedback('Informe o vendedor (SAC)', 'erro'); return; }
     if (!nomeCliente) { mostrarFeedback('Informe o nome do cliente', 'erro'); return; }
     if (!telefone || !validarTelefone(telefone)) { mostrarFeedback('Telefone inválido', 'erro'); return; }
-    if (cpf && !validarCPF(cpf)) { mostrarFeedback('CPF inválido', 'erro'); return; }
     if (pecasAdicionadas.length === 0) { mostrarFeedback('Adicione ao menos uma peça', 'erro'); return; }
-    if (!formaPagamento) { mostrarFeedback('Selecione a forma de pagamento', 'erro'); return; }
+    if (tipoVenda && !formaPagamento) { mostrarFeedback('Selecione a forma de pagamento', 'erro'); return; }
 
     envioEmAndamento = true;
     const btnSubmit = document.querySelector('.btn-registrar-venda');
     btnSubmit.disabled = true;
     btnSubmit.textContent = 'Enviando...';
 
-    const totalVenda = pecasAdicionadas.reduce((sum, p) => sum + p.total, 0);
+    const totalPecas = pecasAdicionadas.reduce((sum, p) => sum + p.total, 0);
+    const totalGeral = totalPecas + valorFrete;
+
+    // Montar tipo de atendimento
+    let tipoAtendimento = [];
+    if (tipoVenda) tipoAtendimento.push('Venda');
+    if (tipoGarantia) tipoAtendimento.push('Garantia');
 
     const venda = {
         id: `PCA-${Date.now()}`,
-        loja,
-        vendedor: vendedorSelecionado || vendedor,
-        matriculaVendedor: matriculaSelecionada || '',
+        tipoAtendimento: tipoAtendimento.join(' + '),
+        origemSac,
+        protocoloSac,
         dataVenda: data,
+        vendedor,
+        prevEmbarque,
         cliente: {
             nome: nomeCliente,
-            cpf: cpf.replace(/\D/g, ''),
+            tipo: tipoCliente,
+            cpfCnpj: cpfCnpj.replace(/\D/g, ''),
+            ie,
             telefone: telefone.replace(/\D/g, ''),
-            email
+            endereco,
+            bairro,
+            cidade,
+            uf,
+            cep: cep.replace(/\D/g, '')
         },
         pecas: pecasAdicionadas.map(p => ({
+            categoria: p.categoria,
             descricao: p.descricao,
-            codigo: p.codigo,
+            modelo: p.modelo,
+            tipoPreco: p.tipoPreco,
             quantidade: p.quantidade,
             precoUnitario: p.precoUnitario,
             total: p.total
         })),
         pagamento: {
             forma: formaPagamento,
-            parcelas: formaPagamento === 'credito' ? parcelas : '1'
+            parcelas: (formaPagamento === 'credito' || formaPagamento === 'link') ? parcelas : '1'
+        },
+        frete: {
+            transportadora,
+            valor: valorFrete
         },
         observacoes,
-        total: totalVenda
+        totalPecas,
+        totalGeral
     };
 
     // Mostrar modal de resumo
     mostrarResumoModal(venda);
 
-    // Enviar tudo ao Google Apps Script (planilha + Bling em um só request)
+    // Enviar ao Google Apps Script
     const resultado = await enviarParaGoogle(venda);
 
     // Atualizar checklist do modal
@@ -525,12 +601,11 @@ async function registrarVenda(event) {
 
     envioEmAndamento = false;
     btnSubmit.disabled = false;
-    btnSubmit.innerHTML = '<span class="btn-icon">✅</span> Registrar Venda de Peças';
+    btnSubmit.innerHTML = '<span class="btn-icon">✅</span> Registrar Atendimento';
 }
 
 // ========================================
 // ENVIO PARA GOOGLE APPS SCRIPT
-// (Planilha + Bling em um único request)
 // ========================================
 
 async function enviarParaGoogle(venda) {
@@ -541,7 +616,6 @@ async function enviarParaGoogle(venda) {
         return resultado;
     }
 
-    // Proteção anti-duplicidade
     if (vendaJaEnviada(venda)) {
         console.warn('Venda duplicada bloqueada');
         return { planilha: true, bling: true };
@@ -549,24 +623,35 @@ async function enviarParaGoogle(venda) {
 
     const payload = {
         id: venda.id,
-        loja: venda.loja,
-        vendedor: venda.vendedor,
-        matriculaVendedor: venda.matriculaVendedor,
+        tipoAtendimento: venda.tipoAtendimento,
+        origemSac: venda.origemSac,
+        protocoloSac: venda.protocoloSac,
         dataVenda: venda.dataVenda,
+        vendedor: venda.vendedor,
+        prevEmbarque: venda.prevEmbarque,
         nomeCliente: venda.cliente.nome,
-        cpfCliente: venda.cliente.cpf,
+        tipoCliente: venda.cliente.tipo,
+        cpfCnpjCliente: venda.cliente.cpfCnpj,
+        ieCliente: venda.cliente.ie,
         telefoneCliente: venda.cliente.telefone,
-        emailCliente: venda.cliente.email,
+        enderecoCliente: venda.cliente.endereco,
+        bairroCliente: venda.cliente.bairro,
+        cidadeCliente: venda.cliente.cidade,
+        ufCliente: venda.cliente.uf,
+        cepCliente: venda.cliente.cep,
         pecas: venda.pecas,
         formaPagamento: venda.pagamento.forma,
         parcelas: venda.pagamento.parcelas,
+        transportadora: venda.frete.transportadora,
+        valorFrete: venda.frete.valor,
         observacoes: venda.observacoes,
-        total: venda.total
+        totalPecas: venda.totalPecas,
+        totalGeral: venda.totalGeral
     };
 
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s para dar tempo ao Bling
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
 
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
@@ -576,22 +661,15 @@ async function enviarParaGoogle(venda) {
 
         clearTimeout(timeoutId);
 
-        // Google Apps Script redireciona (302) e pode retornar como text
         try {
             const data = await response.json();
             resultado.planilha = data.planilha || false;
             resultado.bling = data.bling || false;
-
             if (data.erros && data.erros.length > 0) {
                 console.warn('Erros no envio:', data.erros);
             }
-            if (data.blingPedidoId) {
-                console.log('Pedido Bling criado:', data.blingPedidoId);
-            }
         } catch (parseError) {
-            // Se não conseguiu parsear JSON, o Google pode ter retornado redirect
-            // Nesse caso, assumir que foi enviado com sucesso
-            console.log('Resposta não-JSON do Google (provavelmente redirect) - considerando sucesso');
+            console.log('Resposta não-JSON do Google — considerando sucesso');
             resultado.planilha = true;
             resultado.bling = true;
         }
@@ -602,7 +680,6 @@ async function enviarParaGoogle(venda) {
     } catch (error) {
         console.error('Erro ao enviar para Google:', error);
         if (error.name === 'AbortError') {
-            // Timeout - pode ter funcionado no servidor
             marcarVendaEnviada(venda);
             resultado.planilha = true;
         }
@@ -617,9 +694,9 @@ async function enviarParaGoogle(venda) {
 function gerarFingerprint(venda) {
     const partes = [
         venda.cliente.nome,
-        venda.cliente.cpf || '',
+        venda.cliente.cpfCnpj || '',
         venda.dataVenda,
-        String(venda.total),
+        String(venda.totalGeral),
         venda.pecas.map(p => `${p.descricao}-${p.quantidade}`).sort().join('|')
     ];
     const str = partes.join('::');
@@ -656,27 +733,43 @@ function marcarVendaEnviada(venda) {
 function mostrarResumoModal(venda) {
     const formaLabel = {
         'dinheiro': 'Dinheiro', 'pix': 'PIX', 'debito': 'Débito',
-        'credito': 'Crédito', 'boleto': 'Boleto', 'transferencia': 'Transferência'
+        'credito': 'Crédito', 'boleto': 'Boleto', 'link': 'Link de Pagamento',
+        'transferencia': 'Transferência'
+    };
+    const transpLabel = {
+        'correios': 'Correios', 'rodonaves': 'Rodonaves',
+        'em_maos': 'Em Mãos', 'loja': 'Loja', 'outro': 'Outro'
     };
 
-    let texto = `*VENDA DE PEÇAS*\n`;
+    let texto = `*ATENDIMENTO SAC - PEÇAS*\n`;
     texto += `━━━━━━━━━━━━━━━━\n`;
-    texto += `*Loja:* ${venda.loja}\n`;
-    texto += `*Vendedor:* ${venda.vendedor}${venda.matriculaVendedor ? ` (${venda.matriculaVendedor})` : ''}\n`;
-    texto += `*Data:* ${formatarData(venda.dataVenda)}\n\n`;
-    texto += `*Cliente:* ${venda.cliente.nome}\n`;
+    texto += `*Tipo:* ${venda.tipoAtendimento}\n`;
+    if (venda.origemSac) texto += `*Origem:* ${venda.origemSac}\n`;
+    if (venda.protocoloSac) texto += `*Protocolo:* ${venda.protocoloSac}\n`;
+    texto += `*Data:* ${formatarData(venda.dataVenda)}\n`;
+    texto += `*Vendedor:* ${venda.vendedor}\n`;
+    if (venda.prevEmbarque) texto += `*Prev. Embarque:* ${formatarData(venda.prevEmbarque)}\n`;
+    texto += `\n*CLIENTE:*\n`;
+    texto += `*Nome:* ${venda.cliente.nome}\n`;
     texto += `*Telefone:* ${formatarTelefoneExibicao(venda.cliente.telefone)}\n`;
-    if (venda.cliente.cpf) texto += `*CPF:* ${formatarCpfExibicao(venda.cliente.cpf)}\n`;
-    if (venda.cliente.email) texto += `*E-mail:* ${venda.cliente.email}\n`;
+    if (venda.cliente.cpfCnpj) texto += `*${venda.cliente.tipo === 'J' ? 'CNPJ' : 'CPF'}:* ${venda.cliente.cpfCnpj}\n`;
+    if (venda.cliente.ie) texto += `*IE:* ${venda.cliente.ie}\n`;
+    if (venda.cliente.endereco) texto += `*Endereço:* ${venda.cliente.endereco}\n`;
+    if (venda.cliente.bairro) texto += `*Bairro:* ${venda.cliente.bairro}\n`;
+    if (venda.cliente.cidade) texto += `*Cidade:* ${venda.cliente.cidade}${venda.cliente.uf ? ' - ' + venda.cliente.uf : ''}\n`;
+    if (venda.cliente.cep) texto += `*CEP:* ${venda.cliente.cep}\n`;
     texto += `\n*PEÇAS:*\n`;
     venda.pecas.forEach((p, i) => {
-        texto += `${i + 1}. ${p.descricao}`;
-        if (p.codigo) texto += ` (${p.codigo})`;
-        texto += `\n   ${p.quantidade}x R$ ${formatarValor(p.precoUnitario)} = R$ ${formatarValor(p.total)}\n`;
+        texto += `${i + 1}. ${p.descricao} (${p.modelo})\n`;
+        texto += `   ${p.quantidade}x R$ ${formatarValor(p.precoUnitario)} = R$ ${formatarValor(p.total)}\n`;
     });
-    texto += `\n*TOTAL: R$ ${formatarValor(venda.total)}*\n`;
+    texto += `\n*Total Peças: R$ ${formatarValor(venda.totalPecas)}*\n`;
+    if (venda.frete.valor > 0) {
+        texto += `*Frete (${transpLabel[venda.frete.transportadora] || venda.frete.transportadora}): R$ ${formatarValor(venda.frete.valor)}*\n`;
+    }
+    texto += `*TOTAL GERAL: R$ ${formatarValor(venda.totalGeral)}*\n`;
     texto += `*Pagamento:* ${formaLabel[venda.pagamento.forma] || venda.pagamento.forma}`;
-    if (venda.pagamento.forma === 'credito') texto += ` (${venda.pagamento.parcelas}x)`;
+    if (venda.pagamento.forma === 'credito' || venda.pagamento.forma === 'link') texto += ` (${venda.pagamento.parcelas}x)`;
     texto += '\n';
     if (venda.observacoes) texto += `*Obs:* ${venda.observacoes}\n`;
 
@@ -709,7 +802,6 @@ function copiarResumo() {
     navigator.clipboard.writeText(ultimoResumo).then(() => {
         mostrarFeedback('Resumo copiado!', 'sucesso');
     }).catch(() => {
-        // Fallback
         const textarea = document.getElementById('textoResumoModal');
         textarea.select();
         document.execCommand('copy');
@@ -721,39 +813,17 @@ function novaVenda() {
     document.getElementById('resumoModal').style.display = 'none';
     document.getElementById('vendaPecaForm').reset();
     pecasAdicionadas = [];
-    vendedorSelecionado = null;
-    matriculaSelecionada = null;
     renderizarPecas();
     atualizarTotal();
     configurarDataHoje();
     document.getElementById('parcelasContainer').style.display = 'none';
-    // Limpar validações visuais
+    document.getElementById('subtotalPeca').textContent = 'R$ 0,00';
     document.querySelectorAll('.campo-invalido, .campo-valido').forEach(el => {
         el.classList.remove('campo-invalido', 'campo-valido');
     });
     document.querySelectorAll('.campo-aviso').forEach(el => {
         el.classList.remove('visivel');
     });
-}
-
-// ========================================
-// FORMATAÇÃO PARA EXIBIÇÃO
-// ========================================
-
-function formatarData(dataISO) {
-    const [ano, mes, dia] = dataISO.split('-');
-    return `${dia}/${mes}/${ano}`;
-}
-
-function formatarTelefoneExibicao(digitos) {
-    if (digitos.length === 11) {
-        return digitos.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
-    }
-    return digitos.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3');
-}
-
-function formatarCpfExibicao(digitos) {
-    return digitos.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
 }
 
 // ========================================
