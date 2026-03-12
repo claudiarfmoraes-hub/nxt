@@ -780,6 +780,7 @@ function mostrarResumoModal(venda) {
     if (venda.observacoes) texto += `*Obs:* ${venda.observacoes}\n`;
 
     ultimoResumo = texto;
+    ultimaVendaPDF = venda;
     document.getElementById('textoResumoModal').value = texto;
     document.getElementById('resumoModal').style.display = 'flex';
 }
@@ -830,6 +831,171 @@ function novaVenda() {
     document.querySelectorAll('.campo-aviso').forEach(el => {
         el.classList.remove('visivel');
     });
+}
+
+// ========================================
+// GERAR PDF DE SEPARAÇÃO (EXPEDIÇÃO)
+// ========================================
+
+let ultimaVendaPDF = null;
+
+function gerarPDFSeparacao() {
+    if (!ultimaVendaPDF) {
+        mostrarFeedback('Nenhum pedido para gerar PDF', 'erro');
+        return;
+    }
+
+    const venda = ultimaVendaPDF;
+    const transpLabel = {
+        'correios': 'Correios', 'rodonaves': 'Rodonaves',
+        'em_maos': 'Em Mãos', 'loja': 'Loja', 'outro': 'Outro'
+    };
+    const urgenciaLabel = {
+        'baixa': 'BAIXA', 'normal': 'NORMAL', 'alta': 'ALTA', 'urgente': 'URGENTE'
+    };
+
+    const urgenciaClass = venda.urgencia === 'urgente' ? 'urgente' : (venda.urgencia === 'alta' ? 'alta' : '');
+
+    let pecasRows = '';
+    venda.pecas.forEach((p, i) => {
+        pecasRows += `
+            <tr>
+                <td style="text-align:center">${i + 1}</td>
+                <td>${p.descricao}</td>
+                <td style="text-align:center">${p.modelo}</td>
+                <td style="text-align:center">${p.categoria}</td>
+                <td style="text-align:center">${p.quantidade}</td>
+                <td class="check-col"></td>
+            </tr>`;
+    });
+
+    const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Separação - ${venda.id}</title>
+    <style>
+        @page { size: A4; margin: 15mm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #222; }
+
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #1a1a2e; padding-bottom: 10px; margin-bottom: 12px; }
+        .header-left h1 { font-size: 18px; color: #1a1a2e; margin-bottom: 2px; }
+        .header-left p { font-size: 11px; color: #666; }
+        .header-right { text-align: right; }
+        .pedido-id { font-size: 16px; font-weight: bold; color: #1a1a2e; }
+        .pedido-data { font-size: 11px; color: #666; margin-top: 2px; }
+
+        .urgencia-badge { display: inline-block; padding: 3px 12px; border-radius: 4px; font-weight: bold; font-size: 12px; color: white; background: #999; margin-top: 4px; }
+        .urgencia-badge.urgente { background: #dc3545; }
+        .urgencia-badge.alta { background: #ff9800; }
+
+        .section { margin-bottom: 12px; }
+        .section-title { font-size: 13px; font-weight: bold; background: #1a1a2e; color: #c6ff00; padding: 5px 10px; border-radius: 4px 4px 0 0; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid #ddd; border-top: none; }
+        .info-item { padding: 5px 10px; border-bottom: 1px solid #eee; font-size: 11px; }
+        .info-item:nth-child(odd) { border-right: 1px solid #eee; }
+        .info-label { font-weight: bold; color: #555; display: block; font-size: 9px; text-transform: uppercase; margin-bottom: 1px; }
+
+        table { width: 100%; border-collapse: collapse; border: 1px solid #ddd; }
+        th { background: #f5f5f5; font-size: 11px; padding: 6px 8px; border: 1px solid #ddd; text-align: left; }
+        td { padding: 6px 8px; border: 1px solid #ddd; font-size: 11px; }
+        .check-col { width: 50px; min-height: 20px; }
+
+        .footer-section { margin-top: 15px; }
+        .obs-box { border: 1px solid #ddd; border-radius: 4px; padding: 8px 10px; min-height: 40px; font-size: 11px; background: #fafafa; }
+
+        .assinatura-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
+        .assinatura-item { text-align: center; }
+        .assinatura-linha { border-top: 1px solid #333; padding-top: 4px; font-size: 10px; color: #666; margin-top: 40px; }
+
+        .watermark { text-align: center; font-size: 9px; color: #bbb; margin-top: 15px; }
+
+        @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <h1>NXT MOTOS</h1>
+            <p>PEDIDO DE SEPARAÇÃO - EXPEDIÇÃO</p>
+        </div>
+        <div class="header-right">
+            <div class="pedido-id">${venda.id}</div>
+            <div class="pedido-data">Data: ${formatarData(venda.dataVenda)}</div>
+            ${venda.prevEmbarque ? `<div class="pedido-data">Prev. Embarque: ${formatarData(venda.prevEmbarque)}</div>` : ''}
+            ${venda.urgencia ? `<div class="urgencia-badge ${urgenciaClass}">${urgenciaLabel[venda.urgencia] || venda.urgencia}</div>` : ''}
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">CLIENTE</div>
+        <div class="info-grid">
+            <div class="info-item"><span class="info-label">Nome</span>${venda.cliente.nome}</div>
+            <div class="info-item"><span class="info-label">Telefone</span>${venda.cliente.telefone ? formatarTelefoneExibicao(venda.cliente.telefone) : '-'}</div>
+            <div class="info-item"><span class="info-label">Endereço</span>${venda.cliente.endereco || '-'}</div>
+            <div class="info-item"><span class="info-label">Bairro</span>${venda.cliente.bairro || '-'}</div>
+            <div class="info-item"><span class="info-label">Cidade/UF</span>${venda.cliente.cidade || '-'}${venda.cliente.uf ? '/' + venda.cliente.uf : ''}</div>
+            <div class="info-item"><span class="info-label">CEP</span>${venda.cliente.cep || '-'}</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">PEÇAS PARA SEPARAÇÃO</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:35px;text-align:center">#</th>
+                    <th>Descrição da Peça</th>
+                    <th style="width:90px;text-align:center">Modelo</th>
+                    <th style="width:120px;text-align:center">Categoria</th>
+                    <th style="width:45px;text-align:center">Qtd</th>
+                    <th style="width:50px;text-align:center">OK</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${pecasRows}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">ENVIO</div>
+        <div class="info-grid">
+            <div class="info-item"><span class="info-label">Transportadora</span>${transpLabel[venda.frete.transportadora] || venda.frete.transportadora || '-'}</div>
+            <div class="info-item"><span class="info-label">Peso / Volume</span>${venda.pesoVolume || '-'}</div>
+            <div class="info-item"><span class="info-label">Vendedor (SAC)</span>${venda.vendedor}</div>
+            <div class="info-item"><span class="info-label">Tipo</span>${venda.tipoAtendimento}</div>
+        </div>
+    </div>
+
+    ${venda.observacoes ? `
+    <div class="section">
+        <div class="section-title">OBSERVAÇÕES</div>
+        <div class="obs-box">${venda.observacoes}</div>
+    </div>` : ''}
+
+    <div class="assinatura-grid">
+        <div class="assinatura-item">
+            <div class="assinatura-linha">Separado por / Data</div>
+        </div>
+        <div class="assinatura-item">
+            <div class="assinatura-linha">Conferido por / Data</div>
+        </div>
+    </div>
+
+    <div class="watermark">NXT Peças V1.0 - Documento gerado em ${new Date().toLocaleString('pt-BR')}</div>
+
+    <script>window.onload = function() { window.print(); }</script>
+</body>
+</html>`;
+
+    const janela = window.open('', '_blank');
+    janela.document.write(html);
+    janela.document.close();
 }
 
 // ========================================
