@@ -297,16 +297,17 @@ function gravarNaPlanilha(dados) {
   // Criar cabeçalho se a planilha estiver vazia
   if (sheet.getLastRow() === 0) {
     sheet.appendRow([
-      'ID', 'Data Registro', 'Data Venda', 'Tipo Atendimento', 'Origem SAC', 'Protocolo SAC',
-      'Vendedor', 'Prev. Embarque',
-      'Cliente', 'Tipo', 'CPF/CNPJ', 'IE', 'Telefone',
-      'Endereço', 'Bairro', 'Cidade', 'UF', 'CEP',
-      'Peças', 'Qtd Total', 'Total Peças (R$)',
-      'Transportadora', 'Frete (R$)', 'Total Geral (R$)',
-      'Forma Pagamento', 'Parcelas', 'Observações',
-      'Bling Status', 'Bling Pedido ID'
+      'DATA', 'PEDIDO', 'VENDEDOR', 'ORIGEM SAC', 'PROTOCOLO SAC',
+      'NOME DO CLIENTE', 'CPF/CNPJ', 'IE', 'TELEFONE',
+      'ENDEREÇO', 'BAIRRO', 'CIDADE/ESTADO', 'CEP',
+      'TIPO DE SOLICITAÇÃO', 'PEDIDO DE PEÇAS', 'TIPO DE PEÇA', 'MODELO',
+      'QTD', 'TOTAL PEÇAS (R$)', 'PAGAMENTO',
+      'URGÊNCIA', 'PREV. EMBARQUE', 'ENVIO', 'FRETE (R$)',
+      'TOTAL GERAL (R$)',
+      'STATUS', 'NF', 'PESO / VOLUME', 'OBS', 'FECHAMENTO',
+      'BLING STATUS', 'BLING PEDIDO ID'
     ]);
-    var headerRange = sheet.getRange(1, 1, 1, 29);
+    var headerRange = sheet.getRange(1, 1, 1, 32);
     headerRange.setFontWeight('bold');
     headerRange.setBackground('#1a1a2e');
     headerRange.setFontColor('#c6ff00');
@@ -318,6 +319,15 @@ function gravarNaPlanilha(dados) {
     return p.descricao + ' (' + p.modelo + ')' +
            ' - ' + p.quantidade + 'x R$' + Number(p.precoUnitario).toFixed(2).replace('.', ',');
   }).join(' | ');
+
+  // Extrair categorias e modelos únicos
+  var categorias = [];
+  var modelos = [];
+  pecas.forEach(function(p) {
+    if (p.categoria && categorias.indexOf(p.categoria) === -1) categorias.push(p.categoria);
+    if (p.modelo && modelos.indexOf(p.modelo) === -1) modelos.push(p.modelo);
+  });
+
   var qtdTotal = pecas.reduce(function(sum, p) { return sum + (p.quantidade || 0); }, 0);
 
   // Formatar forma de pagamento
@@ -335,45 +345,54 @@ function gravarNaPlanilha(dados) {
     'em_maos': 'Em Mãos', 'loja': 'Loja', 'outro': 'Outro'
   };
 
+  var urgLabels = {
+    'baixa': 'Baixa', 'normal': 'Normal', 'alta': 'Alta', 'urgente': 'URGENTE'
+  };
+
+  var cidadeEstado = (dados.cidadeCliente || '') + (dados.ufCliente ? '/' + dados.ufCliente : '');
+
   // Inserir linha
   sheet.appendRow([
-    dados.id || '',
-    new Date(),
-    dados.dataVenda || '',
-    dados.tipoAtendimento || '',
-    dados.origemSac || '',
-    dados.protocoloSac || '',
-    dados.vendedor || '',
-    dados.prevEmbarque || '',
-    dados.nomeCliente || '',
-    dados.tipoCliente === 'J' ? 'PJ' : 'PF',
-    dados.cpfCnpjCliente || '',
-    dados.ieCliente || '',
-    dados.telefoneCliente || '',
-    dados.enderecoCliente || '',
-    dados.bairroCliente || '',
-    dados.cidadeCliente || '',
-    dados.ufCliente || '',
-    dados.cepCliente || '',
-    pecasDesc,
-    qtdTotal,
-    dados.totalPecas || 0,
-    transpLabels[dados.transportadora] || dados.transportadora || '',
-    dados.valorFrete || 0,
-    dados.totalGeral || 0,
-    formaPag,
-    dados.parcelas || '1',
-    dados.observacoes || '',
-    '',  // Bling Status
-    ''   // Bling Pedido ID
+    dados.dataVenda || '',                                          // DATA
+    dados.id || '',                                                 // PEDIDO
+    dados.vendedor || '',                                           // VENDEDOR
+    dados.origemSac || '',                                          // ORIGEM SAC
+    dados.protocoloSac || '',                                       // PROTOCOLO SAC
+    dados.nomeCliente || '',                                        // NOME DO CLIENTE
+    dados.cpfCnpjCliente || '',                                     // CPF/CNPJ
+    dados.ieCliente || '',                                          // IE
+    dados.telefoneCliente || '',                                    // TELEFONE
+    dados.enderecoCliente || '',                                    // ENDEREÇO
+    dados.bairroCliente || '',                                      // BAIRRO
+    cidadeEstado,                                                   // CIDADE/ESTADO
+    dados.cepCliente || '',                                         // CEP
+    dados.tipoAtendimento || '',                                    // TIPO DE SOLICITAÇÃO
+    pecasDesc,                                                      // PEDIDO DE PEÇAS
+    categorias.join(', '),                                          // TIPO DE PEÇA
+    modelos.join(', '),                                             // MODELO
+    qtdTotal,                                                       // QTD
+    dados.totalPecas || 0,                                          // TOTAL PEÇAS (R$)
+    formaPag,                                                       // PAGAMENTO
+    urgLabels[dados.urgencia] || dados.urgencia || '',               // URGÊNCIA
+    dados.prevEmbarque || '',                                       // PREV. EMBARQUE
+    transpLabels[dados.transportadora] || dados.transportadora || '',// ENVIO
+    dados.valorFrete || 0,                                          // FRETE (R$)
+    dados.totalGeral || 0,                                          // TOTAL GERAL (R$)
+    '',                                                             // STATUS (manual)
+    '',                                                             // NF (manual)
+    dados.pesoVolume || '',                                         // PESO / VOLUME
+    dados.observacoes || '',                                        // OBS
+    '',                                                             // FECHAMENTO (manual)
+    '',                                                             // BLING STATUS
+    ''                                                              // BLING PEDIDO ID
   ]);
 
   var lastRow = sheet.getLastRow();
 
   // Formatar colunas de valor como moeda
-  sheet.getRange(lastRow, 21).setNumberFormat('R$ #.##0,00');
-  sheet.getRange(lastRow, 23).setNumberFormat('R$ #.##0,00');
+  sheet.getRange(lastRow, 19).setNumberFormat('R$ #.##0,00');
   sheet.getRange(lastRow, 24).setNumberFormat('R$ #.##0,00');
+  sheet.getRange(lastRow, 25).setNumberFormat('R$ #.##0,00');
 
   return lastRow;
 }
@@ -381,8 +400,8 @@ function gravarNaPlanilha(dados) {
 function atualizarBlingStatus(row, status, pedidoId) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Pecas') || ss.getSheets()[0];
-  sheet.getRange(row, 28).setValue(status);
-  sheet.getRange(row, 29).setValue(pedidoId || '');
+  sheet.getRange(row, 31).setValue(status);
+  sheet.getRange(row, 32).setValue(pedidoId || '');
 }
 
 // ========== ENDPOINT PRINCIPAL ==========

@@ -520,8 +520,10 @@ async function registrarVenda(event) {
     const cidade = document.getElementById('cidadeCliente').value.trim();
     const uf = document.getElementById('ufCliente').value;
     const cep = document.getElementById('cepCliente').value.trim();
+    const urgencia = document.getElementById('urgencia').value;
     const transportadora = document.getElementById('transportadora').value;
     const valorFrete = parseMoeda(document.getElementById('valorFrete').value);
+    const pesoVolume = document.getElementById('pesoVolume').value.trim();
     const formaPagamento = document.getElementById('formaPagamento').value;
     const parcelas = document.getElementById('parcelas').value;
     const observacoes = document.getElementById('observacoes').value.trim();
@@ -580,10 +582,12 @@ async function registrarVenda(event) {
             forma: formaPagamento,
             parcelas: (formaPagamento === 'credito' || formaPagamento === 'link') ? parcelas : '1'
         },
+        urgencia,
         frete: {
             transportadora,
             valor: valorFrete
         },
+        pesoVolume,
         observacoes,
         totalPecas,
         totalGeral
@@ -642,8 +646,10 @@ async function enviarParaGoogle(venda) {
         pecas: venda.pecas,
         formaPagamento: venda.pagamento.forma,
         parcelas: venda.pagamento.parcelas,
+        urgencia: venda.urgencia,
         transportadora: venda.frete.transportadora,
         valorFrete: venda.frete.valor,
+        pesoVolume: venda.pesoVolume,
         observacoes: venda.observacoes,
         totalPecas: venda.totalPecas,
         totalGeral: venda.totalGeral
