@@ -984,6 +984,82 @@ function gerarPDFSeparacao() {
 
         .watermark { text-align: center; font-size: 9px; color: #bbb; margin-top: 15px; }
 
+        /* ETIQUETA DE ENVIO */
+        .etiqueta-page { padding-top: 10px; }
+        .etiqueta {
+            border: 2px dashed #999;
+            border-radius: 8px;
+            overflow: hidden;
+            max-width: 550px;
+            margin: 0 auto;
+        }
+        .etiqueta-header {
+            background: #1a1a2e;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .etiqueta-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        .etiqueta-box {
+            padding: 14px 16px;
+            border-bottom: 1px solid #ddd;
+        }
+        .etiqueta-remetente {
+            border-right: 1px solid #ddd;
+            background: #fafafa;
+        }
+        .etiqueta-destinatario {
+            background: #fff;
+        }
+        .etiqueta-label {
+            font-size: 8px;
+            font-weight: bold;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+        }
+        .etiqueta-nome {
+            font-size: 14px;
+            font-weight: bold;
+            color: #222;
+            margin-bottom: 6px;
+        }
+        .etiqueta-endereco {
+            font-size: 11px;
+            color: #444;
+            line-height: 1.5;
+        }
+        .etiqueta-footer {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            background: #f5f5f5;
+            border-top: 1px solid #ddd;
+        }
+        .etiqueta-footer-item {
+            padding: 8px 12px;
+            border-right: 1px solid #eee;
+            text-align: center;
+        }
+        .etiqueta-footer-item:last-child { border-right: none; }
+        .etiqueta-footer-label {
+            display: block;
+            font-size: 7px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+        .etiqueta-footer-value {
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+        }
+
         @media print {
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
@@ -1064,6 +1140,66 @@ function gerarPDFSeparacao() {
     </div>
 
     <div class="watermark">NXT Peças V1.2 - Documento gerado em ${new Date().toLocaleString('pt-BR')}</div>
+
+    <!-- PÁGINA 2: ETIQUETA DE ENVIO -->
+    <div style="page-break-before: always;"></div>
+
+    <div class="etiqueta-page">
+        <p style="text-align:center; font-size:10px; color:#999; margin-bottom:12px;">Recorte pela linha tracejada</p>
+
+        <div class="etiqueta">
+            <div class="etiqueta-header">
+                <img src="${LOGO_BASE64}" style="height:24px;">
+                <span style="font-size:11px; color:#c6ff00; font-weight:bold; letter-spacing:1px;">ETIQUETA DE ENVIO</span>
+                <span style="font-size:10px; color:#e0e0e0;">${venda.id}${venda.protocoloSac ? ' | ' + venda.protocoloSac : ''}</span>
+            </div>
+
+            <div class="etiqueta-body">
+                <div class="etiqueta-box etiqueta-remetente">
+                    <div class="etiqueta-label">REMETENTE</div>
+                    <div class="etiqueta-nome">NXT MOTOS</div>
+                    <div class="etiqueta-endereco">
+                        Rua Manoel Francisco da Costa, 3900<br>
+                        João Pessoa - Cond. Ângelo Pereira<br>
+                        Jaraguá do Sul - SC<br>
+                        CEP: 89257-407
+                    </div>
+                </div>
+
+                <div class="etiqueta-box etiqueta-destinatario">
+                    <div class="etiqueta-label">DESTINATÁRIO</div>
+                    <div class="etiqueta-nome">${venda.cliente.nome}</div>
+                    <div class="etiqueta-endereco">
+                        ${venda.cliente.endereco || '-'}${venda.cliente.bairro ? '<br>' + venda.cliente.bairro : ''}
+                        <br>${venda.cliente.cidade || '-'}${venda.cliente.uf ? ' - ' + venda.cliente.uf : ''}
+                        <br><strong>CEP: ${venda.cliente.cep || '-'}</strong>
+                        <br>Tel: ${venda.cliente.telefone ? formatarTelefoneExibicao(venda.cliente.telefone) : '-'}
+                    </div>
+                </div>
+            </div>
+
+            <div class="etiqueta-footer">
+                <div class="etiqueta-footer-item">
+                    <span class="etiqueta-footer-label">Transportadora</span>
+                    <span class="etiqueta-footer-value">${transpLabel[venda.frete.transportadora] || venda.frete.transportadora || '-'}</span>
+                </div>
+                <div class="etiqueta-footer-item">
+                    <span class="etiqueta-footer-label">Peso / Volume</span>
+                    <span class="etiqueta-footer-value">${venda.pesoVolume || '-'}</span>
+                </div>
+                <div class="etiqueta-footer-item">
+                    <span class="etiqueta-footer-label">Data</span>
+                    <span class="etiqueta-footer-value">${formatarData(venda.dataVenda)}</span>
+                </div>
+                <div class="etiqueta-footer-item">
+                    <span class="etiqueta-footer-label">Atendente</span>
+                    <span class="etiqueta-footer-value">${venda.vendedor}</span>
+                </div>
+            </div>
+        </div>
+
+        <p style="text-align:center; font-size:9px; color:#bbb; margin-top:15px;">NXT Peças V1.2 - Etiqueta gerada em ${new Date().toLocaleString('pt-BR')}</p>
+    </div>
 
     <script>window.onload = function() { window.print(); }</script>
 </body>
