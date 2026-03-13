@@ -3,15 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NXT Peças V1.0</title>
+    <title>NXT Peças V1.2</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a1a2e">
 </head>
 <body>
     <header>
-        <h1>NXT PEÇAS V1.0</h1>
-        <p class="subtitle">SAC - Venda de Peças e Garantia</p>
+        <div class="header-inner">
+            <img src="logo nxt.png" alt="NXT Motos" class="header-logo">
+            <div class="header-text">
+                <h1>NXT PEÇAS <span class="version-badge">V1.2</span></h1>
+                <p class="subtitle">SAC - Venda de Peças e Garantia</p>
+            </div>
+        </div>
     </header>
 
     <main>
@@ -229,6 +234,25 @@
                         </div>
                     </div>
                     <div class="form-row">
+                        <div class="form-group">
+                            <label for="corBike">
+                                <span class="label-icon">🎨</span> Cor da Bike <span class="opcional-badge">Opcional</span>
+                            </label>
+                            <select id="corBike">
+                                <option value="">Selecione a cor...</option>
+                                <option value="Preta">Preta</option>
+                                <option value="Branca">Branca</option>
+                                <option value="Vermelha">Vermelha</option>
+                                <option value="Azul">Azul</option>
+                                <option value="Verde">Verde</option>
+                                <option value="Amarela">Amarela</option>
+                                <option value="Cinza">Cinza</option>
+                                <option value="Laranja">Laranja</option>
+                                <option value="Rosa">Rosa</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
                         <div class="form-group form-group-small">
                             <label for="qtdPeca">
                                 <span class="label-icon">🔢</span> Qtd
@@ -244,6 +268,15 @@
                         <div class="form-group form-group-small">
                             <label>Subtotal</label>
                             <div class="subtotal-display" id="subtotalPeca">R$ 0,00</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="imagemPeca">
+                                <span class="label-icon">📷</span> Imagem da Peça <span class="opcional-badge">Opcional</span>
+                            </label>
+                            <input type="file" id="imagemPeca" accept="image/*" multiple>
+                            <div id="previewImagens" class="preview-imagens"></div>
                         </div>
                     </div>
                     <button type="button" class="btn-adicionar-peca" onclick="adicionarPeca()">
@@ -271,6 +304,7 @@
                             <option value="">Selecione...</option>
                             <option value="correios">Correios</option>
                             <option value="rodonaves">Rodonaves</option>
+                            <option value="atual_cargas">Atual Cargas</option>
                             <option value="em_maos">Em Mãos</option>
                             <option value="loja">Loja</option>
                             <option value="outro">Outro</option>
