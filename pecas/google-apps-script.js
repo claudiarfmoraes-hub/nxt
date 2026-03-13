@@ -300,14 +300,14 @@ function gravarNaPlanilha(dados) {
       'DATA', 'PEDIDO', 'VENDEDOR', 'ORIGEM SAC', 'PROTOCOLO SAC',
       'NOME DO CLIENTE', 'CPF/CNPJ', 'IE', 'TELEFONE',
       'ENDEREÇO', 'BAIRRO', 'CIDADE/ESTADO', 'CEP',
-      'TIPO DE SOLICITAÇÃO', 'PEDIDO DE PEÇAS', 'TIPO DE PEÇA', 'MODELO',
+      'TIPO DE SOLICITAÇÃO', 'PEDIDO DE PEÇAS', 'TIPO DE PEÇA', 'MODELO', 'COR',
       'QTD', 'TOTAL PEÇAS (R$)', 'PAGAMENTO',
       'URGÊNCIA', 'PREV. EMBARQUE', 'ENVIO', 'FRETE (R$)',
       'TOTAL GERAL (R$)',
       'STATUS', 'NF', 'PESO / VOLUME', 'OBS', 'FECHAMENTO',
       'BLING STATUS', 'BLING PEDIDO ID'
     ]);
-    var headerRange = sheet.getRange(1, 1, 1, 32);
+    var headerRange = sheet.getRange(1, 1, 1, 33);
     headerRange.setFontWeight('bold');
     headerRange.setBackground('#1a1a2e');
     headerRange.setFontColor('#c6ff00');
@@ -317,15 +317,18 @@ function gravarNaPlanilha(dados) {
   var pecas = dados.pecas || [];
   var pecasDesc = pecas.map(function(p) {
     return p.descricao + ' (' + p.modelo + ')' +
+           (p.cor ? ' [Cor: ' + p.cor + ']' : '') +
            ' - ' + p.quantidade + 'x R$' + Number(p.precoUnitario).toFixed(2).replace('.', ',');
   }).join(' | ');
 
-  // Extrair categorias e modelos únicos
+  // Extrair categorias, modelos e cores únicos
   var categorias = [];
   var modelos = [];
+  var cores = [];
   pecas.forEach(function(p) {
     if (p.categoria && categorias.indexOf(p.categoria) === -1) categorias.push(p.categoria);
     if (p.modelo && modelos.indexOf(p.modelo) === -1) modelos.push(p.modelo);
+    if (p.cor && cores.indexOf(p.cor) === -1) cores.push(p.cor);
   });
 
   var qtdTotal = pecas.reduce(function(sum, p) { return sum + (p.quantidade || 0); }, 0);
@@ -341,7 +344,7 @@ function gravarNaPlanilha(dados) {
   }
 
   var transpLabels = {
-    'correios': 'Correios', 'rodonaves': 'Rodonaves',
+    'correios': 'Correios', 'rodonaves': 'Rodonaves', 'atual_cargas': 'Atual Cargas',
     'em_maos': 'Em Mãos', 'loja': 'Loja', 'outro': 'Outro'
   };
 
@@ -370,6 +373,7 @@ function gravarNaPlanilha(dados) {
     pecasDesc,                                                      // PEDIDO DE PEÇAS
     categorias.join(', '),                                          // TIPO DE PEÇA
     modelos.join(', '),                                             // MODELO
+    cores.join(', '),                                               // COR
     qtdTotal,                                                       // QTD
     dados.totalPecas || 0,                                          // TOTAL PEÇAS (R$)
     formaPag,                                                       // PAGAMENTO
@@ -390,9 +394,9 @@ function gravarNaPlanilha(dados) {
   var lastRow = sheet.getLastRow();
 
   // Formatar colunas de valor como moeda
-  sheet.getRange(lastRow, 19).setNumberFormat('R$ #.##0,00');
-  sheet.getRange(lastRow, 24).setNumberFormat('R$ #.##0,00');
+  sheet.getRange(lastRow, 20).setNumberFormat('R$ #.##0,00');
   sheet.getRange(lastRow, 25).setNumberFormat('R$ #.##0,00');
+  sheet.getRange(lastRow, 26).setNumberFormat('R$ #.##0,00');
 
   return lastRow;
 }
@@ -400,8 +404,8 @@ function gravarNaPlanilha(dados) {
 function atualizarBlingStatus(row, status, pedidoId) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Pecas') || ss.getSheets()[0];
-  sheet.getRange(row, 31).setValue(status);
-  sheet.getRange(row, 32).setValue(pedidoId || '');
+  sheet.getRange(row, 32).setValue(status);
+  sheet.getRange(row, 33).setValue(pedidoId || '');
 }
 
 // ========== ENDPOINT PRINCIPAL ==========
