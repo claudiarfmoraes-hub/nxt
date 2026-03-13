@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NXT Peças V1.2</title>
+    <title>NXT Peças V1.3</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a1a2e">
@@ -13,7 +13,7 @@
         <div class="header-inner">
             <img src="logo-nxt.png" alt="NXT Motos" class="header-logo">
             <div class="header-text">
-                <h1>NXT PEÇAS <span class="version-badge">V1.2</span></h1>
+                <h1>NXT PEÇAS <span class="version-badge">V1.3</span></h1>
                 <p class="subtitle">SAC - Venda de Peças e Garantia</p>
             </div>
         </div>
@@ -140,6 +140,12 @@
                     </div>
                 </div>
                 <div class="form-row">
+                    <div class="form-group form-group-small">
+                        <label for="cepCliente">
+                            <span class="label-icon">📮</span> CEP <span class="opcional-badge">Auto preenche</span>
+                        </label>
+                        <input type="text" id="cepCliente" placeholder="00000-000" maxlength="9">
+                    </div>
                     <div class="form-group form-group-large">
                         <label for="enderecoCliente">
                             <span class="label-icon">📍</span> Endereço
@@ -164,29 +170,7 @@
                         <label for="ufCliente">
                             <span class="label-icon">🗺️</span> UF
                         </label>
-                        <select id="ufCliente">
-                            <option value="">UF</option>
-                            <option value="AC">AC</option><option value="AL">AL</option>
-                            <option value="AP">AP</option><option value="AM">AM</option>
-                            <option value="BA">BA</option><option value="CE">CE</option>
-                            <option value="DF">DF</option><option value="ES">ES</option>
-                            <option value="GO">GO</option><option value="MA">MA</option>
-                            <option value="MT">MT</option><option value="MS">MS</option>
-                            <option value="MG">MG</option><option value="PA">PA</option>
-                            <option value="PB">PB</option><option value="PR">PR</option>
-                            <option value="PE">PE</option><option value="PI">PI</option>
-                            <option value="RJ">RJ</option><option value="RN">RN</option>
-                            <option value="RS">RS</option><option value="RO">RO</option>
-                            <option value="RR">RR</option><option value="SC">SC</option>
-                            <option value="SP">SP</option><option value="SE">SE</option>
-                            <option value="TO">TO</option>
-                        </select>
-                    </div>
-                    <div class="form-group form-group-small">
-                        <label for="cepCliente">
-                            <span class="label-icon">📮</span> CEP
-                        </label>
-                        <input type="text" id="cepCliente" placeholder="00000-000" maxlength="9">
+                        <input type="text" id="ufCliente" placeholder="UF" maxlength="2" style="text-transform:uppercase;">
                     </div>
                 </div>
             </section>
