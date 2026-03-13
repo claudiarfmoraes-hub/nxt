@@ -11,7 +11,7 @@
 <body>
     <header>
         <div class="header-inner">
-            <img src="logo nxt.png" alt="NXT Motos" class="header-logo">
+            <img src="logo-nxt.png" alt="NXT Motos" class="header-logo">
             <div class="header-text">
                 <h1>NXT PEÇAS <span class="version-badge">V1.2</span></h1>
                 <p class="subtitle">SAC - Venda de Peças e Garantia</p>
@@ -238,18 +238,18 @@
                             <label for="corBike">
                                 <span class="label-icon">🎨</span> Cor da Bike <span class="opcional-badge">Opcional</span>
                             </label>
-                            <select id="corBike">
-                                <option value="">Selecione a cor...</option>
-                                <option value="Preta">Preta</option>
-                                <option value="Branca">Branca</option>
-                                <option value="Vermelha">Vermelha</option>
-                                <option value="Azul">Azul</option>
-                                <option value="Verde">Verde</option>
-                                <option value="Amarela">Amarela</option>
-                                <option value="Cinza">Cinza</option>
-                                <option value="Laranja">Laranja</option>
-                                <option value="Rosa">Rosa</option>
-                            </select>
+                            <input type="text" id="corBike" list="listaCores" placeholder="Digite a cor...">
+                            <datalist id="listaCores">
+                                <option value="Preta">
+                                <option value="Branca">
+                                <option value="Vermelha">
+                                <option value="Azul">
+                                <option value="Verde">
+                                <option value="Amarela">
+                                <option value="Cinza">
+                                <option value="Laranja">
+                                <option value="Rosa">
+                            </datalist>
                         </div>
                     </div>
                     <div class="form-row">

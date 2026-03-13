@@ -297,15 +297,15 @@ function gravarNaPlanilha(dados) {
   // Criar cabeçalho se a planilha estiver vazia
   if (sheet.getLastRow() === 0) {
     sheet.appendRow([
-      'DATA', 'PEDIDO', 'VENDEDOR', 'ORIGEM SAC', 'PROTOCOLO SAC',
-      'NOME DO CLIENTE', 'CPF/CNPJ', 'IE', 'TELEFONE',
+      'DATA', 'PEDIDO', 'PROTOCOLO SAC', 'ATENDENTE', 'Nº',
+      'NOME DO CLIENTE', 'STATUS', 'NF', 'TELEFONE',
       'ENDEREÇO', 'BAIRRO', 'CIDADE/ESTADO', 'CEP',
-      'TIPO DE SOLICITAÇÃO', 'PEDIDO DE PEÇAS', 'TIPO DE PEÇA', 'MODELO', 'COR',
-      'QTD', 'TOTAL PEÇAS (R$)', 'PAGAMENTO',
+      'SOLICITAÇÃO', 'PEDIDO DE PEÇAS', 'TIPO DE PEÇA', 'MODELO', 'COR',
+      'QTD', 'TOTAL PEÇA (R$)', 'PAGAMENTO',
       'URGÊNCIA', 'PREV. EMBARQUE', 'ENVIO', 'FRETE (R$)',
       'TOTAL GERAL (R$)',
-      'STATUS', 'NF', 'PESO / VOLUME', 'OBS', 'FECHAMENTO',
-      'BLING STATUS', 'BLING PEDIDO ID'
+      '', '', 'PESO / VOLUME', 'OBS',
+      'BLING STATUS', 'BLING PEDIDO ID', 'FECHAMENTO'
     ]);
     var headerRange = sheet.getRange(1, 1, 1, 33);
     headerRange.setFontWeight('bold');
@@ -354,46 +354,46 @@ function gravarNaPlanilha(dados) {
 
   var cidadeEstado = (dados.cidadeCliente || '') + (dados.ufCliente ? '/' + dados.ufCliente : '');
 
-  // Inserir linha
+  // Inserir linha (ordem igual à planilha existente)
   sheet.appendRow([
-    dados.dataVenda || '',                                          // DATA
-    dados.id || '',                                                 // PEDIDO
-    dados.vendedor || '',                                           // VENDEDOR
-    dados.origemSac || '',                                          // ORIGEM SAC
-    dados.protocoloSac || '',                                       // PROTOCOLO SAC
-    dados.nomeCliente || '',                                        // NOME DO CLIENTE
-    dados.cpfCnpjCliente || '',                                     // CPF/CNPJ
-    dados.ieCliente || '',                                          // IE
-    dados.telefoneCliente || '',                                    // TELEFONE
-    dados.enderecoCliente || '',                                    // ENDEREÇO
-    dados.bairroCliente || '',                                      // BAIRRO
-    cidadeEstado,                                                   // CIDADE/ESTADO
-    dados.cepCliente || '',                                         // CEP
-    dados.tipoAtendimento || '',                                    // TIPO DE SOLICITAÇÃO
-    pecasDesc,                                                      // PEDIDO DE PEÇAS
-    categorias.join(', '),                                          // TIPO DE PEÇA
-    modelos.join(', '),                                             // MODELO
-    cores.join(', '),                                               // COR
-    qtdTotal,                                                       // QTD
-    dados.totalPecas || 0,                                          // TOTAL PEÇAS (R$)
-    formaPag,                                                       // PAGAMENTO
-    urgLabels[dados.urgencia] || dados.urgencia || '',               // URGÊNCIA
-    dados.prevEmbarque || '',                                       // PREV. EMBARQUE
-    transpLabels[dados.transportadora] || dados.transportadora || '',// ENVIO
-    dados.valorFrete || 0,                                          // FRETE (R$)
-    dados.totalGeral || 0,                                          // TOTAL GERAL (R$)
-    '',                                                             // STATUS (manual)
-    '',                                                             // NF (manual)
-    dados.pesoVolume || '',                                         // PESO / VOLUME
-    dados.observacoes || '',                                        // OBS
-    '',                                                             // FECHAMENTO (manual)
-    '',                                                             // BLING STATUS
-    ''                                                              // BLING PEDIDO ID
+    dados.dataVenda || '',                                          // A - DATA
+    dados.id || '',                                                 // B - PEDIDO
+    dados.protocoloSac || '',                                       // C - PROTOCOLO SAC
+    dados.vendedor || '',                                           // D - ATENDENTE
+    dados.origemSac || '',                                          // E - Nº
+    dados.nomeCliente || '',                                        // F - NOME DO CLIENTE
+    '',                                                             // G - STATUS (manual)
+    '',                                                             // H - NF (manual)
+    dados.telefoneCliente || '',                                    // I - TELEFONE
+    dados.enderecoCliente || '',                                    // J - ENDEREÇO
+    dados.bairroCliente || '',                                      // K - BAIRRO
+    cidadeEstado,                                                   // L - CIDADE/ESTADO
+    dados.cepCliente || '',                                         // M - CEP
+    dados.tipoAtendimento || '',                                    // N - SOLICITAÇÃO
+    pecasDesc,                                                      // O - PEDIDO DE PEÇAS
+    categorias.join(', '),                                          // P - TIPO DE PEÇA
+    modelos.join(', '),                                             // Q - MODELO
+    cores.join(', '),                                               // R - COR
+    qtdTotal,                                                       // S - QTD
+    dados.totalPecas || 0,                                          // T - TOTAL PEÇA (R$)
+    formaPag,                                                       // U - PAGAMENTO
+    urgLabels[dados.urgencia] || dados.urgencia || '',               // V - URGÊNCIA
+    dados.prevEmbarque || '',                                       // W - PREV. EMBARQUE
+    transpLabels[dados.transportadora] || dados.transportadora || '',// X - ENVIO
+    dados.valorFrete || 0,                                          // Y - FRETE (R$)
+    dados.totalGeral || 0,                                          // Z - TOTAL GERAL (R$)
+    '',                                                             // AA - (vazio)
+    '',                                                             // AB - (vazio)
+    dados.pesoVolume || '',                                         // AC - PESO / VOLUME
+    dados.observacoes || '',                                        // AD - OBS
+    '',                                                             // AE - BLING STATUS
+    '',                                                             // AF - BLING PEDIDO ID
+    ''                                                              // AG - FECHAMENTO (manual)
   ]);
 
   var lastRow = sheet.getLastRow();
 
-  // Formatar colunas de valor como moeda
+  // Formatar colunas de valor como moeda (T=20, Y=25, Z=26)
   sheet.getRange(lastRow, 20).setNumberFormat('R$ #.##0,00');
   sheet.getRange(lastRow, 25).setNumberFormat('R$ #.##0,00');
   sheet.getRange(lastRow, 26).setNumberFormat('R$ #.##0,00');
@@ -404,8 +404,8 @@ function gravarNaPlanilha(dados) {
 function atualizarBlingStatus(row, status, pedidoId) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Pecas') || ss.getSheets()[0];
-  sheet.getRange(row, 32).setValue(status);
-  sheet.getRange(row, 33).setValue(pedidoId || '');
+  sheet.getRange(row, 31).setValue(status);
+  sheet.getRange(row, 32).setValue(pedidoId || '');
 }
 
 // ========== ENDPOINT PRINCIPAL ==========
