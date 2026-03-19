@@ -292,9 +292,9 @@ function enviarPedidoBling(dados) {
 
 function gravarNaPlanilha(dados) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName('Pedido de Peças');
+  var sheet = ss.getSheetByName('PEDIDOS');
   if (!sheet) {
-    throw new Error('Aba "Pedido de Peças" não encontrada na planilha');
+    throw new Error('Aba "PEDIDOS" não encontrada na planilha');
   }
 
   // Criar cabeçalho se a planilha estiver vazia
@@ -356,7 +356,7 @@ function gravarNaPlanilha(dados) {
 
   var cidadeEstado = (dados.cidadeCliente || '') + (dados.ufCliente ? '/' + dados.ufCliente : '');
 
-  // Inserir linha (ordem conforme aba "Pedido de Peças")
+  // Inserir linha (ordem conforme aba "PEDIDOS")
   sheet.appendRow([
     dados.dataVenda || '',                                          // A - DATA
     dados.id || '',                                                 // B - PEDIDO
@@ -405,7 +405,7 @@ function gravarNaPlanilha(dados) {
 
 function atualizarBlingStatus(row, status, pedidoId) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName('Pedido de Peças');
+  var sheet = ss.getSheetByName('PEDIDOS');
   if (!sheet) return;
   sheet.getRange(row, 31).setValue(status);
   sheet.getRange(row, 32).setValue(pedidoId || '');
