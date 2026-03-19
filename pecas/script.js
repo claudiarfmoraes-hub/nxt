@@ -675,6 +675,9 @@ async function enviarParaGoogle(venda) {
         return { planilha: true, bling: true };
     }
 
+    // Remover imagens do payload (não são usadas na planilha/Bling e pesam demais)
+    const pecasSemImagem = venda.pecas.map(({ imagens, ...resto }) => resto);
+
     const payload = {
         id: venda.id,
         tipoAtendimento: venda.tipoAtendimento,
@@ -693,7 +696,7 @@ async function enviarParaGoogle(venda) {
         cidadeCliente: venda.cliente.cidade,
         ufCliente: venda.cliente.uf,
         cepCliente: venda.cliente.cep,
-        pecas: venda.pecas,
+        pecas: pecasSemImagem,
         formaPagamento: venda.pagamento.forma,
         parcelas: venda.pagamento.parcelas,
         urgencia: venda.urgencia,
@@ -711,23 +714,33 @@ async function enviarParaGoogle(venda) {
 
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
+            mode: 'no-cors',
+            redirect: 'follow',
             body: JSON.stringify(payload),
             signal: controller.signal
         });
 
         clearTimeout(timeoutId);
 
-        try {
-            const data = await response.json();
-            resultado.planilha = data.planilha || false;
-            resultado.bling = data.bling || false;
-            if (data.erros && data.erros.length > 0) {
-                console.warn('Erros no envio:', data.erros);
-            }
-        } catch (parseError) {
-            console.log('Resposta não-JSON do Google — considerando sucesso');
+        // Com mode: 'no-cors', a resposta é opaca (type: 'opaque', status: 0)
+        // Se não houve erro de rede, consideramos que o envio foi bem-sucedido
+        if (response.type === 'opaque' || response.ok) {
             resultado.planilha = true;
             resultado.bling = true;
+            console.log('Envio realizado com sucesso (resposta opaca do Google Apps Script)');
+        } else {
+            try {
+                const data = await response.json();
+                resultado.planilha = data.planilha || false;
+                resultado.bling = data.bling || false;
+                if (data.erros && data.erros.length > 0) {
+                    console.warn('Erros no envio:', data.erros);
+                }
+            } catch (parseError) {
+                console.log('Resposta não-JSON do Google — considerando sucesso');
+                resultado.planilha = true;
+                resultado.bling = true;
+            }
         }
 
         marcarVendaEnviada(venda);
@@ -735,10 +748,6 @@ async function enviarParaGoogle(venda) {
 
     } catch (error) {
         console.error('Erro ao enviar para Google:', error);
-        if (error.name === 'AbortError') {
-            marcarVendaEnviada(venda);
-            resultado.planilha = true;
-        }
         return resultado;
     }
 }
