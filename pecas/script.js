@@ -1,5 +1,5 @@
 // ========================================
-// NXT PEÇAS V1.0 - Script Principal
+// NXT PEÇAS V1.4 - Script Principal
 // SAC - Venda de Peças e Garantia
 // ========================================
 
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     configurarSubtotalCalc();
     document.getElementById('vendaPecaForm').addEventListener('submit', registrarVenda);
     configurarPreviewImagens();
-    console.log('NXT Peças V1.3 inicializado');
+    console.log('NXT Peças V1.4 inicializado');
 });
 
 function configurarDataHoje() {
@@ -1148,7 +1148,7 @@ function gerarPDFSeparacao() {
         </div>
     </div>
 
-    <div class="watermark">NXT Peças V1.3 - Documento gerado em ${new Date().toLocaleString('pt-BR')}</div>
+    <div class="watermark">NXT Peças V1.4 - Documento gerado em ${new Date().toLocaleString('pt-BR')}</div>
 
     <!-- PÁGINA 2: ETIQUETA DE ENVIO -->
     <div style="page-break-before: always;"></div>
@@ -1207,7 +1207,7 @@ function gerarPDFSeparacao() {
             </div>
         </div>
 
-        <p style="text-align:center; font-size:9px; color:#bbb; margin-top:15px;">NXT Peças V1.3 - Etiqueta gerada em ${new Date().toLocaleString('pt-BR')}</p>
+        <p style="text-align:center; font-size:9px; color:#bbb; margin-top:15px;">NXT Peças V1.4 - Etiqueta gerada em ${new Date().toLocaleString('pt-BR')}</p>
     </div>
 
     <script>window.onload = function() { window.print(); }</script>
