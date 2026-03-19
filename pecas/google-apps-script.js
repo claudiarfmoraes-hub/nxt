@@ -29,6 +29,135 @@
 
 var BLING_API_BASE = 'https://www.bling.com.br/Api/v3';
 
+// ========== MAPEAMENTO FISCAL (Tabela Claudia Peças) ==========
+// Cada peça do formulário → código Bling + descrição NFe + IPI
+// Peças sem mapeamento (baterias, motor, carregador, alarme) continuam buscando por nome no Bling
+
+var MAPEAMENTO_FISCAL = {
+  // --- 04.0035 | GUIDÃO / PARTES DIVERSAS | IPI 9% ---
+  'Guidão ferro':                    { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Display lcd':                     { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Suporte de celular':              { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Acelerador de dedo':              { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Acelerador de punho':             { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Punho':                           { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Mesa inferior':                   { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Mesa superior':                   { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Conjunto botões (buzina, luz alta)': { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Par bengala':                     { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Ignição':                         { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Manopla':                         { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Conjunto de direção':             { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Par manete com sensor':           { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Garfo completo':                  { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Painel display com acelerador':   { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Canote':                          { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Miolo trava':                     { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+  'Suspensão dianteira':             { codigo: '04.0035', descricaoNfe: 'PARTES/DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: GUIDAO - PRODUTO NOVO.', ipi: 0.09 },
+
+  // --- 04.0030 | ASSENTO / BANCO | IPI 9% ---
+  'Banco traseiro':                  { codigo: '04.0030', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: ASSENTO ENCOSTO - ALMOFADA - PRODUTO NOVO.', ipi: 0.09 },
+  'Banco passageiro':                { codigo: '04.0030', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: ASSENTO ENCOSTO - ALMOFADA - PRODUTO NOVO.', ipi: 0.09 },
+  'Banco de encosto':                { codigo: '04.0030', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: ASSENTO ENCOSTO - ALMOFADA - PRODUTO NOVO.', ipi: 0.09 },
+  'Encosto com alça':                { codigo: '04.0030', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: ASSENTO ENCOSTO - ALMOFADA - PRODUTO NOVO.', ipi: 0.09 },
+
+  // --- 04.0038 | FRAME / QUADRO | IPI 9% ---
+  'Cesto':                           { codigo: '04.0038', descricaoNfe: 'PARTES/DE MOTOCICLETAS INCLUINDO OS CICLOMOTORES - SENDO: FRAME - QUADRO, ARMACAO PARA MOTOCICLETA ELETRICA - MARCA: N', ipi: 0.09 },
+  'Amortecedor':                     { codigo: '04.0038', descricaoNfe: 'PARTES/DE MOTOCICLETAS INCLUINDO OS CICLOMOTORES - SENDO: FRAME - QUADRO, ARMACAO PARA MOTOCICLETA ELETRICA - MARCA: N', ipi: 0.09 },
+  'Par suspensão traseira':          { codigo: '04.0038', descricaoNfe: 'PARTES/DE MOTOCICLETAS INCLUINDO OS CICLOMOTORES - SENDO: FRAME - QUADRO, ARMACAO PARA MOTOCICLETA ELETRICA - MARCA: N', ipi: 0.09 },
+  'Quadro chassi':                   { codigo: '04.0038', descricaoNfe: 'PARTES/DE MOTOCICLETAS INCLUINDO OS CICLOMOTORES - SENDO: FRAME - QUADRO, ARMACAO PARA MOTOCICLETA ELETRICA - MARCA: N', ipi: 0.09 },
+
+  // --- 04.0007 | MÓDULO CONTROLADOR | IPI 9.75% ---
+  'Módulo controlador':              { codigo: '04.0007', descricaoNfe: 'CONTROLLER -MODULO CONTROLADOR SCOOTER/MOTO ELETRICA', ipi: 0.0975 },
+  'Módulo controlador 48v':          { codigo: '04.0007', descricaoNfe: 'CONTROLLER -MODULO CONTROLADOR SCOOTER/MOTO ELETRICA', ipi: 0.0975 },
+
+  // --- 04.0049 | RETROVISOR | IPI 9% ---
+  'Retrovisor':                      { codigo: '04.0049', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: ESPELHO RETROVISOR - PRODUTO NOVO. (REARVIEW MIRROR)', ipi: 0.09 },
+
+  // --- 04.0002 | ILUMINAÇÃO / FARÓIS | IPI 9.75% ---
+  'Farol dianteiro':                 { codigo: '04.0002', descricaoNfe: 'APARELHOS ELETRICOS  DE ILUMINACAO - SENDO: FAROIS - PRODUTO NOVO - MARCA NXT', ipi: 0.0975 },
+  'Lanterna traseira':               { codigo: '04.0002', descricaoNfe: 'APARELHOS ELETRICOS  DE ILUMINACAO - SENDO: FAROIS - PRODUTO NOVO - MARCA NXT', ipi: 0.0975 },
+  'Par pisca punho led':             { codigo: '04.0002', descricaoNfe: 'APARELHOS ELETRICOS  DE ILUMINACAO - SENDO: FAROIS - PRODUTO NOVO - MARCA NXT', ipi: 0.0975 },
+  'Relê':                            { codigo: '04.0002', descricaoNfe: 'APARELHOS ELETRICOS  DE ILUMINACAO - SENDO: FAROIS - PRODUTO NOVO - MARCA NXT', ipi: 0.0975 },
+  'Iluminação':                      { codigo: '04.0002', descricaoNfe: 'APARELHOS ELETRICOS  DE ILUMINACAO - SENDO: FAROIS - PRODUTO NOVO - MARCA NXT', ipi: 0.0975 },
+
+  // --- 04.0018 | CARENAGEM / PLÁSTICO | IPI 9% ---
+  'Assoalho':                        { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Carenagem bau':                   { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Carenagem escudo':                { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Carenagem frontal farol':         { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Carenagem lateral':               { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Para-brisa':                      { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Paralamas dianteiro':             { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Paralamas traseiro':              { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Plástico lateral':                { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Plástico peito':                  { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Tapete':                          { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Bico ventil':                     { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Calota':                          { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Bico dianteiro':                  { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Maleta de bateria':               { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Porta treco':                     { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Rabeta':                          { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Par protetor de balança':         { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+  'Protetor de motor':               { codigo: '04.0018', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES),  SENDO: CARENAGEM/COBERTURA DE PLASTICO - PARTE DE CARROCARIA, PRO', ipi: 0.09 },
+
+  // --- 04.0099 | RODA / PNEU | IPI 9% ---
+  'Aro 10 dianteiro':                { codigo: '04.0099', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO:RODA DA FRENTE - PRODUTO NOVO.', ipi: 0.09 },
+  'Pneu 10 2.75':                    { codigo: '04.0099', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO:RODA DA FRENTE - PRODUTO NOVO.', ipi: 0.09 },
+  'Pneu 12 2.50':                    { codigo: '04.0099', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO:RODA DA FRENTE - PRODUTO NOVO.', ipi: 0.09 },
+  'Camara de ar':                    { codigo: '04.0099', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO:RODA DA FRENTE - PRODUTO NOVO.', ipi: 0.09 },
+
+  // --- 04.0031 | CABO DE FREIO | IPI 9% ---
+  'Cabo de freio diant / traseiro':  { codigo: '04.0031', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO:CABO DE FREIO', ipi: 0.09 },
+  'Reservatório de óleo':            { codigo: '04.0031', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO:CABO DE FREIO', ipi: 0.09 },
+
+  // --- 04.0027 | FREIO DE TAMBOR | IPI 9% ---
+  'Freio tambor':                    { codigo: '04.0027', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: FREIO DE TAMBOR', ipi: 0.09 },
+  'Disco de freio':                  { codigo: '04.0027', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: FREIO DE TAMBOR', ipi: 0.09 },
+  'Freio hidráulico completo':       { codigo: '04.0027', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: FREIO DE TAMBOR', ipi: 0.09 },
+  'Pastilha freio par':              { codigo: '04.0027', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: FREIO DE TAMBOR', ipi: 0.09 },
+
+  // --- 04.0021 | ALAVANCA DE FREIO | IPI 9% ---
+  'Alavanca do freio':               { codigo: '04.0021', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: ALAVANCA DE FREIO', ipi: 0.09 },
+
+  // --- 04.0045 | PEDAL | IPI 9% ---
+  'Pedaleira com chapa':             { codigo: '04.0045', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: PEDAL - PRODUTO NOVO.', ipi: 0.09 },
+  'Pezinho de descanso':             { codigo: '04.0045', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: PEDAL - PRODUTO NOVO.', ipi: 0.09 },
+
+  // --- 04.0047 | MANIVELA | IPI 9% ---
+  'Manivela':                        { codigo: '04.0047', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: MANIVELA - PRODUTO NOVO.', ipi: 0.09 },
+
+  // --- 04.0048 | COROA DE TRANSMISSÃO | IPI 9% ---
+  'Coroa de transmissão':            { codigo: '04.0048', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: COROA DE TRANSMISSAO - PRODUTO NOVO.', ipi: 0.09 },
+
+  // --- 04.0020 | OLHO DE GATO | IPI 9% ---
+  'Olho de gato':                    { codigo: '04.0020', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), REFETOR TIPO OLHO DE GATO ( CATADIOPTRICOS -DISPOSITIVO REFLETOR -', ipi: 0.09 },
+
+  // --- 04.0024 | CABO DE BATERIA / ELÉTRICO | IPI 9% ---
+  'Chicote':                         { codigo: '04.0024', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: CABO DE BATERIA', ipi: 0.09 },
+  'Fonte do carregador':             { codigo: '04.0024', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: CABO DE BATERIA', ipi: 0.09 },
+  'Tomada carregador':               { codigo: '04.0024', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: CABO DE BATERIA', ipi: 0.09 },
+  'Fuzível':                         { codigo: '04.0024', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: CABO DE BATERIA', ipi: 0.09 },
+  'Tomada maleta':                   { codigo: '04.0024', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: CABO DE BATERIA', ipi: 0.09 },
+  'Conjunto cabos de bateria':       { codigo: '04.0024', descricaoNfe: 'PARTES / DE MOTOCICLETAS (INCLUINDO OS CICLOMOTORES), SENDO: CABO DE BATERIA', ipi: 0.09 }
+};
+
+// Busca o mapeamento fiscal pela descrição da peça (case-insensitive)
+function buscarMapeamentoFiscal(descricaoPeca) {
+  if (!descricaoPeca) return null;
+  var desc = descricaoPeca.trim();
+  // Busca exata primeiro
+  if (MAPEAMENTO_FISCAL[desc]) return MAPEAMENTO_FISCAL[desc];
+  // Busca case-insensitive
+  var descLower = desc.toLowerCase();
+  var keys = Object.keys(MAPEAMENTO_FISCAL);
+  for (var i = 0; i < keys.length; i++) {
+    if (keys[i].toLowerCase() === descLower) return MAPEAMENTO_FISCAL[keys[i]];
+  }
+  return null;
+}
+
 // ========== ARMAZENAMENTO DE TOKENS ==========
 
 function getProperty(key) {
@@ -230,42 +359,54 @@ function enviarPedidoBling(dados) {
     cep: dados.cepCliente || ''
   });
 
-  // 2. Montar itens do pedido
+  // 2. Montar itens do pedido (com mapeamento fiscal da Claudia Peças)
   var itens = [];
   var pecas = dados.pecas || [];
 
   for (var i = 0; i < pecas.length; i++) {
     var peca = pecas[i];
+    var fiscal = buscarMapeamentoFiscal(peca.descricao);
+
     var item = {
-      descricao: peca.descricao.toUpperCase(),
+      descricao: fiscal ? fiscal.descricaoNfe : peca.descricao.toUpperCase(),
       unidade: 'UN',
       quantidade: peca.quantidade,
       valor: peca.precoUnitario
     };
 
-    // Tentar vincular ao produto no Bling por código
-    if (peca.codigo) {
+    // Se tem mapeamento fiscal, usar o código da tabela da contabilidade
+    if (fiscal) {
+      item.codigo = fiscal.codigo;
       try {
-        var busca = blingRequest('/produtos?codigo=' + encodeURIComponent(peca.codigo), 'get');
+        var busca = blingRequest('/produtos?codigo=' + encodeURIComponent(fiscal.codigo), 'get');
         if (busca.data && busca.data.length > 0) {
           item.produto = { id: busca.data[0].id };
-          item.codigo = peca.codigo;
         }
       } catch (e) {
-        // Produto não encontrado por código
+        // Produto não encontrado por código fiscal
       }
     }
 
-    // Se não encontrou por código, tentar pelo nome
-    if (!item.produto) {
-      try {
-        var buscaNome = blingRequest('/produtos?nome=' + encodeURIComponent(peca.descricao), 'get');
-        if (buscaNome.data && buscaNome.data.length > 0) {
-          item.produto = { id: buscaNome.data[0].id };
-          item.codigo = buscaNome.data[0].codigo || '';
-        }
-      } catch (e) {
-        // Produto não encontrado
+    // Se não tem mapeamento fiscal, tentar vincular por código manual ou nome (fallback)
+    if (!fiscal) {
+      if (peca.codigo) {
+        try {
+          var buscaCod = blingRequest('/produtos?codigo=' + encodeURIComponent(peca.codigo), 'get');
+          if (buscaCod.data && buscaCod.data.length > 0) {
+            item.produto = { id: buscaCod.data[0].id };
+            item.codigo = peca.codigo;
+          }
+        } catch (e) {}
+      }
+
+      if (!item.produto) {
+        try {
+          var buscaNome = blingRequest('/produtos?nome=' + encodeURIComponent(peca.descricao), 'get');
+          if (buscaNome.data && buscaNome.data.length > 0) {
+            item.produto = { id: buscaNome.data[0].id };
+            item.codigo = buscaNome.data[0].codigo || '';
+          }
+        } catch (e) {}
       }
     }
 
