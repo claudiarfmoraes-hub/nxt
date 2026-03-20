@@ -290,12 +290,34 @@ function buscarOuCriarContato(cliente) {
   var cpf = cliente.cpf || '';
   var telefone = cliente.telefone || '';
 
-  // Buscar por CPF se existir
-  if (cpf && cpf.length === 11 && validarCPF(cpf)) {
+  // Buscar por CPF/CNPJ se existir
+  var docLength = cpf.length;
+  var docValido = (docLength === 11 && validarCPF(cpf)) || docLength === 14;
+  if (cpf && docValido) {
     try {
       var busca = blingRequest('/contatos?numeroDocumento=' + cpf, 'get');
       if (busca.data && busca.data.length > 0) {
-        return busca.data[0].id;
+        var contatoExistente = busca.data[0];
+        // Atualizar endereço do contato existente (necessário para NF)
+        if (cliente.endereco) {
+          try {
+            blingRequest('/contatos/' + contatoExistente.id, 'put', {
+              nome: contatoExistente.nome,
+              tipo: contatoExistente.tipo || (cliente.tipo === 'J' ? 'J' : 'F'),
+              endereco: {
+                endereco: cliente.endereco,
+                numero: cliente.numero || 'S/N',
+                bairro: cliente.bairro || '',
+                municipio: cliente.cidade || '',
+                uf: cliente.uf || '',
+                cep: cliente.cep || ''
+              }
+            });
+          } catch (eUpdate) {
+            // Se falhar a atualização, segue com o contato existente
+          }
+        }
+        return contatoExistente.id;
       }
     } catch (e) {
       // Contato não encontrado, vai criar
