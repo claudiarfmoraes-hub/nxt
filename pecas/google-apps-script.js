@@ -332,6 +332,7 @@ function buscarOuCriarContato(cliente) {
   if (cliente.endereco) {
     novoContato.endereco = {
       endereco: cliente.endereco,
+      numero: cliente.numero || 'S/N',
       bairro: cliente.bairro || '',
       municipio: cliente.cidade || '',
       uf: cliente.uf || '',
@@ -353,6 +354,7 @@ function enviarPedidoBling(dados) {
     tipo: dados.tipoCliente || 'F',
     ie: dados.ieCliente || '',
     endereco: dados.enderecoCliente || '',
+    numero: dados.numeroCliente || '',
     bairro: dados.bairroCliente || '',
     cidade: dados.cidadeCliente || '',
     uf: dados.ufCliente || '',
@@ -367,11 +369,20 @@ function enviarPedidoBling(dados) {
     var peca = pecas[i];
     var fiscal = buscarMapeamentoFiscal(peca.descricao);
 
+    // Se tem IPI no mapeamento fiscal, o valor enviado ao Bling deve ser o valor BASE (sem IPI)
+    // Ex: cliente paga R$200, IPI 9% → valor base = 200 / 1.09 = R$183,49
+    // Quando a nota for gerada, o Bling soma o IPI automaticamente e fecha no valor total
+    var valorUnitario = peca.precoUnitario;
+    if (fiscal && fiscal.ipi > 0) {
+      valorUnitario = peca.precoUnitario / (1 + fiscal.ipi);
+      valorUnitario = Math.round(valorUnitario * 100) / 100; // arredondar 2 casas
+    }
+
     var item = {
       descricao: fiscal ? fiscal.descricaoNfe : peca.descricao.toUpperCase(),
       unidade: 'UN',
       quantidade: peca.quantidade,
-      valor: peca.precoUnitario
+      valor: valorUnitario
     };
 
     // Se tem mapeamento fiscal, usar o código da tabela da contabilidade
@@ -424,6 +435,15 @@ function enviarPedidoBling(dados) {
     itens: itens,
     observacoes: 'SAC - ' + (dados.tipoAtendimento || 'Peças') + (dados.protocoloSac ? ' | Protocolo: ' + dados.protocoloSac : '') + (dados.observacoes ? '\n' + dados.observacoes : '')
   };
+
+  // 3.1 Adicionar transporte (frete + endereço de entrega para NF)
+  var valorFrete = parseFloat(dados.valorFrete) || 0;
+  pedido.transporte = {
+    fretePorConta: 0 // 0 = por conta do remetente
+  };
+  if (valorFrete > 0) {
+    pedido.transporte.frete = valorFrete;
+  }
 
   var resultado = blingRequest('/pedidos/vendas', 'post', pedido);
   return resultado.data.id;
@@ -512,7 +532,7 @@ function gravarNaPlanilha(dados) {
     urgLabels[dados.urgencia] || dados.urgencia || '',               // J - URGÊNCIA
     transpLabels[dados.transportadora] || dados.transportadora || '',// K - ENVIO
     dados.telefoneCliente || '',                                    // L - TELEFONE
-    dados.enderecoCliente || '',                                    // M - ENDEREÇO
+    (dados.enderecoCliente || '') + (dados.numeroCliente ? ', ' + dados.numeroCliente : ''), // M - ENDEREÇO
     dados.bairroCliente || '',                                      // N - BAIRRO
     cidadeEstado,                                                   // O - CIDADE/ESTADO
     dados.cepCliente || '',                                         // P - CEP

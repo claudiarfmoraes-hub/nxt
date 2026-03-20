@@ -278,6 +278,7 @@ function configurarMascaras() {
             docInput.placeholder = '000.000.000-00';
         }
         docInput.value = v;
+        validarCampoDocumento();
     });
 
     // Máscara de CEP
@@ -340,6 +341,7 @@ function configurarTipoCliente() {
             docInput.placeholder = '000.000.000-00';
             docInput.maxLength = 14;
         }
+        validarCampoDocumento();
     });
 }
 
@@ -357,6 +359,56 @@ function validarCPF(cpf) {
         if (resto !== parseInt(cpf[t])) return false;
     }
     return true;
+}
+
+function validarCNPJ(cnpj) {
+    cnpj = cnpj.replace(/\D/g, '');
+    if (cnpj.length !== 14) return false;
+    if (/^(\d)\1{13}$/.test(cnpj)) return false;
+    const pesos1 = [5,4,3,2,9,8,7,6,5,4,3,2];
+    const pesos2 = [6,5,4,3,2,9,8,7,6,5,4,3,2];
+    let soma = 0;
+    for (let i = 0; i < 12; i++) soma += parseInt(cnpj[i]) * pesos1[i];
+    let resto = soma % 11;
+    if (parseInt(cnpj[12]) !== (resto < 2 ? 0 : 11 - resto)) return false;
+    soma = 0;
+    for (let i = 0; i < 13; i++) soma += parseInt(cnpj[i]) * pesos2[i];
+    resto = soma % 11;
+    if (parseInt(cnpj[13]) !== (resto < 2 ? 0 : 11 - resto)) return false;
+    return true;
+}
+
+function validarCampoDocumento() {
+    const input = document.getElementById('cpfCnpjCliente');
+    const aviso = document.getElementById('avisoDocumento');
+    const tipo = document.getElementById('tipoCliente').value;
+    const digitos = input.value.replace(/\D/g, '');
+
+    if (digitos.length === 0) {
+        input.classList.remove('campo-invalido', 'campo-valido');
+        aviso.classList.remove('visivel');
+        return;
+    }
+
+    const tamanhoEsperado = tipo === 'J' ? 14 : 11;
+
+    if (digitos.length < tamanhoEsperado) {
+        // Ainda digitando — sem feedback negativo
+        input.classList.remove('campo-invalido', 'campo-valido');
+        aviso.classList.remove('visivel');
+    } else {
+        const valido = tipo === 'J' ? validarCNPJ(digitos) : validarCPF(digitos);
+        if (valido) {
+            input.classList.remove('campo-invalido');
+            input.classList.add('campo-valido');
+            aviso.classList.remove('visivel');
+        } else {
+            input.classList.add('campo-invalido');
+            input.classList.remove('campo-valido');
+            aviso.textContent = tipo === 'J' ? 'CNPJ inválido' : 'CPF inválido';
+            aviso.classList.add('visivel');
+        }
+    }
 }
 
 function validarTelefone(tel) {
@@ -564,6 +616,7 @@ async function registrarVenda(event) {
     const ie = document.getElementById('ieCliente').value.trim();
     const telefone = document.getElementById('telefoneCliente').value.trim();
     const endereco = document.getElementById('enderecoCliente').value.trim();
+    const numero = document.getElementById('numeroCliente').value.trim();
     const bairro = document.getElementById('bairroCliente').value.trim();
     const cidade = document.getElementById('cidadeCliente').value.trim();
     const uf = document.getElementById('ufCliente').value;
@@ -581,6 +634,11 @@ async function registrarVenda(event) {
     if (!vendedor) { mostrarFeedback('Informe o vendedor (SAC)', 'erro'); return; }
     if (!nomeCliente) { mostrarFeedback('Informe o nome do cliente', 'erro'); return; }
     if (!telefone || !validarTelefone(telefone)) { mostrarFeedback('Telefone inválido', 'erro'); return; }
+    if (cpfCnpj) {
+        const docDigitos = cpfCnpj.replace(/\D/g, '');
+        if (tipoCliente === 'J' && !validarCNPJ(docDigitos)) { mostrarFeedback('CNPJ inválido', 'erro'); return; }
+        if (tipoCliente !== 'J' && docDigitos.length === 11 && !validarCPF(docDigitos)) { mostrarFeedback('CPF inválido', 'erro'); return; }
+    }
     if (pecasAdicionadas.length === 0) { mostrarFeedback('Adicione ao menos uma peça', 'erro'); return; }
     if (tipoVenda && !formaPagamento) { mostrarFeedback('Selecione a forma de pagamento', 'erro'); return; }
 
@@ -612,6 +670,7 @@ async function registrarVenda(event) {
             ie,
             telefone: telefone.replace(/\D/g, ''),
             endereco,
+            numero,
             bairro,
             cidade,
             uf,
@@ -692,6 +751,7 @@ async function enviarParaGoogle(venda) {
         ieCliente: venda.cliente.ie,
         telefoneCliente: venda.cliente.telefone,
         enderecoCliente: venda.cliente.endereco,
+        numeroCliente: venda.cliente.numero,
         bairroCliente: venda.cliente.bairro,
         cidadeCliente: venda.cliente.cidade,
         ufCliente: venda.cliente.uf,
@@ -819,7 +879,7 @@ function mostrarResumoModal(venda) {
     texto += `*Telefone:* ${formatarTelefoneExibicao(venda.cliente.telefone)}\n`;
     if (venda.cliente.cpfCnpj) texto += `*${venda.cliente.tipo === 'J' ? 'CNPJ' : 'CPF'}:* ${venda.cliente.cpfCnpj}\n`;
     if (venda.cliente.ie) texto += `*IE:* ${venda.cliente.ie}\n`;
-    if (venda.cliente.endereco) texto += `*Endereço:* ${venda.cliente.endereco}\n`;
+    if (venda.cliente.endereco) texto += `*Endereço:* ${venda.cliente.endereco}${venda.cliente.numero ? ', ' + venda.cliente.numero : ''}\n`;
     if (venda.cliente.bairro) texto += `*Bairro:* ${venda.cliente.bairro}\n`;
     if (venda.cliente.cidade) texto += `*Cidade:* ${venda.cliente.cidade}${venda.cliente.uf ? ' - ' + venda.cliente.uf : ''}\n`;
     if (venda.cliente.cep) texto += `*CEP:* ${venda.cliente.cep}\n`;
@@ -1093,8 +1153,9 @@ function gerarPDFSeparacao() {
         <div class="section-title">CLIENTE</div>
         <div class="info-grid">
             <div class="info-item"><span class="info-label">Nome</span>${venda.cliente.nome}</div>
+            <div class="info-item"><span class="info-label">${venda.cliente.tipo === 'J' ? 'CNPJ' : 'CPF'}</span>${venda.cliente.cpfCnpj || '-'}</div>
             <div class="info-item"><span class="info-label">Telefone</span>${venda.cliente.telefone ? formatarTelefoneExibicao(venda.cliente.telefone) : '-'}</div>
-            <div class="info-item"><span class="info-label">Endereço</span>${venda.cliente.endereco || '-'}</div>
+            <div class="info-item"><span class="info-label">Endereço</span>${venda.cliente.endereco || '-'}${venda.cliente.numero ? ', ' + venda.cliente.numero : ''}</div>
             <div class="info-item"><span class="info-label">Bairro</span>${venda.cliente.bairro || '-'}</div>
             <div class="info-item"><span class="info-label">Cidade/UF</span>${venda.cliente.cidade || '-'}${venda.cliente.uf ? '/' + venda.cliente.uf : ''}</div>
             <div class="info-item"><span class="info-label">CEP</span>${venda.cliente.cep || '-'}</div>
@@ -1179,7 +1240,7 @@ function gerarPDFSeparacao() {
                     <div class="etiqueta-label">DESTINATÁRIO</div>
                     <div class="etiqueta-nome">${venda.cliente.nome}</div>
                     <div class="etiqueta-endereco">
-                        ${venda.cliente.endereco || '-'}${venda.cliente.bairro ? '<br>' + venda.cliente.bairro : ''}
+                        ${venda.cliente.endereco || '-'}${venda.cliente.numero ? ', ' + venda.cliente.numero : ''}${venda.cliente.bairro ? '<br>' + venda.cliente.bairro : ''}
                         <br>${venda.cliente.cidade || '-'}${venda.cliente.uf ? ' - ' + venda.cliente.uf : ''}
                         <br><strong>CEP: ${venda.cliente.cep || '-'}</strong>
                         <br>Tel: ${venda.cliente.telefone ? formatarTelefoneExibicao(venda.cliente.telefone) : '-'}
