@@ -398,10 +398,21 @@
       "nome": "LARA FABIAN CAVALCANTE FINOTTI",
       "loja": "",
       "funcao": "VENDEDOR(A)"
+    },
+    "6616": {
+      "nome": "ANDERSON FERNANDO RIBEIRO DOS SANTOS BRITO JUNIOR",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
+    },
+    "4883": {
+      "nome": "WILLIAS NARCIZO",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
     }
   },
   "vendedores": [
     "ALERSON GEAN DE MELO FAGUNDES",
+    "ANDERSON FERNANDO RIBEIRO DOS SANTOS BRITO JUNIOR",
     "ANA LARA LIMA SILVA",
     "ARIANE NATALIA PEREIRA",
     "BIANCA IASMIN BARROS MARANHAO",
@@ -479,7 +490,8 @@
     "VITORIA GABRIELI GUIMARAES SILVA",
     "WALLAKCE DA SILVA E SILVA",
     "WESLEY PINEDA DA SILVA",
-    "WILLIANS SACRAMENTO SOARES"
+    "WILLIANS SACRAMENTO SOARES",
+    "WILLIAS NARCIZO"
   ],
-  "total_vendedores": 77
+  "total_vendedores": 79
 }
