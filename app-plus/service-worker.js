@@ -1,11 +1,11 @@
-const CACHE_NAME = 'nxt-lojas-cache-v7'; // Força atualização completa
+const CACHE_NAME = 'nxt-plus-cache-v7';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/style.css',
-  '/script.js',
+  '/style-plus.css',
+  '/app-plus.js',
+  '/firebase-config.js',
   '/logo nxt.png',
-  '/dados/lojas.json',
   '/dados/produtos.json'
 ];
 

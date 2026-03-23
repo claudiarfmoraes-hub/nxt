@@ -3325,11 +3325,21 @@ async function buscarOuCriarContato(cliente) {
             try {
                 const busca = await blingRequest(`/contatos?numeroDocumento=${docLimpo}`);
                 if (busca.data && busca.data.length > 0) {
-                    console.log(`Contato encontrado: ID ${busca.data[0].id}`);
+                    console.log(`Contato encontrado por documento: ID ${busca.data[0].id}`);
                     return busca.data[0].id;
                 }
             } catch (e) {
-                console.log('Busca de contato falhou, tentando criar:', e.message);
+                console.log('Busca por numeroDocumento falhou, tentando busca por pesquisa:', e.message);
+                // Fallback: buscar por pesquisa genérica com o documento
+                try {
+                    const buscaAlt = await blingRequest(`/contatos?pesquisa=${docLimpo}`);
+                    if (buscaAlt.data && buscaAlt.data.length > 0) {
+                        console.log(`Contato encontrado por pesquisa: ID ${buscaAlt.data[0].id}`);
+                        return buscaAlt.data[0].id;
+                    }
+                } catch (e2) {
+                    console.log('Busca alternativa também falhou, tentando criar:', e2.message);
+                }
             }
         }
 
@@ -3376,9 +3386,34 @@ async function buscarOuCriarContato(cliente) {
         }
 
         console.log('Criando contato no Bling:', JSON.stringify(novoContato, null, 2));
-        const resultado = await blingRequest('/contatos', 'POST', novoContato);
-        console.log('Contato criado com sucesso:', resultado.data?.id);
-        return resultado.data.id;
+
+        try {
+            const resultado = await blingRequest('/contatos', 'POST', novoContato);
+            console.log('Contato criado com sucesso:', resultado.data?.id);
+            return resultado.data.id;
+        } catch (criarError) {
+            // Se falhou porque CPF já existe, buscar o contato existente
+            if (docLimpo && criarError.message && (
+                criarError.message.toLowerCase().includes('cpf') ||
+                criarError.message.toLowerCase().includes('cnpj') ||
+                criarError.message.toLowerCase().includes('já está cadastrado') ||
+                criarError.message.toLowerCase().includes('ja esta cadastrado') ||
+                criarError.message.toLowerCase().includes('documento já cadastrado') ||
+                criarError.message.toLowerCase().includes('documento ja cadastrado')
+            )) {
+                console.log('CPF/CNPJ já cadastrado no Bling, buscando contato existente...');
+                try {
+                    const buscaRetry = await blingRequest(`/contatos?pesquisa=${docLimpo}`);
+                    if (buscaRetry.data && buscaRetry.data.length > 0) {
+                        console.log(`Contato existente encontrado na segunda busca: ID ${buscaRetry.data[0].id}`);
+                        return buscaRetry.data[0].id;
+                    }
+                } catch (retryError) {
+                    console.error('Falha na segunda busca de contato:', retryError.message);
+                }
+            }
+            throw criarError;
+        }
 
     } catch (error) {
         console.error('Erro ao buscar/criar contato:', error);
