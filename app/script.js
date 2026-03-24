@@ -3323,23 +3323,14 @@ async function buscarOuCriarContato(cliente) {
 
         if (docLimpo) {
             try {
-                const busca = await blingRequest(`/contatos?numeroDocumento=${docLimpo}`);
+                // API v3 do Bling usa parâmetro 'pesquisa' para buscar por CPF/CNPJ
+                const busca = await blingRequest(`/contatos?pesquisa=${docLimpo}`);
                 if (busca.data && busca.data.length > 0) {
-                    console.log(`Contato encontrado por documento: ID ${busca.data[0].id}`);
+                    console.log(`Contato encontrado por pesquisa: ID ${busca.data[0].id}`);
                     return busca.data[0].id;
                 }
             } catch (e) {
-                console.log('Busca por numeroDocumento falhou, tentando busca por pesquisa:', e.message);
-                // Fallback: buscar por pesquisa genérica com o documento
-                try {
-                    const buscaAlt = await blingRequest(`/contatos?pesquisa=${docLimpo}`);
-                    if (buscaAlt.data && buscaAlt.data.length > 0) {
-                        console.log(`Contato encontrado por pesquisa: ID ${buscaAlt.data[0].id}`);
-                        return buscaAlt.data[0].id;
-                    }
-                } catch (e2) {
-                    console.log('Busca alternativa também falhou, tentando criar:', e2.message);
-                }
+                console.log('Busca de contato por CPF/CNPJ falhou, tentando criar:', e.message);
             }
         }
 
