@@ -604,6 +604,7 @@ async function registrarVenda(event) {
 
     // Validações
     const tipoVenda = document.getElementById('tipoVenda').checked;
+    const tipoVendaSumare = document.getElementById('tipoVendaSumare').checked;
     const tipoGarantia = document.getElementById('tipoGarantia').checked;
     const origemSac = document.getElementById('origemSac').value;
     const protocoloSac = document.getElementById('protocoloSac').value.trim();
@@ -629,7 +630,7 @@ async function registrarVenda(event) {
     const parcelas = document.getElementById('parcelas').value;
     const observacoes = document.getElementById('observacoes').value.trim();
 
-    if (!tipoVenda && !tipoGarantia) { mostrarFeedback('Selecione o tipo de atendimento', 'erro'); return; }
+    if (!tipoVenda && !tipoVendaSumare && !tipoGarantia) { mostrarFeedback('Selecione o tipo de atendimento', 'erro'); return; }
     if (!data) { mostrarFeedback('Informe a data', 'erro'); return; }
     if (!vendedor) { mostrarFeedback('Informe o vendedor (SAC)', 'erro'); return; }
     if (!nomeCliente) { mostrarFeedback('Informe o nome do cliente', 'erro'); return; }
@@ -640,7 +641,7 @@ async function registrarVenda(event) {
         if (tipoCliente !== 'J' && docDigitos.length === 11 && !validarCPF(docDigitos)) { mostrarFeedback('CPF inválido', 'erro'); return; }
     }
     if (pecasAdicionadas.length === 0) { mostrarFeedback('Adicione ao menos uma peça', 'erro'); return; }
-    if (tipoVenda && !formaPagamento) { mostrarFeedback('Selecione a forma de pagamento', 'erro'); return; }
+    if ((tipoVenda || tipoVendaSumare) && !formaPagamento) { mostrarFeedback('Selecione a forma de pagamento', 'erro'); return; }
 
     envioEmAndamento = true;
     const btnSubmit = document.querySelector('.btn-registrar-venda');
@@ -652,7 +653,8 @@ async function registrarVenda(event) {
 
     // Montar tipo de atendimento
     let tipoAtendimento = [];
-    if (tipoVenda) tipoAtendimento.push('Venda');
+    if (tipoVenda) tipoAtendimento.push('Venda de Peças SAC');
+    if (tipoVendaSumare) tipoAtendimento.push('Venda de Peças Sumaré');
     if (tipoGarantia) tipoAtendimento.push('Garantia');
 
     const venda = {
