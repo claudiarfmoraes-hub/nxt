@@ -408,6 +408,11 @@
       "nome": "WILLIAS NARCIZO",
       "loja": "",
       "funcao": "VENDEDOR(A)"
+    },
+    "8909": {
+      "nome": "EDUARDO CORRÊA",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
     }
   },
   "vendedores": [
@@ -425,6 +430,7 @@
     "DIEGO AMERICO DE SOUZA",
     "DIEGO HENRIQUE DOS SANTOS",
     "EDGAR MELARATO SILVA",
+    "EDUARDO CORRÊA",
     "EDSON OLIVEIRA CAMPOS",
     "ELLEN CRISTINA GOMES",
     "FELIPE ASSUNCAO CARDOSO",
@@ -493,5 +499,5 @@
     "WILLIANS SACRAMENTO SOARES",
     "WILLIAS NARCIZO"
   ],
-  "total_vendedores": 79
+  "total_vendedores": 80
 }
