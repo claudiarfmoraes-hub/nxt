@@ -413,6 +413,11 @@
       "nome": "EDUARDO CORRÊA",
       "loja": "",
       "funcao": "VENDEDOR(A)"
+    },
+    "2821": {
+      "nome": "THAÍS PACHECO MARQUES",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
     }
   },
   "vendedores": [
@@ -489,6 +494,7 @@
     "SAMIRES DA SILVA FERNANDES VIDAL",
     "SERGIO PEREIRA DE GODOY",
     "TAYNA JULIA DE ALVARENGA SOUSA",
+    "THAÍS PACHECO MARQUES",
     "ULLIAN DO SACRAMENTO SOARES",
     "VANESSA CRISTINA BUENO PITELI",
     "VANESSA DO CARMO SANTOS",
@@ -499,5 +505,5 @@
     "WILLIANS SACRAMENTO SOARES",
     "WILLIAS NARCIZO"
   ],
-  "total_vendedores": 80
+  "total_vendedores": 81
 }

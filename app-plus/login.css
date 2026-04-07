@@ -1,5 +1,10 @@
 /* Estilos da Tela de Login - NXT Plus */
 
+/* App principal escondido por padrão */
+.app-principal-hidden {
+    display: none !important;
+}
+
 .login-container {
     position: fixed;
     top: 0;

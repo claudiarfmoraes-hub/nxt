@@ -11,7 +11,9 @@ function handleLogin(event) {
 // Mostrar tela de login
 function mostrarTelaLogin() {
     document.getElementById('telaLogin').style.display = 'flex';
-    document.getElementById('appPrincipal').style.display = 'none';
+    const appPrincipal = document.getElementById('appPrincipal');
+    appPrincipal.classList.add('app-principal-hidden');
+    appPrincipal.style.display = 'none';
     document.getElementById('footerUserInfo').style.display = 'none';
     esconderLoading();
     esconderErro();
@@ -20,7 +22,9 @@ function mostrarTelaLogin() {
 // Mostrar app principal
 function mostrarAppPrincipal() {
     document.getElementById('telaLogin').style.display = 'none';
-    document.getElementById('appPrincipal').style.display = 'block';
+    const appPrincipal = document.getElementById('appPrincipal');
+    appPrincipal.classList.remove('app-principal-hidden');
+    appPrincipal.style.display = 'block';
     document.getElementById('footerUserInfo').style.display = 'flex';
 
     // Atualizar info do usuário no footer
