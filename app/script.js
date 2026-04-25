@@ -1686,17 +1686,11 @@ function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     if (venda.entrega.prazo) {
         resumo += `*Prazo:* ${new Date(venda.entrega.prazo).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}\n`;
     }
+    const lojaSaidaNome = dadosLojas[venda.entrega.localSaida]?.nome || venda.loja;
     if (venda.entrega.tipo === 'domicilio') {
-        const origemSelect = document.getElementById('origemProduto');
-        resumo += `*Origem:* ${origemSelect.options[origemSelect.selectedIndex].text}\n`;
-        if (venda.entrega.origem === 'outro_lugar') {
-            const localSaidaSelect = document.getElementById('lojaSaida');
-            resumo += `*Local de Saída:* ${localSaidaSelect.options[localSaidaSelect.selectedIndex].text}\n`;
-        }
+        resumo += `*Local de Saída:* ${lojaSaidaNome}\n`;
     } else if (venda.entrega.tipo === 'retirada') {
-        // Mostra onde será a retirada (qual loja)
-        const lojaRetirada = dadosLojas[venda.entrega.localSaida]?.nome || venda.loja;
-        resumo += `*Local de Retirada:* ${lojaRetirada}\n`;
+        resumo += `*Local de Retirada:* ${lojaSaidaNome}\n`;
     }
     resumo += `\n`;
 
