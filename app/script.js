@@ -152,6 +152,7 @@ function preencherDropdowns() {
     const lojaVendaSelect = document.getElementById('lojaVenda');
     const lojaSaidaSelect = document.getElementById('lojaSaida');
     const lojaInventarioSelect = document.getElementById('lojaInventario');
+    const lojaDestinoMovimentacaoSelect = document.getElementById('lojaDestinoMovimentacao');
     const modeloProdutoSelect = document.getElementById('modeloProduto');
     const corProdutoSelect = document.getElementById('corProduto');
     const modeloInventarioSelect = document.getElementById('modeloInventario');
@@ -160,7 +161,7 @@ function preencherDropdowns() {
     const modeloMovimentacaoSelect = document.getElementById('modeloMovimentacao');
     const corMovimentacaoSelect = document.getElementById('corMovimentacao');
 
-    [lojaVendaSelect, lojaSaidaSelect, lojaInventarioSelect, modeloProdutoSelect, corProdutoSelect, modeloInventarioSelect, corInventarioSelect, modeloMovimentacaoSelect, corMovimentacaoSelect].forEach(select => {
+    [lojaVendaSelect, lojaSaidaSelect, lojaInventarioSelect, lojaDestinoMovimentacaoSelect, modeloProdutoSelect, corProdutoSelect, modeloInventarioSelect, corInventarioSelect, modeloMovimentacaoSelect, corMovimentacaoSelect].forEach(select => {
         if(select) {
             const firstOption = select.options[0];
             select.innerHTML = '';
@@ -173,6 +174,7 @@ function preencherDropdowns() {
             const option = new Option(dadosLojas[id].nome, id);
             if (lojaVendaSelect) lojaVendaSelect.add(option.cloneNode(true));
             if (lojaInventarioSelect) lojaInventarioSelect.add(option.cloneNode(true));
+            if (lojaDestinoMovimentacaoSelect) lojaDestinoMovimentacaoSelect.add(option.cloneNode(true));
             if (lojaSaidaSelect) lojaSaidaSelect.add(option);
         }
     }
@@ -243,6 +245,12 @@ function configurarFormularios() {
     const movimentacaoForm = document.getElementById('movimentacaoForm');
     if (movimentacaoForm) {
         movimentacaoForm.addEventListener('submit', adicionarItemMovimentacao);
+    }
+
+    // Reagir quando o usuário digita motivo manualmente
+    const motivoInput = document.getElementById('motivoMovimentacao');
+    if (motivoInput) {
+        motivoInput.addEventListener('input', atualizarCamposCondicionaisMovimentacao);
     }
 
     const modalWizard = document.getElementById('modalWizardVenda');
@@ -649,7 +657,7 @@ function atualizarListaInventarioUI() {
                 : `${item.quantidade}x ${item.modelo} (${item.cor})`;
             const detalhes = item.tipoItem === 'capacete'
                 ? `Contagem • ${dataFormatada}`
-                : `${item.chassi ? `Chassi: ${item.chassi} • ` : ''}${dataFormatada}`;
+                : `${item.chassi ? `Chassi: ${item.chassi} • ` : ''}${item.motor ? `Motor: ${item.motor} • ` : ''}${dataFormatada}`;
 
             div.innerHTML = `
                 <div class="item-icon">${icone}</div>
@@ -670,9 +678,12 @@ function atualizarListaInventarioUI() {
             const titulo = item.tipoItem === 'capacete'
                 ? `${item.quantidade}x Capacete`
                 : `${item.quantidade}x ${item.modelo} (${item.cor})`;
+            let extras = '';
+            if (item.lojaDestinoNome) extras += ` • Loja: ${item.lojaDestinoNome}`;
+            if (item.cliente) extras += ` • Cliente: ${item.cliente}`;
             const detalhes = item.tipoItem === 'capacete'
-                ? `${item.motivo} • ${dataFormatada}`
-                : `${item.chassi ? `Chassi: ${item.chassi} • ` : ''}${item.motivo} • ${dataFormatada}`;
+                ? `${item.motivo}${extras} • ${dataFormatada}`
+                : `${item.chassi ? `Chassi: ${item.chassi} • ` : ''}${item.motor ? `Motor: ${item.motor} • ` : ''}${item.motivo}${extras} • ${dataFormatada}`;
 
             div.innerHTML = `
                 <div class="item-icon">${itemIcone}</div>
@@ -793,6 +804,8 @@ function selecionarTipoMovimentacao(tipo) {
     if (btnSubmit) {
         btnSubmit.disabled = false;
     }
+
+    atualizarCamposCondicionaisMovimentacao();
 }
 
 function selecionarMotivo(motivo) {
@@ -806,6 +819,41 @@ function selecionarMotivo(motivo) {
             btn.classList.add('active');
         }
     });
+
+    atualizarCamposCondicionaisMovimentacao();
+}
+
+function atualizarCamposCondicionaisMovimentacao() {
+    const tipoMov = document.getElementById('tipoMovimentacaoHidden').value;
+    const motivo = (document.getElementById('motivoMovimentacao').value || '').toLowerCase();
+    const lojaDestinoWrap = document.getElementById('lojaDestinoWrap');
+    const lojaDestinoLabel = document.getElementById('lojaDestinoLabel');
+    const clienteWrap = document.getElementById('clienteVendaOutraLojaWrap');
+
+    const isSaida = tipoMov === 'saida';
+    const isTransferencia = motivo.includes('transfer');
+    const isVendaOutraLoja = motivo.includes('venda de outra loja') || motivo.includes('venda outra loja');
+
+    if (isSaida && (isTransferencia || isVendaOutraLoja)) {
+        if (lojaDestinoWrap) lojaDestinoWrap.style.display = '';
+        if (lojaDestinoLabel) {
+            lojaDestinoLabel.innerHTML = isVendaOutraLoja
+                ? 'Loja que vendeu: <span style="color: red;">*</span>'
+                : 'Loja de destino: <span style="color: red;">*</span>';
+        }
+    } else {
+        if (lojaDestinoWrap) lojaDestinoWrap.style.display = 'none';
+        const lojaDestinoSelect = document.getElementById('lojaDestinoMovimentacao');
+        if (lojaDestinoSelect) lojaDestinoSelect.value = '';
+    }
+
+    if (isSaida && isVendaOutraLoja) {
+        if (clienteWrap) clienteWrap.style.display = '';
+    } else {
+        if (clienteWrap) clienteWrap.style.display = 'none';
+        const clienteInput = document.getElementById('clienteVendaOutraLoja');
+        if (clienteInput) clienteInput.value = '';
+    }
 }
 
 function alterarQuantidade(delta) {
@@ -839,6 +887,10 @@ function adicionarItemMovimentacao(event) {
         return;
     }
 
+    const motivoLower = motivo.toLowerCase();
+    const isTransferencia = motivoLower.includes('transfer');
+    const isVendaOutraLoja = motivoLower.includes('venda de outra loja') || motivoLower.includes('venda outra loja');
+
     const item = {
         id: Date.now(),
         operacao: 'movimentacao',
@@ -859,6 +911,27 @@ function adicionarItemMovimentacao(event) {
         if (!item.modelo || !item.cor) {
             mostrarFeedback('Preencha o modelo e a cor da moto', 'erro');
             return;
+        }
+    }
+
+    // Saídas com loja relacionada: capturar destino e (quando aplicável) cliente
+    if (tipoMovimentacao === 'saida' && (isTransferencia || isVendaOutraLoja)) {
+        const lojaDestinoSelect = document.getElementById('lojaDestinoMovimentacao');
+        const lojaDestinoId = lojaDestinoSelect ? lojaDestinoSelect.value : '';
+        if (!lojaDestinoId) {
+            mostrarFeedback(isVendaOutraLoja ? 'Selecione a loja que vendeu' : 'Selecione a loja de destino', 'erro');
+            return;
+        }
+        item.lojaDestinoId = lojaDestinoId;
+        item.lojaDestinoNome = dadosLojas[lojaDestinoId]?.nome || lojaDestinoId;
+
+        if (isVendaOutraLoja) {
+            const cliente = document.getElementById('clienteVendaOutraLoja').value.trim();
+            if (!cliente) {
+                mostrarFeedback('Informe o nome do cliente da venda', 'erro');
+                return;
+            }
+            item.cliente = cliente;
         }
     }
 
@@ -930,6 +1003,16 @@ function limparFormularioMovimentacao() {
 
     // Resetar tipo de item para moto
     selecionarTipoItemMov('moto');
+
+    // Resetar e ocultar campos condicionais (loja destino e cliente)
+    const lojaDestinoSelect = document.getElementById('lojaDestinoMovimentacao');
+    if (lojaDestinoSelect) lojaDestinoSelect.value = '';
+    const lojaDestinoWrap = document.getElementById('lojaDestinoWrap');
+    if (lojaDestinoWrap) lojaDestinoWrap.style.display = 'none';
+    const clienteInput = document.getElementById('clienteVendaOutraLoja');
+    if (clienteInput) clienteInput.value = '';
+    const clienteWrap = document.getElementById('clienteVendaOutraLojaWrap');
+    if (clienteWrap) clienteWrap.style.display = 'none';
 }
 
 function mostrarFeedback(mensagem, tipo) {
@@ -1302,6 +1385,9 @@ async function finalizarInventario() {
         '2️⃣ Os NOMES dos modelos estão corretos? (Não confundiu modelos parecidos?)\n\n' +
         '3️⃣ Contou SOMENTE o que está na loja e NÃO foi vendido?\n\n' +
         '4️⃣ Registrou TUDO que aconteceu desde o último inventário?\n\n' +
+        '5️⃣ Nas SAÍDAS por Transferência, indicou a LOJA DE DESTINO?\n\n' +
+        '6️⃣ Nas SAÍDAS por Venda de outra loja, indicou a LOJA e o NOME DO CLIENTE?\n\n' +
+        '7️⃣ Preencheu CHASSI e MOTOR sempre que possível?\n\n' +
         'Está tudo correto?'
     );
     if (!conferiu) return;
@@ -1474,7 +1560,7 @@ function exportarInventarios() {
 
     const dataExportacao = new Date().toISOString().split('T')[0];
     const dados = {
-        versao: 'NXT V4.8',
+        versao: 'NXT V4.9',
         dataExportacao: new Date().toISOString(),
         totalInventarios: inventariosSalvos.length,
         inventarios: inventariosSalvos
@@ -1541,7 +1627,7 @@ function importarInventarios(event) {
 function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     const dataFormatada = new Date(venda.dataVenda).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
 
-    let resumo = `=== SISTEMA NXT V4.8===\n🏍️ *RESUMO DA VENDA - ${venda.loja}*\n`;
+    let resumo = `=== SISTEMA NXT V4.9===\n🏍️ *RESUMO DA VENDA - ${venda.loja}*\n`;
     resumo += `*Vendedor:* ${venda.matriculaVendedor ? venda.matriculaVendedor + ' - ' : ''}${venda.vendedor}\n`;
     resumo += `*Data:* ${dataFormatada}\n\n`;
     
@@ -1828,7 +1914,7 @@ function gerarHTMLFatura(venda) {
         </div>
 
         <div class="fatura-footer">
-            <p>Esta fatura foi gerada pelo Sistema NXT V4.8</p>
+            <p>Esta fatura foi gerada pelo Sistema NXT V4.9</p>
             <p>NXT Lojas - Soluções em Mobilidade Urbana</p>
             <p><strong>Visite nosso site:</strong> <a href="https://www.nxt.eco.br/" target="_blank">www.nxt.eco.br</a></p>
             <p><small>Para dúvidas ou suporte, entre em contato através do nosso site.</small></p>
@@ -1939,7 +2025,7 @@ Observação: As garantias acima referem-se exclusivamente a defeitos de fabrica
 
 *IMPORTANTE: Este documento tem caráter informativo e não constitui documento fiscal para fins tributários. A nota fiscal eletrônica será emitida e enviada separadamente*
 
-Esta fatura foi gerada pelo Sistema NXT V4.8
+Esta fatura foi gerada pelo Sistema NXT V4.9
 NXT Lojas - Soluções em Mobilidade Urbana
 
 Visite nosso site: https://www.nxt.eco.br/
@@ -2132,7 +2218,7 @@ function copiarResumoInventario() {
         // CABEÇALHO PROFISSIONAL
         // ══════════════════════════════
         resumo += `╔══════════════════════════════════╗\n`;
-        resumo += `   *SISTEMA NXT V4.8 - INVENTÁRIO*\n`;
+        resumo += `   *SISTEMA NXT V4.9 - INVENTÁRIO*\n`;
         resumo += `   Loja: *${lojaNome}*\n`;
         resumo += `   Data: ${new Date().toLocaleDateString('pt-BR')}\n`;
         resumo += `╚══════════════════════════════════╝\n\n`;
@@ -2198,6 +2284,7 @@ function copiarResumoInventario() {
             motosInventario.forEach(item => {
                 resumo += `  • ${item.quantidade}x ${item.modelo} ${item.cor}`;
                 if (item.chassi) resumo += ` | Chassi: ${item.chassi}`;
+                if (item.motor) resumo += ` | Motor: ${item.motor}`;
                 resumo += `\n`;
             });
             capacetesInventario.forEach(item => {
@@ -2231,6 +2318,7 @@ function copiarResumoInventario() {
                     } else {
                         resumo += `│  • ${item.quantidade}x ${item.modelo} ${item.cor} - ${item.motivo}`;
                         if (item.chassi) resumo += ` | Chassi: ${item.chassi}`;
+                        if (item.motor) resumo += ` | Motor: ${item.motor}`;
                         resumo += `\n`;
                     }
                     if (item.recebidoPor) {
@@ -2256,7 +2344,17 @@ function copiarResumoInventario() {
                     } else {
                         resumo += `│  • ${item.quantidade}x ${item.modelo} ${item.cor} - ${item.motivo}`;
                         if (item.chassi) resumo += ` | Chassi: ${item.chassi}`;
+                        if (item.motor) resumo += ` | Motor: ${item.motor}`;
                         resumo += `\n`;
+                    }
+                    const motivoLower = (item.motivo || '').toLowerCase();
+                    const isVendaOutraLoja = motivoLower.includes('venda de outra loja') || motivoLower.includes('venda outra loja');
+                    if (item.lojaDestinoNome) {
+                        const rotulo = isVendaOutraLoja ? 'Loja que vendeu' : 'Loja de destino';
+                        resumo += `│    → ${rotulo}: ${item.lojaDestinoNome}\n`;
+                    }
+                    if (item.cliente) {
+                        resumo += `│    → Cliente: ${item.cliente}\n`;
                     }
                 });
             }

@@ -15,7 +15,7 @@
     <header class="header">
         <div class="header-content">
             <img src="logo nxt.png" alt="NXT Lojas Logo" style="width: 120px;">
-            <h1>SISTEMA NXT V4.8</h1>
+            <h1>SISTEMA NXT V4.9</h1>
             <div id="statusAutomacao"></div>
         </div>
     </header>
@@ -593,7 +593,13 @@
                 <div class="inventario-instrucao-box">
                     <strong>Quando enviar:</strong> No horário do inventário, faça as DUAS coisas juntas: conte o estoque da loja E registre tudo que aconteceu desde o último inventário.<br><br>
                     <strong>Como conferir:</strong> Estoque de ontem − vendas da loja + entradas − saídas = inventário de hoje. Se não bater, registre na aba "O que aconteceu?" para explicar a diferença.<br><br>
-                    <strong>Atenção nos modelos:</strong> Confira o NOME do modelo antes de adicionar! Não confunda modelos de nome parecido.
+                    <strong>Atenção nos modelos:</strong> Confira o NOME do modelo antes de adicionar! Não confunda modelos de nome parecido.<br><br>
+                    <strong>Saídas — campos obrigatórios:</strong>
+                    <ul style="margin: 6px 0 0 18px; padding: 0;">
+                        <li><strong>Transferência:</strong> selecione a LOJA DE DESTINO na lista.</li>
+                        <li><strong>Venda de outra loja:</strong> selecione a LOJA que vendeu na lista E informe o NOME DO CLIENTE.</li>
+                    </ul>
+                    Sempre que possível, preencha CHASSI e MOTOR — os dois aparecem no resumo final.
                 </div>
 
                 <!-- Caixa de cuidados com motos -->
@@ -758,11 +764,26 @@
                                 <label for="motivoMovimentacao">Por quê? (O que aconteceu)</label>
                                 <div class="motivos-rapidos">
                                     <button type="button" class="motivo-btn" onclick="selecionarMotivo('Transferência entre lojas')">Transferência</button>
+                                    <button type="button" class="motivo-btn" onclick="selecionarMotivo('Venda de outra loja')">Venda outra loja</button>
                                     <button type="button" class="motivo-btn" onclick="selecionarMotivo('Recebimento de fábrica')">Fábrica</button>
                                     <button type="button" class="motivo-btn" onclick="selecionarMotivo('Ajuste de estoque')">Ajuste</button>
                                     <button type="button" class="motivo-btn" onclick="selecionarMotivo('Devolução')">Devolução</button>
                                 </div>
                                 <input type="text" id="motivoMovimentacao" placeholder="Ou digite o motivo...">
+                            </div>
+
+                            <!-- Loja destino (Transferência ou Venda de outra loja) -->
+                            <div class="form-group" id="lojaDestinoWrap" style="display: none;">
+                                <label for="lojaDestinoMovimentacao" id="lojaDestinoLabel">Loja de destino: <span style="color: red;">*</span></label>
+                                <select id="lojaDestinoMovimentacao" class="select-enhanced">
+                                    <option value="">Selecione a loja...</option>
+                                </select>
+                            </div>
+
+                            <!-- Cliente (Venda de outra loja) -->
+                            <div class="form-group" id="clienteVendaOutraLojaWrap" style="display: none;">
+                                <label for="clienteVendaOutraLoja">Nome do cliente: <span style="color: red;">*</span></label>
+                                <input type="text" id="clienteVendaOutraLoja" placeholder="Nome completo do cliente...">
                             </div>
 
                             <!-- Controle de Quantidade -->
