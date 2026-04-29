@@ -2204,7 +2204,7 @@ function copiarResumoInventario() {
         const itensInventarioOnly = itensInventario.filter(item => item.operacao === 'inventario');
         const itensMovimentacao = itensInventario.filter(item => item.operacao === 'movimentacao');
 
-        const ordemFixa = ['Juna', 'Kay', 'Pancho', 'Luna', 'Hyphen', 'Vega', 'V0', 'Gataka', 'Jaya', 'Jay', 'Smart-Juna', 'Shaka', 'Zilla'];
+        const ordemFixa = ['Juna', 'Kay', 'Pancho', 'Luna', 'Hyphen', 'Vega', 'V0', 'Gataka', 'Jaya', 'Jay', 'Smart-Juna', 'Shaka', 'Zilla', 'Akasha'];
 
         let resumo = '';
 
