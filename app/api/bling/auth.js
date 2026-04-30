@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     // GET = Redirecionar para autorização do Bling
     if (req.method === 'GET') {
         const redirectUri = `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}/api/bling/callback`;
-        const authUrl = `https://www.bling.com.br/Api/v3/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=matriz`;
+        const authUrl = `https://api.bling.com.br/Api/v3/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=matriz`;
 
         return res.redirect(302, authUrl);
     }
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
         try {
             const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
-            const response = await fetch('https://www.bling.com.br/Api/v3/oauth/token', {
+            const response = await fetch('https://api.bling.com.br/Api/v3/oauth/token', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     try {
         const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
-        const response = await fetch('https://www.bling.com.br/Api/v3/oauth/token', {
+        const response = await fetch('https://api.bling.com.br/Api/v3/oauth/token', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
