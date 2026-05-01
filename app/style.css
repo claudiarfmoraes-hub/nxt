@@ -2405,9 +2405,18 @@ h4, h5 {
 
 .cartoes-hint {
     display: block;
-    margin-top: 0.25rem;
-    font-size: 0.8rem;
-    color: #666;
+    margin-top: 0.35rem;
+    padding: 0.5rem 0.65rem;
+    background-color: #fff;
+    border-left: 3px solid #f57c00;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    color: #444;
+    line-height: 1.4;
+}
+
+.cartoes-hint strong {
+    color: #c62828;
 }
 
 .cartao-row {
