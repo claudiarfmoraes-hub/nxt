@@ -326,7 +326,7 @@ function atualizarListaProdutosUI() {
     if (produtosDaVenda.length === 0) {
         container.innerHTML = `
             <div class="empty-state-produtos">
-                <span class="empty-icon">🛒</span>
+                
                 <p>Nenhum produto adicionado</p>
                 <p class="empty-hint">Preencha os dados acima e clique em adicionar</p>
             </div>
@@ -341,12 +341,12 @@ function atualizarListaProdutosUI() {
         div.className = 'produto-item-novo';
 
         const capaceteInfo = produto.capacete === 'sim'
-            ? ` • 🪖 ${produto.corCapacete || 'Capacete'}`
+            ? ` • ${produto.corCapacete || 'Capacete'}`
             : '';
 
         div.innerHTML = `
             <div class="produto-info">
-                <div class="produto-modelo">🏍️ ${produto.modelo} - ${produto.cor}</div>
+                <div class="produto-modelo">${produto.modelo} - ${produto.cor}</div>
                 <div class="produto-detalhes">
                     ${produto.chassi ? `Chassi: ${produto.chassi}` : ''}
                     ${produto.motor ? ` • Motor: ${produto.motor}` : ''}
@@ -653,7 +653,7 @@ function atualizarListaInventarioUI() {
 
         if (item.operacao === 'inventario') {
             div.className = 'item-card-novo';
-            const icone = item.tipoItem === 'capacete' ? '🪖' : '🏍️';
+            const icone = item.tipoItem === 'capacete' ? '' : '';
             const titulo = item.tipoItem === 'capacete'
                 ? `${item.quantidade}x Capacete`
                 : `${item.quantidade}x ${item.modelo} (${item.cor})`;
@@ -676,7 +676,7 @@ function atualizarListaInventarioUI() {
             div.className = `item-card-novo ${tipoClasse}`;
             const icone = item.tipo === 'entrada' ? '📥' : '📤';
             const tipoTexto = item.tipo === 'entrada' ? 'Entrada' : 'Saída';
-            const itemIcone = item.tipoItem === 'capacete' ? '🪖' : '🏍️';
+            const itemIcone = item.tipoItem === 'capacete' ? '' : '';
             const titulo = item.tipoItem === 'capacete'
                 ? `${item.quantidade}x Capacete`
                 : `${item.quantidade}x ${item.modelo} (${item.cor})`;
@@ -1510,7 +1510,7 @@ function mostrarHistoricoInventario() {
                  onclick="carregarInventarioPorIndice(${indexReal})">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <strong style="font-size: 16px;">🏪 ${inv.loja}</strong>
+                        <strong style="font-size: 16px;">${inv.loja}</strong>
                         <div style="color: #666; margin-top: 5px;">
                             📅 ${data}
                         </div>
@@ -1629,11 +1629,11 @@ function importarInventarios(event) {
 function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     const dataFormatada = new Date(venda.dataVenda).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
 
-    let resumo = `=== SISTEMA NXT V4.10===\n🏍️ *RESUMO DA VENDA - ${venda.loja}*\n`;
+    let resumo = `=== SISTEMA NXT V4.10===\n*RESUMO DA VENDA — ${venda.loja}*\n`;
     resumo += `*Vendedor:* ${venda.matriculaVendedor ? venda.matriculaVendedor + ' - ' : ''}${venda.vendedor}\n`;
     resumo += `*Data:* ${dataFormatada}\n\n`;
     
-    resumo += `👤 *CLIENTE*\n`;
+    resumo += `*CLIENTE*\n`;
     resumo += `*Nome:* ${venda.cliente.nome}\n`;
     resumo += `*Telefone:* ${venda.cliente.telefone}\n`;
     if (venda.cliente.email) resumo += `*E-mail:* ${venda.cliente.email}\n`;
@@ -1643,7 +1643,7 @@ function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     const endereco = `${end.rua}, ${end.numero} - ${end.bairro}, ${end.cidade}/${end.estado} - CEP: ${end.cep}`;
     resumo += `*Endereço:* ${endereco}\n\n`;
 
-    resumo += `📦 *PRODUTOS*\n`;
+    resumo += `*PRODUTOS*\n`;
     venda.produtos.forEach(p => {
         resumo += `- ${p.modelo} ${p.cor}\n`;
         if (p.chassi) resumo += `  *Chassi:* ${p.chassi}\n`;
@@ -1653,7 +1653,7 @@ function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     });
     resumo += `\n`;
 
-    resumo += `💳 *PAGAMENTO*\n`;
+    resumo += `*PAGAMENTO*\n`;
 
     if (venda.pagamento.valores && Object.keys(venda.pagamento.valores).length > 0) {
         const formasPagamento = [];
@@ -1687,7 +1687,7 @@ function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     
     resumo += `*TOTAL:* R$ ${formatarValorMonetario(venda.total)}\n\n`;
 
-    resumo += `🚚 *ENTREGA*\n`;
+    resumo += `*ENTREGA*\n`;
     const tipoEntregaValue = document.getElementById('tipoEntrega').value;
     const tipoEntregaTexto = tipoEntregaValue === 'retirada' ? 'Retirado pelo Cliente' : 'Receber em Casa';
     resumo += `*Tipo:* ${tipoEntregaTexto}\n`;
@@ -1703,7 +1703,7 @@ function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     resumo += `\n`;
 
     if (enviadoParaBling) {
-        resumo += `✅ *Venda enviada ao sistema Bling para emissão da NF-e*\n`;
+        resumo += `*Venda enviada ao sistema Bling para emissão da NF-e*\n`;
     }
 
     return resumo;
@@ -2251,7 +2251,7 @@ function copiarResumoInventario() {
 
         resumo += `▸ *ESTOQUE ATUAL (O que tem na loja)*\n`;
         resumo += `┌──────────────────────────────────┐\n`;
-        resumo += `│ 🏍️ *Motos: ${totalMotos} unidades*\n`;
+        resumo += `│ *Motos: ${totalMotos} unidades*\n`;
         resumo += `│\n`;
 
         // Grade fixa - SEMPRE mostra todos os modelos
@@ -2270,7 +2270,7 @@ function copiarResumoInventario() {
 
         if (totalCapacetes > 0) {
             resumo += `│\n`;
-            resumo += `│ 🪖 *Capacetes: ${totalCapacetes} unidades*\n`;
+            resumo += `│ *Capacetes: ${totalCapacetes} unidades*\n`;
         }
         resumo += `└──────────────────────────────────┘\n\n`;
 
@@ -2377,8 +2377,8 @@ function copiarResumoInventario() {
         // SEÇÃO: CUIDADOS COM O ESTOQUE
         // ══════════════════════════════
         resumo += `\n▸ *CUIDADOS COM O ESTOQUE*\n`;
-        resumo += `  ⚡ Manter TODAS as motos carregadas (baterias descarregadas = dano permanente)\n`;
-        resumo += `  ☀️ Não deixar motos expostas ao sol ou chuva\n`;
+        resumo += `  • Manter TODAS as motos carregadas (baterias descarregadas = dano permanente)\n`;
+        resumo += `  • Não deixar motos expostas ao sol ou chuva\n`;
         resumo += `  🔧 Verificar pneus e freios periodicamente\n`;
 
         // Salvar resumo no histórico
@@ -4328,7 +4328,7 @@ function enviarFaturaWhatsApp() {
     }
 
     // Montar mensagem completa
-    const mensagem = `Olá ${nomeCliente}! 🏍️
+    const mensagem = `Olá ${nomeCliente}!
 
 Segue a fatura da sua compra:
 
@@ -4341,12 +4341,12 @@ Segue a fatura da sua compra:
 *Endereço:* ${venda.cliente.endereco.rua}, ${venda.cliente.endereco.numero} - ${venda.cliente.endereco.bairro}
 ${venda.cliente.endereco.cidade}/${venda.cliente.endereco.estado} - CEP: ${venda.cliente.endereco.cep}
 
-📦 *PRODUTOS*
+*PRODUTOS*
 ${produtosTexto}
-💳 *PAGAMENTO*
+*PAGAMENTO*
 ${pagamentoTexto}${venda.pagamento.observacoes ? `\nObs: ${venda.pagamento.observacoes}` : ''}
 
-🚚 *ENTREGA*
+*ENTREGA*
 ${entregaTexto}
 
 ━━━━━━━━━━━━━━━━━
@@ -4359,9 +4359,9 @@ ${entregaTexto}
 • Bateria: 6 meses contra defeitos de fabricação
 _Danos por uso inadequado, acidentes ou desgaste natural não são cobertos pela garantia._
 
-📅 Data da Venda: ${dataVenda}
-📅 Emissão: ${dataEmissao}
-🏪 Loja: ${venda.loja}
+Data da Venda: ${dataVenda}
+Emissão: ${dataEmissao}
+Loja: ${venda.loja}
 ${(() => {
     const modelos = [...new Set(venda.produtos.map(p => p.modelo))];
     const manuaisTexto = modelos
