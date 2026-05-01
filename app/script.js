@@ -2291,13 +2291,16 @@ function copiarResumoInventario() {
             });
 
             motosInventario.forEach(item => {
-                resumo += `  • ${item.quantidade}x ${item.modelo} ${item.cor}`;
-                if (item.chassi) resumo += ` | Chassi: ${item.chassi}`;
-                if (item.motor) resumo += ` | Motor: ${item.motor}`;
-                resumo += `\n`;
+                resumo += `  • *${item.modelo} ${item.cor}*\n`;
+                const partes = [];
+                if (item.chassi) partes.push(`Chassi ${item.chassi}`);
+                if (item.motor) partes.push(`Motor ${item.motor}`);
+                if (partes.length > 0) {
+                    resumo += `    _${partes.join(' · ')}_\n`;
+                }
             });
             capacetesInventario.forEach(item => {
-                resumo += `  • ${item.quantidade}x Capacete\n`;
+                resumo += `  • *${item.quantidade}x Capacete*\n`;
             });
 
             if (motosInventario.length === 0 && capacetesInventario.length === 0) {
@@ -2320,41 +2323,73 @@ function copiarResumoInventario() {
 
             // Entradas
             if (itensEntrada.length > 0) {
-                resumo += `│ 📥 *ENTRADAS: ${totalEntradas} unidades*\n`;
+                resumo += `│ *ENTRADAS: ${totalEntradas} unidades*\n`;
                 itensEntrada.forEach(item => {
                     if (item.tipoItem === 'capacete') {
-                        resumo += `│  • ${item.quantidade}x Capacete - ${item.motivo}\n`;
+                        resumo += `│  • *${item.quantidade}x Capacete*\n`;
                     } else {
-                        resumo += `│  • ${item.quantidade}x ${item.modelo} ${item.cor} - ${item.motivo}`;
-                        if (item.chassi) resumo += ` | Chassi: ${item.chassi}`;
-                        if (item.motor) resumo += ` | Motor: ${item.motor}`;
-                        resumo += `\n`;
-                    }
-                    if (item.recebidoPor) {
-                        resumo += `│    ✓ Recebido por: ${item.recebidoPor}`;
-                        resumo += ` | Inspeção: ${item.inspecaoVisual ? 'OK' : '—'}`;
-                        resumo += ` | Carregador: ${item.carregadorOk ? 'OK' : '—'}`;
-                        resumo += ` | Acessórios: ${item.acessoriosOk ? 'OK' : '—'}`;
-                        resumo += `\n`;
+                        resumo += `│  • *${item.quantidade}x ${item.modelo} ${item.cor}*\n`;
+                        const partes = [];
+                        if (item.chassi) partes.push(`Chassi ${item.chassi}`);
+                        if (item.motor) partes.push(`Motor ${item.motor}`);
+                        if (partes.length > 0) {
+                            resumo += `│    _${partes.join(' · ')}_\n`;
+                        }
                     }
                 });
+
+                // Bloco consolidado: motivo + recebedor + conferencia
+                const motivos = [...new Set(itensEntrada.map(i => i.motivo).filter(Boolean))];
+                const recebedores = [...new Set(itensEntrada.map(i => i.recebidoPor).filter(Boolean))];
+                const inspNok = itensEntrada.filter(i => i.recebidoPor && !i.inspecaoVisual);
+                const cargNok = itensEntrada.filter(i => i.recebidoPor && !i.carregadorOk);
+                const acesNok = itensEntrada.filter(i => i.recebidoPor && !i.acessoriosOk);
+                const algumComConferencia = itensEntrada.some(i => i.recebidoPor);
+
+                if (motivos.length > 0 || recebedores.length > 0 || algumComConferencia) {
+                    resumo += `│\n`;
+                }
+                if (motivos.length === 1) {
+                    resumo += `│ Motivo: ${motivos[0]}\n`;
+                } else if (motivos.length > 1) {
+                    resumo += `│ Motivos: ${motivos.join('; ')}\n`;
+                }
+                if (recebedores.length === 1) {
+                    resumo += `│ Recebido por: ${recebedores[0]}\n`;
+                } else if (recebedores.length > 1) {
+                    resumo += `│ Recebido por: ${recebedores.join(', ')}\n`;
+                }
+                if (algumComConferencia) {
+                    if (inspNok.length === 0 && cargNok.length === 0 && acesNok.length === 0) {
+                        resumo += `│ Conferência: OK\n`;
+                    } else {
+                        resumo += `│ ⚠️ DIVERGÊNCIAS NA CONFERÊNCIA:\n`;
+                        const fmt = arr => arr.map(i => `${i.modelo} ${i.cor}`).join(', ');
+                        if (inspNok.length) resumo += `│   Inspeção visual: ${fmt(inspNok)}\n`;
+                        if (cargNok.length) resumo += `│   Carregador: ${fmt(cargNok)}\n`;
+                        if (acesNok.length) resumo += `│   Acessórios: ${fmt(acesNok)}\n`;
+                    }
+                }
             }
 
             if (itensEntrada.length > 0 && itensSaida.length > 0) {
                 resumo += `│\n`;
             }
 
-            // Saídas
+            // Saídas (motivo/destino/cliente variam por item — mantido por linha)
             if (itensSaida.length > 0) {
-                resumo += `│ 📤 *SAÍDAS: ${totalSaidas} unidades*\n`;
+                resumo += `│ *SAÍDAS: ${totalSaidas} unidades*\n`;
                 itensSaida.forEach(item => {
                     if (item.tipoItem === 'capacete') {
-                        resumo += `│  • ${item.quantidade}x Capacete - ${item.motivo}\n`;
+                        resumo += `│  • *${item.quantidade}x Capacete* — ${item.motivo}\n`;
                     } else {
-                        resumo += `│  • ${item.quantidade}x ${item.modelo} ${item.cor} - ${item.motivo}`;
-                        if (item.chassi) resumo += ` | Chassi: ${item.chassi}`;
-                        if (item.motor) resumo += ` | Motor: ${item.motor}`;
-                        resumo += `\n`;
+                        resumo += `│  • *${item.quantidade}x ${item.modelo} ${item.cor}* — ${item.motivo}\n`;
+                        const partes = [];
+                        if (item.chassi) partes.push(`Chassi ${item.chassi}`);
+                        if (item.motor) partes.push(`Motor ${item.motor}`);
+                        if (partes.length > 0) {
+                            resumo += `│    _${partes.join(' · ')}_\n`;
+                        }
                     }
                     const motivoLower = (item.motivo || '').toLowerCase();
                     const isVendaOutraLoja = motivoLower.includes('venda de outra loja') || motivoLower.includes('venda outra loja');
@@ -2372,14 +2407,6 @@ function copiarResumoInventario() {
             resumo += `▸ *O QUE ACONTECEU (Entradas e Saídas)*\n`;
             resumo += `  (nenhuma movimentação registrada)\n`;
         }
-
-        // ══════════════════════════════
-        // SEÇÃO: CUIDADOS COM O ESTOQUE
-        // ══════════════════════════════
-        resumo += `\n▸ *CUIDADOS COM O ESTOQUE*\n`;
-        resumo += `  • Manter TODAS as motos carregadas (baterias descarregadas = dano permanente)\n`;
-        resumo += `  • Não deixar motos expostas ao sol ou chuva\n`;
-        resumo += `  🔧 Verificar pneus e freios periodicamente\n`;
 
         // Salvar resumo no histórico
         salvarResumoNoHistorico(lojaNome, resumo);
