@@ -357,14 +357,9 @@
                                             <label for="valorDinheiro">Dinheiro (R$):</label>
                                             <input type="text" id="valorDinheiro" class="currency-input valor-forma-pagamento" placeholder="R$ 0,00">
                                         </div>
-                                        <div id="debitoValorGroup" class="valor-group" style="display: none;">
-                                            <label for="valorDebito">Débito (R$):</label>
-                                            <input type="text" id="valorDebito" class="currency-input valor-forma-pagamento" placeholder="R$ 0,00">
-                                        </div>
-                                        <div id="creditoValorGroup" class="valor-group" style="display: none;">
-                                            <label for="valorCredito">Crédito (R$):</label>
-                                            <input type="text" id="valorCredito" class="currency-input valor-forma-pagamento" placeholder="R$ 0,00">
-                                        </div>
+                                        <!-- Inputs ocultos: somatorios de cartoes (preenchidos automaticamente a partir da secao de Detalhes de Cartao) -->
+                                        <input type="hidden" id="valorDebito" class="valor-forma-pagamento">
+                                        <input type="hidden" id="valorCredito" class="valor-forma-pagamento">
                                         <div id="crediarioValorGroup" class="valor-group" style="display: none;">
                                             <label for="valorCrediario">Crediário (R$):</label>
                                             <input type="text" id="valorCrediario" class="currency-input valor-forma-pagamento" placeholder="R$ 0,00">
@@ -376,25 +371,21 @@
                                     </div>
                                 </div>
 
-                                <div id="parcelasGroup" class="parcelas-section" style="display: none;">
-                                    <label for="parcelasCredito">
-                                        <span class="label-icon">🔢</span> Parcelas do Crédito:
-                                    </label>
-                                    <div class="parcelas-selector">
-                                        <button type="button" class="parcela-btn" data-parcelas="1">1x</button>
-                                        <button type="button" class="parcela-btn" data-parcelas="2">2x</button>
-                                        <button type="button" class="parcela-btn" data-parcelas="3">3x</button>
-                                        <button type="button" class="parcela-btn" data-parcelas="4">4x</button>
-                                        <button type="button" class="parcela-btn" data-parcelas="5">5x</button>
-                                        <button type="button" class="parcela-btn" data-parcelas="6">6x</button>
-                                        <button type="button" class="parcela-btn" data-parcelas="7">7x</button>
-                                        <button type="button" class="parcela-btn" data-parcelas="8">8x</button>
-                                        <button type="button" class="parcela-btn" data-parcelas="9">9x</button>
-                                        <button type="button" class="parcela-btn" data-parcelas="10">10x</button>
-                                        <button type="button" class="parcela-btn" data-parcelas="11">11x</button>
-                                        <button type="button" class="parcela-btn" data-parcelas="12">12x</button>
+                                <!-- Hidden legacy: parcelas do primeiro cartao de credito (preenchido automaticamente pela secao de Detalhes de Cartao) -->
+                                <input type="hidden" id="parcelasCredito" value="1">
+
+                                <!-- Detalhes de Cartao: registro por transacao para conciliacao financeira -->
+                                <div id="cartoesGroup" class="cartoes-section" style="display: none;">
+                                    <div class="cartoes-header">
+                                        <h5><span class="label-icon">💳</span> Detalhes de Cartão</h5>
+                                        <small class="cartoes-hint">Preencher uma linha por transação para conciliação com extrato da maquininha.</small>
                                     </div>
-                                    <input type="hidden" id="parcelasCredito" value="1">
+                                    <div id="cartoesList"></div>
+                                    <button type="button" id="btnAddCartao" class="btn-add-cartao" onclick="adicionarCartao()">+ Adicionar cartão</button>
+                                    <div class="cartoes-totais">
+                                        <span>Total Débito: <strong id="totalCartaoDebito">R$ 0,00</strong></span>
+                                        <span>Total Crédito: <strong id="totalCartaoCredito">R$ 0,00</strong></span>
+                                    </div>
                                 </div>
 
                                 <div id="outrosPagamentoGroup" style="display: none;">

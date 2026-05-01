@@ -39,6 +39,7 @@ let dadosVendedores = [];
 let dadosMatriculas = {};
 let dadosFiscais = {};
 let produtosDaVenda = [];
+let cartoesVenda = []; // transacoes de cartao da venda atual (conciliacao financeira)
 let itensInventario = [];
 let ultimoResumoVenda = '';
 let ultimaVendaRegistrada = null;
@@ -457,6 +458,7 @@ async function registrarVenda(event) {
             formas: Array.from(document.querySelectorAll('input[name="pagamento"]:checked')).map(cb => cb.value),
             valores: obterValoresFormasPagamento(),
             parcelas: document.getElementById('parcelasCredito').value,
+            cartoes: cartoesVenda.map(c => ({ ...c })),
             outros: document.getElementById('outrosPagamentoTexto').value,
             observacoes: document.getElementById('observacoesPagamento').value
         },
@@ -1652,7 +1654,7 @@ function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     resumo += `\n`;
 
     resumo += `💳 *PAGAMENTO*\n`;
-    
+
     if (venda.pagamento.valores && Object.keys(venda.pagamento.valores).length > 0) {
         const formasPagamento = [];
         for (const [forma, valor] of Object.entries(venda.pagamento.valores)) {
@@ -1663,12 +1665,18 @@ function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     } else {
         resumo += `*Formas:* ${venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f === 'crediario' ? 'CREDIÁRIO' : f.toUpperCase()).join(', ')}\n`;
     }
-    
-    if (venda.pagamento.formas.includes('credito')) {
+
+    // Detalhes de cartao para conciliacao financeira
+    if (Array.isArray(venda.pagamento.cartoes) && venda.pagamento.cartoes.length > 0) {
+        resumo += `*Cartões:*\n`;
+        venda.pagamento.cartoes.forEach(c => {
+            resumo += `  - ${descreverCartao(c)}\n`;
+        });
+    } else if (venda.pagamento.formas.includes('credito')) {
         resumo += `*Parcelas:* ${venda.pagamento.parcelas}x\n`;
     }
-    
-    
+
+
     if (venda.pagamento.observacoes) {
         resumo += `*Observações:* ${venda.pagamento.observacoes}\n`;
     }
@@ -1738,6 +1746,7 @@ function copiarResumoVenda(isFromModal) {
                     formas: Array.from(document.querySelectorAll('input[name="pagamento"]:checked')).map(cb => cb.value),
                     valores: obterValoresFormasPagamento(),
                     parcelas: document.getElementById('parcelasCredito').value,
+                    cartoes: cartoesVenda.map(c => ({ ...c })),
                     observacoes: document.getElementById('observacoesPagamento').value
                 },
                 valorFrete: obterValorNumerico('valorFrete'),
@@ -1809,7 +1818,10 @@ function gerarHTMLFatura(venda) {
         formasPagamentoTexto = venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f === 'crediario' ? 'CREDIÁRIO' : f.toUpperCase()).join(', ');
     }
 
-    if (venda.pagamento.formas.includes('credito')) {
+    if (Array.isArray(venda.pagamento.cartoes) && venda.pagamento.cartoes.length > 0) {
+        const detalhes = venda.pagamento.cartoes.map(c => descreverCartao(c)).join('<br>');
+        formasPagamentoTexto += `<br><small>${detalhes}</small>`;
+    } else if (venda.pagamento.formas.includes('credito')) {
         formasPagamentoTexto += ` (${venda.pagamento.parcelas}x)`;
     }
 
@@ -1949,7 +1961,10 @@ function gerarTextoFatura(venda) {
         formasPagamentoTexto = venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f === 'crediario' ? 'CREDIÁRIO' : f.toUpperCase()).join(', ');
     }
 
-    if (venda.pagamento.formas.includes('credito')) {
+    if (Array.isArray(venda.pagamento.cartoes) && venda.pagamento.cartoes.length > 0) {
+        const detalhes = venda.pagamento.cartoes.map(c => `  - ${descreverCartao(c)}`).join('\n');
+        formasPagamentoTexto += `\n${detalhes}`;
+    } else if (venda.pagamento.formas.includes('credito')) {
         formasPagamentoTexto += ` (${venda.pagamento.parcelas}x)`;
     }
 
@@ -2577,19 +2592,25 @@ function obterValoresFormasPagamento() {
     const valores = {};
     const formasSelecionadas = Array.from(document.querySelectorAll('input[name="pagamento"]:checked')).map(cb => cb.value);
 
-    // Se apenas 1 forma selecionada, atribuir o total da venda automaticamente
-    if (formasSelecionadas.length === 1) {
+    // Cartoes: somar de cartoesVenda (preenchidos manualmente para conciliacao)
+    const totalCartaoDebito = cartoesVenda.filter(c => c.tipo === 'debito').reduce((s, c) => s + (c.valor || 0), 0);
+    const totalCartaoCredito = cartoesVenda.filter(c => c.tipo === 'credito').reduce((s, c) => s + (c.valor || 0), 0);
+    if (formasSelecionadas.includes('debito')) valores.debito = totalCartaoDebito;
+    if (formasSelecionadas.includes('credito')) valores.credito = totalCartaoCredito;
+
+    const naoCartao = formasSelecionadas.filter(f => f !== 'debito' && f !== 'credito');
+
+    // Se UMA unica forma e nao e cartao, auto-atribuir o total da venda
+    if (formasSelecionadas.length === 1 && naoCartao.length === 1) {
         const totalProdutos = produtosDaVenda.reduce((acc, produto) => acc + produto.preco, 0);
         const valorFrete = obterValorNumerico('valorFrete');
         const totalVenda = totalProdutos + valorFrete;
-        if (totalVenda > 0) {
-            valores[formasSelecionadas[0]] = totalVenda;
-        }
+        if (totalVenda > 0) valores[naoCartao[0]] = totalVenda;
         return valores;
     }
 
-    // Se 2+ formas, ler os campos de valor individuais
-    ['pix', 'pos', 'dinheiro', 'debito', 'credito', 'crediario', 'outros'].forEach(forma => {
+    // Multiplas formas: ler campos individuais (apenas nao-cartao)
+    naoCartao.forEach(forma => {
         const input = document.getElementById(`valor${forma.charAt(0).toUpperCase() + forma.slice(1)}`);
         if (input) {
             const valorNumerico = parseFloat(input.value.replace(/[R$\s.]/g, '').replace(',', '.'));
@@ -2599,11 +2620,9 @@ function obterValoresFormasPagamento() {
         }
     });
 
-    // Garantir que toda forma selecionada tenha entrada no valores (mesmo que 0)
+    // Garantir que toda forma selecionada tenha entrada (mesmo que 0)
     formasSelecionadas.forEach(forma => {
-        if (!(forma in valores)) {
-            valores[forma] = 0;
-        }
+        if (!(forma in valores)) valores[forma] = 0;
     });
 
     return valores;
@@ -2618,6 +2637,146 @@ function calcularTotalFormasPagamento() {
 
     document.getElementById('totalVenda').textContent = `R$ ${formatarValorMonetario(totalEsperado)}`;
     document.getElementById('totalVenda').style.color = '';
+}
+
+// --- DETALHES DE CARTAO (conciliacao financeira) ---
+
+function dataHoraLocalAgora() {
+    const now = new Date();
+    const tz = now.getTimezoneOffset() * 60000;
+    return new Date(now - tz).toISOString().slice(0, 16);
+}
+
+function formatarDataHoraCartaoBR(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+function descreverCartao(c) {
+    const tipo = c.tipo === 'debito' ? 'DÉBITO' : 'CRÉDITO';
+    let modalidadeStr = '';
+    if (c.tipo === 'credito') {
+        modalidadeStr = c.modalidade === 'parc' ? ` ${c.parcelas}x parcelado` : ' à vista';
+    }
+    const dh = c.dataHora ? ` — ${formatarDataHoraCartaoBR(c.dataHora)}` : '';
+    return `${tipo}${modalidadeStr} — R$ ${formatarValorMonetario(c.valor || 0)}${dh}`;
+}
+
+function adicionarCartao() {
+    const isCredito = document.querySelector('input[name="pagamento"][value="credito"]').checked;
+    const isDebito = document.querySelector('input[name="pagamento"][value="debito"]').checked;
+    const tipoDefault = (isCredito && !isDebito) ? 'credito' : 'debito';
+    cartoesVenda.push({
+        tipo: tipoDefault,
+        modalidade: 'av',
+        parcelas: 1,
+        valor: 0,
+        dataHora: dataHoraLocalAgora()
+    });
+    renderCartoes();
+    recalcularValoresCartao();
+}
+
+function removerCartao(index) {
+    cartoesVenda.splice(index, 1);
+    renderCartoes();
+    recalcularValoresCartao();
+}
+
+function renderCartoes() {
+    const list = document.getElementById('cartoesList');
+    if (!list) return;
+    list.innerHTML = cartoesVenda.map((c, i) => `
+        <div class="cartao-row" data-index="${i}">
+            <div class="cartao-grid">
+                <div class="cartao-field">
+                    <label>Tipo</label>
+                    <select class="cartao-tipo" onchange="atualizarLinhaCartao(${i})">
+                        <option value="debito" ${c.tipo === 'debito' ? 'selected' : ''}>Débito</option>
+                        <option value="credito" ${c.tipo === 'credito' ? 'selected' : ''}>Crédito</option>
+                    </select>
+                </div>
+                <div class="cartao-field">
+                    <label>Modalidade</label>
+                    <select class="cartao-modalidade" onchange="atualizarLinhaCartao(${i})" ${c.tipo === 'debito' ? 'disabled' : ''}>
+                        <option value="av" ${c.modalidade === 'av' ? 'selected' : ''}>À vista</option>
+                        <option value="parc" ${c.modalidade === 'parc' ? 'selected' : ''}>Parcelado</option>
+                    </select>
+                </div>
+                <div class="cartao-field">
+                    <label>Parcelas</label>
+                    <select class="cartao-parcelas" onchange="atualizarLinhaCartao(${i})" ${(c.tipo !== 'credito' || c.modalidade !== 'parc') ? 'disabled' : ''}>
+                        ${Array.from({length: 12}, (_, n) => `<option value="${n+1}" ${String(c.parcelas) === String(n+1) ? 'selected' : ''}>${n+1}x</option>`).join('')}
+                    </select>
+                </div>
+                <div class="cartao-field">
+                    <label>Valor</label>
+                    <input type="text" class="cartao-valor currency-input" placeholder="R$ 0,00" value="${c.valor > 0 ? formatarValorMonetario(c.valor) : ''}" oninput="atualizarLinhaCartao(${i})">
+                </div>
+                <div class="cartao-field">
+                    <label>Data/Hora</label>
+                    <input type="datetime-local" class="cartao-datahora" value="${c.dataHora || ''}" onchange="atualizarLinhaCartao(${i})">
+                </div>
+                <button type="button" class="btn-remove-cartao" onclick="removerCartao(${i})" title="Remover">✕</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function atualizarLinhaCartao(index) {
+    const row = document.querySelectorAll('.cartao-row')[index];
+    if (!row || !cartoesVenda[index]) return;
+
+    const tipo = row.querySelector('.cartao-tipo').value;
+    let modalidade = row.querySelector('.cartao-modalidade').value;
+    let parcelas = parseInt(row.querySelector('.cartao-parcelas').value, 10) || 1;
+    const valorStr = row.querySelector('.cartao-valor').value;
+    const valor = parseFloat(valorStr.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+    const dataHora = row.querySelector('.cartao-datahora').value;
+
+    // Regras: debito sempre av/1x; credito a vista forca 1x
+    if (tipo === 'debito') {
+        modalidade = 'av';
+        parcelas = 1;
+    } else if (modalidade === 'av') {
+        parcelas = 1;
+    }
+
+    cartoesVenda[index] = { tipo, modalidade, parcelas, valor, dataHora };
+
+    const modalidadeEl = row.querySelector('.cartao-modalidade');
+    const parcelasEl = row.querySelector('.cartao-parcelas');
+    modalidadeEl.disabled = (tipo === 'debito');
+    modalidadeEl.value = modalidade;
+    parcelasEl.disabled = (tipo !== 'credito' || modalidade !== 'parc');
+    parcelasEl.value = String(parcelas);
+
+    recalcularValoresCartao();
+}
+
+function recalcularValoresCartao() {
+    const totalDebito = cartoesVenda.filter(c => c.tipo === 'debito').reduce((s, c) => s + (c.valor || 0), 0);
+    const totalCredito = cartoesVenda.filter(c => c.tipo === 'credito').reduce((s, c) => s + (c.valor || 0), 0);
+
+    const elDebito = document.getElementById('totalCartaoDebito');
+    const elCredito = document.getElementById('totalCartaoCredito');
+    if (elDebito) elDebito.textContent = `R$ ${formatarValorMonetario(totalDebito)}`;
+    if (elCredito) elCredito.textContent = `R$ ${formatarValorMonetario(totalCredito)}`;
+
+    // Sincronizar inputs ocultos legacy (valorDebito/valorCredito alimentam fluxos antigos)
+    const valDebInput = document.getElementById('valorDebito');
+    const valCredInput = document.getElementById('valorCredito');
+    if (valDebInput) valDebInput.value = totalDebito > 0 ? formatarValorMonetario(totalDebito) : '';
+    if (valCredInput) valCredInput.value = totalCredito > 0 ? formatarValorMonetario(totalCredito) : '';
+
+    // parcelas legacy: parcelas do primeiro cartao de credito
+    const primeiroCredito = cartoesVenda.find(c => c.tipo === 'credito');
+    const parcelasInput = document.getElementById('parcelasCredito');
+    if (parcelasInput) parcelasInput.value = primeiroCredito ? String(primeiroCredito.parcelas) : '1';
+
+    calcularTotalFormasPagamento();
 }
 
 // --- FUNÇÃO DE BUSCA DE VENDEDOR ---
@@ -2789,6 +2948,9 @@ function limparFormularioVenda(skipConfirm = false) {
 
     document.getElementById('vendaForm').reset();
     produtosDaVenda = [];
+    cartoesVenda = [];
+    renderCartoes();
+    recalcularValoresCartao();
     ultimoResumoVenda = '';
     ultimaVendaRegistrada = null;
     document.getElementById('valorFrete').value = '';
@@ -2892,22 +3054,37 @@ function handlePagamentoChange() {
     const checkboxes = document.querySelectorAll('input[name="pagamento"]');
     const checkedForms = Array.from(checkboxes).filter(cb => cb.checked);
     const isCredito = document.querySelector('input[name="pagamento"][value="credito"]').checked;
+    const isDebito = document.querySelector('input[name="pagamento"][value="debito"]').checked;
     const isOutros = document.querySelector('input[name="pagamento"][value="outros"]').checked;
-    
-    document.getElementById('parcelasGroup').style.display = isCredito ? 'block' : 'none';
+
     document.getElementById('outrosPagamentoGroup').style.display = isOutros ? 'block' : 'none';
-    
+
+    // Detalhes de cartao: aparece sempre que debito ou credito esta marcado
+    const cartoesGroup = document.getElementById('cartoesGroup');
+    if (cartoesGroup) {
+        const showCartoes = isCredito || isDebito;
+        cartoesGroup.style.display = showCartoes ? 'block' : 'none';
+        if (showCartoes && cartoesVenda.length === 0) {
+            adicionarCartao();
+        } else if (!showCartoes && cartoesVenda.length > 0) {
+            cartoesVenda = [];
+            renderCartoes();
+            recalcularValoresCartao();
+        }
+    }
+
     const valoresGroup = document.getElementById('valoresFormasPagamento');
     valoresGroup.style.display = checkedForms.length > 1 ? 'block' : 'none';
-    
-    ['pix', 'pos', 'dinheiro', 'debito', 'credito', 'crediario', 'outros'].forEach(forma => {
+
+    // Apenas formas nao-cartao tem valor-group visivel (debito/credito vem da secao de cartoes)
+    ['pix', 'pos', 'dinheiro', 'crediario', 'outros'].forEach(forma => {
         const isChecked = document.querySelector(`input[name="pagamento"][value="${forma}"]`).checked;
         const group = document.getElementById(`${forma}ValorGroup`);
         if (group) {
             group.style.display = (checkedForms.length > 1 && isChecked) ? 'block' : 'none';
         }
     });
-    
+
     calcularTotalFormasPagamento();
 }
 
@@ -3048,6 +3225,7 @@ function sanitizarDadosParaEnvio(tipo, dados) {
                 formas: dados.pagamento?.formas || [],
                 valores: dados.pagamento?.valores || {},
                 parcelas: dados.pagamento?.parcelas || '1',
+                cartoes: Array.isArray(dados.pagamento?.cartoes) ? dados.pagamento.cartoes : [],
                 outros: dados.pagamento?.outros || '',
                 observacoes: dados.pagamento?.observacoes || ''
             },
@@ -4125,7 +4303,10 @@ function enviarFaturaWhatsApp() {
     } else {
         pagamentoTexto = venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f === 'crediario' ? 'CREDIÁRIO' : f.toUpperCase()).join(', ');
     }
-    if (venda.pagamento.formas.includes('credito')) {
+    if (Array.isArray(venda.pagamento.cartoes) && venda.pagamento.cartoes.length > 0) {
+        const detalhes = venda.pagamento.cartoes.map(c => `  ${descreverCartao(c)}`).join('\n');
+        pagamentoTexto += `\n${detalhes}`;
+    } else if (venda.pagamento.formas.includes('credito')) {
         pagamentoTexto += ` (${venda.pagamento.parcelas}x)`;
     }
 
