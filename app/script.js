@@ -1,7 +1,8 @@
 // URLs para automação com Make.com (Webhook)
 const POWER_AUTOMATE_URLS = {
     vendas: 'https://hook.us2.make.com/ku3pkl5io6mnh7k8tq275vhowhkcwxxo',
-    inventario: 'https://hook.us2.make.com/xp9611ae67d4cf47frtwlzc9qmhafzck'
+    inventario: 'https://hook.us2.make.com/xp9611ae67d4cf47frtwlzc9qmhafzck',
+    conciliacaoCartoes: 'https://hook.us2.make.com/3sj67yg4r9vpkxgfvcmqo7fxivvjk9u4'
 };
 
 // ========================================
@@ -498,6 +499,13 @@ async function registrarVenda(event) {
         console.error('Erro no envio ao Make:', error);
         mostrarStatusAutomacao(false);
     });
+
+    // Webhook paralelo de conciliacao de cartoes (so dispara se a venda tiver cartao)
+    if (Array.isArray(venda.pagamento?.cartoes) && venda.pagamento.cartoes.length > 0) {
+        enviarParaAutomacao('conciliacaoCartoes', venda).catch(error => {
+            console.error('Erro no envio ao webhook de conciliacao:', error);
+        });
+    }
 
     // Baixa automática no Sistema de Estoque (fire-and-forget)
     venda.produtos.forEach(prod => {
@@ -3224,7 +3232,7 @@ function buscarCEP() {
 
 // Sanitiza os dados antes de enviar ao Make, garantindo que nenhum campo seja null/undefined
 function sanitizarDadosParaEnvio(tipo, dados) {
-    if (tipo === 'vendas') {
+    if (tipo === 'vendas' || tipo === 'conciliacaoCartoes') {
         return {
             id: dados.id || `VNDA-${Date.now()}`,
             loja: dados.loja || '',
