@@ -15,7 +15,7 @@
     <header class="header">
         <div class="header-content">
             <img src="logo nxt.png" alt="NXT Lojas Logo" style="width: 120px;">
-            <h1>SISTEMA NXT V4.9</h1>
+            <h1>SISTEMA NXT V4.10</h1>
             <div id="statusAutomacao"></div>
         </div>
     </header>
@@ -63,7 +63,7 @@
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="lojaVenda">
-                                            <span class="label-icon">📍</span> Loja
+                                            Loja
                                         </label>
                                         <select id="lojaVenda" required class="select-enhanced">
                                             <option value="">Selecione a loja...</option>
@@ -71,13 +71,13 @@
                                     </div>
                                     <div class="form-group form-group-small">
                                         <label for="matriculaVendedor">
-                                            <span class="label-icon">🔢</span> Matrícula
+                                            Matrícula
                                         </label>
                                         <input type="text" id="matriculaVendedor" placeholder="0000" maxlength="4" autocomplete="off" inputmode="numeric">
                                     </div>
                                     <div class="form-group">
                                         <label for="vendedor">
-                                            <span class="label-icon">👤</span> Vendedor
+                                            Vendedor
                                         </label>
                                         <div class="vendedor-container">
                                             <input type="text" id="vendedor" required placeholder="Digite matrícula ou nome..." autocomplete="off">
@@ -86,7 +86,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="dataVenda">
-                                            <span class="label-icon">📅</span> Data
+                                            Data
                                         </label>
                                         <input type="date" id="dataVenda" required>
                                     </div>
@@ -107,13 +107,13 @@
                                 <div class="form-row">
                                     <div class="form-group form-group-large">
                                         <label for="nomeCliente">
-                                            <span class="label-icon">✏️</span> Nome Completo
+                                            Nome Completo
                                         </label>
                                         <input type="text" id="nomeCliente" required placeholder="Nome do cliente...">
                                     </div>
                                     <div class="form-group">
                                         <label for="telefoneCliente">
-                                            <span class="label-icon">📱</span> Telefone
+                                            Telefone
                                         </label>
                                         <input type="tel" id="telefoneCliente" required placeholder="(00) 00000-0000" maxlength="15" class="mask-telefone">
                                         <div id="avisoTelefone" class="campo-aviso">Telefone incompleto — precisa ter DDD + número</div>
@@ -122,7 +122,7 @@
                                 <div class="form-row">
                                     <div class="form-group form-group-large">
                                         <label for="emailCliente">
-                                            <span class="label-icon">📧</span> E-mail <span class="opcional-badge">Opcional</span>
+                                            E-mail <span class="opcional-badge">Opcional</span>
                                         </label>
                                         <input type="email" id="emailCliente" placeholder="cliente@email.com">
                                     </div>
@@ -130,14 +130,14 @@
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="cpfCliente">
-                                            <span class="label-icon">🪪</span> CPF
+                                            CPF
                                         </label>
                                         <input type="text" id="cpfCliente" placeholder="000.000.000-00" maxlength="14" class="mask-cpf">
                                         <div id="avisoCpf" class="campo-aviso">CPF inválido — verifique os números</div>
                                     </div>
                                     <div class="form-group">
                                         <label for="cnpjCliente">
-                                            <span class="label-icon">🏢</span> CNPJ <span class="opcional-badge">Opcional</span>
+                                            CNPJ <span class="opcional-badge">Opcional</span>
                                         </label>
                                         <input type="text" id="cnpjCliente" placeholder="00.000.000/0000-00" maxlength="18" class="mask-cnpj">
                                     </div>
@@ -145,7 +145,6 @@
 
                                 <div class="endereco-section">
                                     <div class="endereco-header">
-                                        <span class="label-icon">📍</span>
                                         <h5>Endereço</h5>
                                         <span class="cep-status" id="cepStatus"></span>
                                     </div>
@@ -205,7 +204,7 @@
                                     <div class="form-row">
                                         <div class="form-group">
                                             <label for="modeloProduto">
-                                                <span class="label-icon">🏍️</span> Modelo
+                                                Modelo
                                             </label>
                                             <select id="modeloProduto" class="select-enhanced">
                                                 <option value="">Selecione o modelo...</option>
@@ -213,7 +212,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="corProduto">
-                                                <span class="label-icon">🎨</span> Cor
+                                                Cor
                                             </label>
                                             <select id="corProduto" class="select-enhanced">
                                                 <option value="">Selecione a cor...</option>
@@ -221,7 +220,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="precoProduto">
-                                                <span class="label-icon">💰</span> Preço
+                                                Preço
                                             </label>
                                             <input type="text" id="precoProduto" class="currency-input input-preco" placeholder="R$ 0,00">
                                         </div>
@@ -247,7 +246,7 @@
                                                 <span class="toggle-slider"></span>
                                             </label>
                                             <span class="toggle-label">
-                                                <span class="label-icon">🪖</span> Acompanha Capacete
+                                                Acompanha Capacete
                                             </span>
                                         </div>
                                         <div id="corCapaceteContainer" class="capacete-cor-container" style="display: none;">
@@ -264,7 +263,7 @@
                                 <!-- Lista de Produtos -->
                                 <div class="produtos-lista-card">
                                     <div class="lista-header-produtos">
-                                        <h5><span class="label-icon">📦</span> Produtos na Venda</h5>
+                                        <h5>Produtos na Venda</h5>
                                     </div>
                                     <div id="listaProdutosVenda" class="lista-produtos-nova">
                                         <div class="empty-state-produtos">
@@ -343,7 +342,7 @@
                                 </div>
 
                                 <div id="valoresFormasPagamento" class="valores-pagamento-section" style="display: none;">
-                                    <h5><span class="label-icon">💰</span> Valores por Forma de Pagamento</h5>
+                                    <h5>Valores por Forma de Pagamento</h5>
                                     <div class="valores-grid">
                                         <div id="pixValorGroup" class="valor-group" style="display: none;">
                                             <label for="valorPix">PIX (R$):</label>
@@ -377,7 +376,7 @@
                                 <!-- Detalhes de Cartao: registro por transacao para conciliacao financeira -->
                                 <div id="cartoesGroup" class="cartoes-section" style="display: none;">
                                     <div class="cartoes-header">
-                                        <h5><span class="label-icon">💳</span> Detalhes de Cartão</h5>
+                                        <h5>Detalhes de Cartão</h5>
                                         <small class="cartoes-hint">Preencher uma linha por transação para conciliação com extrato da maquininha.</small>
                                     </div>
                                     <div id="cartoesList"></div>
@@ -391,7 +390,7 @@
                                 <div id="outrosPagamentoGroup" style="display: none;">
                                     <div class="form-group">
                                         <label for="outrosPagamentoTexto">
-                                            <span class="label-icon">📝</span> Especificar Outros:
+                                            Especificar Outros:
                                         </label>
                                         <input type="text" id="outrosPagamentoTexto" placeholder="Descreva a forma de pagamento...">
                                     </div>
@@ -430,7 +429,7 @@
 
                                 <div class="form-group observacoes-group">
                                     <label for="observacoesPagamento">
-                                        <span class="label-icon">📝</span> Observações do Pagamento
+                                        Observações do Pagamento
                                     </label>
                                     <textarea id="observacoesPagamento" rows="2" placeholder="Informações adicionais..."></textarea>
                                 </div>
@@ -470,13 +469,13 @@
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="prazoEntrega">
-                                            <span class="label-icon">📅</span> Data Prevista
+                                            Data Prevista
                                         </label>
                                         <input type="date" id="prazoEntrega">
                                     </div>
                                     <div class="form-group" id="freteGroup">
                                         <label for="valorFrete">
-                                            <span class="label-icon">💰</span> Valor do Frete
+                                            Valor do Frete
                                         </label>
                                         <input type="text" id="valorFrete" class="currency-input" placeholder="R$ 0,00">
                                     </div>
@@ -485,7 +484,7 @@
                                 <div class="origem-section">
                                     <div class="form-group">
                                         <label for="origemProduto">
-                                            <span class="label-icon">📦</span> Origem do Produto
+                                            Origem do Produto
                                         </label>
                                         <select id="origemProduto" class="select-enhanced">
                                             <option value="propria_loja">Da própria Loja</option>
@@ -494,7 +493,7 @@
                                     </div>
                                     <div id="lojaSaidaGroup" class="loja-saida-group" style="display: none;">
                                         <label for="lojaSaida">
-                                            <span class="label-icon">🏪</span> Local de Saída
+                                            Local de Saída
                                         </label>
                                         <select id="lojaSaida" class="select-enhanced">
                                             <option value="">Selecione...</option>
