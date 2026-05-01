@@ -1655,25 +1655,29 @@ function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
 
     resumo += `*PAGAMENTO*\n`;
 
-    if (venda.pagamento.valores && Object.keys(venda.pagamento.valores).length > 0) {
-        const formasPagamento = [];
-        for (const [forma, valor] of Object.entries(venda.pagamento.valores)) {
-            const nomeForma = forma === 'pos' ? 'PIX POS' : forma === 'pix' ? 'PIX' : forma === 'debito' ? 'DÉBITO' : forma === 'credito' ? 'CRÉDITO' : forma === 'crediario' ? 'CREDIÁRIO' : forma.toUpperCase();
-            formasPagamento.push(`${nomeForma}: R$ ${formatarValorMonetario(valor)}`);
-        }
-        resumo += formasPagamento.join(' | ') + '\n';
-    } else {
-        resumo += `*Formas:* ${venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f === 'crediario' ? 'CREDIÁRIO' : f.toUpperCase()).join(', ')}\n`;
-    }
+    const _valoresEntries = Object.entries(venda.pagamento.valores || {});
+    const _naoCartao = _valoresEntries.filter(([f]) => f !== 'debito' && f !== 'credito');
+    const _cartoesArr = Array.isArray(venda.pagamento.cartoes) ? venda.pagamento.cartoes : [];
+    const _nomeForma = f => f === 'pos' ? 'PIX POS' : f === 'pix' ? 'PIX' : f === 'debito' ? 'DÉBITO' : f === 'credito' ? 'CRÉDITO' : f === 'crediario' ? 'CREDIÁRIO' : f.toUpperCase();
 
-    // Detalhes de cartao para conciliacao financeira
-    if (Array.isArray(venda.pagamento.cartoes) && venda.pagamento.cartoes.length > 0) {
+    if (_cartoesArr.length > 0) {
+        // Tem cartoes detalhados: linha de valores so para formas nao-cartao
+        if (_naoCartao.length > 0) {
+            const linhas = _naoCartao.map(([f, v]) => `${_nomeForma(f)}: R$ ${formatarValorMonetario(v)}`);
+            resumo += linhas.join(' | ') + '\n';
+        }
         resumo += `*Cartões:*\n`;
-        venda.pagamento.cartoes.forEach(c => {
+        _cartoesArr.forEach(c => {
             resumo += `  - ${descreverCartao(c)}\n`;
         });
-    } else if (venda.pagamento.formas.includes('credito')) {
-        resumo += `*Parcelas:* ${venda.pagamento.parcelas}x\n`;
+    } else if (_valoresEntries.length > 0) {
+        const linhas = _valoresEntries.map(([f, v]) => `${_nomeForma(f)}: R$ ${formatarValorMonetario(v)}`);
+        resumo += linhas.join(' | ') + '\n';
+        if (venda.pagamento.formas.includes('credito')) {
+            resumo += `*Parcelas:* ${venda.pagamento.parcelas}x\n`;
+        }
+    } else {
+        resumo += `*Formas:* ${venda.pagamento.formas.map(f => _nomeForma(f)).join(', ')}\n`;
     }
 
 
@@ -1806,23 +1810,25 @@ function gerarHTMLFatura(venda) {
     const dataFormatada = new Date(venda.dataVenda).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
     const dataEmissao = new Date().toLocaleDateString('pt-BR');
 
-    let formasPagamentoTexto = '';
-    if (venda.pagamento.valores && Object.keys(venda.pagamento.valores).length > 0) {
-        const formasPagamento = [];
-        for (const [forma, valor] of Object.entries(venda.pagamento.valores)) {
-            const nomeForma = forma === 'pos' ? 'PIX POS' : forma === 'pix' ? 'PIX' : forma === 'debito' ? 'DÉBITO' : forma === 'credito' ? 'CRÉDITO' : forma === 'crediario' ? 'CREDIÁRIO' : forma.toUpperCase();
-            formasPagamento.push(`${nomeForma}: R$ ${formatarValorMonetario(valor)}`);
-        }
-        formasPagamentoTexto = formasPagamento.join(', ');
-    } else {
-        formasPagamentoTexto = venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f === 'crediario' ? 'CREDIÁRIO' : f.toUpperCase()).join(', ');
-    }
+    const _nomeForma = f => f === 'pos' ? 'PIX POS' : f === 'pix' ? 'PIX' : f === 'debito' ? 'DÉBITO' : f === 'credito' ? 'CRÉDITO' : f === 'crediario' ? 'CREDIÁRIO' : f.toUpperCase();
+    const _valoresEntries = Object.entries(venda.pagamento.valores || {});
+    const _naoCartao = _valoresEntries.filter(([f]) => f !== 'debito' && f !== 'credito');
+    const _cartoesArr = Array.isArray(venda.pagamento.cartoes) ? venda.pagamento.cartoes : [];
 
-    if (Array.isArray(venda.pagamento.cartoes) && venda.pagamento.cartoes.length > 0) {
-        const detalhes = venda.pagamento.cartoes.map(c => descreverCartao(c)).join('<br>');
-        formasPagamentoTexto += `<br><small>${detalhes}</small>`;
-    } else if (venda.pagamento.formas.includes('credito')) {
-        formasPagamentoTexto += ` (${venda.pagamento.parcelas}x)`;
+    let formasPagamentoTexto = '';
+    if (_cartoesArr.length > 0) {
+        if (_naoCartao.length > 0) {
+            formasPagamentoTexto = _naoCartao.map(([f, v]) => `${_nomeForma(f)}: R$ ${formatarValorMonetario(v)}`).join(', ');
+        }
+        const detalhes = _cartoesArr.map(c => descreverCartao(c)).join('<br>');
+        formasPagamentoTexto += (formasPagamentoTexto ? '<br>' : '') + `<small>${detalhes}</small>`;
+    } else if (_valoresEntries.length > 0) {
+        formasPagamentoTexto = _valoresEntries.map(([f, v]) => `${_nomeForma(f)}: R$ ${formatarValorMonetario(v)}`).join(', ');
+        if (venda.pagamento.formas.includes('credito')) {
+            formasPagamentoTexto += ` (${venda.pagamento.parcelas}x)`;
+        }
+    } else {
+        formasPagamentoTexto = venda.pagamento.formas.map(f => _nomeForma(f)).join(', ');
     }
 
     let produtosHTML = '';
@@ -1949,23 +1955,25 @@ function gerarTextoFatura(venda) {
     const dataFormatada = new Date(venda.dataVenda).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
     const dataEmissao = new Date().toLocaleDateString('pt-BR');
 
-    let formasPagamentoTexto = '';
-    if (venda.pagamento.valores && Object.keys(venda.pagamento.valores).length > 0) {
-        const formasPagamento = [];
-        for (const [forma, valor] of Object.entries(venda.pagamento.valores)) {
-            const nomeForma = forma === 'pos' ? 'PIX POS' : forma === 'pix' ? 'PIX' : forma === 'debito' ? 'DÉBITO' : forma === 'credito' ? 'CRÉDITO' : forma === 'crediario' ? 'CREDIÁRIO' : forma.toUpperCase();
-            formasPagamento.push(`${nomeForma}: R$ ${formatarValorMonetario(valor)}`);
-        }
-        formasPagamentoTexto = formasPagamento.join(', ');
-    } else {
-        formasPagamentoTexto = venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f === 'crediario' ? 'CREDIÁRIO' : f.toUpperCase()).join(', ');
-    }
+    const _nomeForma = f => f === 'pos' ? 'PIX POS' : f === 'pix' ? 'PIX' : f === 'debito' ? 'DÉBITO' : f === 'credito' ? 'CRÉDITO' : f === 'crediario' ? 'CREDIÁRIO' : f.toUpperCase();
+    const _valoresEntries = Object.entries(venda.pagamento.valores || {});
+    const _naoCartao = _valoresEntries.filter(([f]) => f !== 'debito' && f !== 'credito');
+    const _cartoesArr = Array.isArray(venda.pagamento.cartoes) ? venda.pagamento.cartoes : [];
 
-    if (Array.isArray(venda.pagamento.cartoes) && venda.pagamento.cartoes.length > 0) {
-        const detalhes = venda.pagamento.cartoes.map(c => `  - ${descreverCartao(c)}`).join('\n');
-        formasPagamentoTexto += `\n${detalhes}`;
-    } else if (venda.pagamento.formas.includes('credito')) {
-        formasPagamentoTexto += ` (${venda.pagamento.parcelas}x)`;
+    let formasPagamentoTexto = '';
+    if (_cartoesArr.length > 0) {
+        if (_naoCartao.length > 0) {
+            formasPagamentoTexto = _naoCartao.map(([f, v]) => `${_nomeForma(f)}: R$ ${formatarValorMonetario(v)}`).join(', ');
+        }
+        const detalhes = _cartoesArr.map(c => `  - ${descreverCartao(c)}`).join('\n');
+        formasPagamentoTexto += (formasPagamentoTexto ? '\n' : '') + detalhes;
+    } else if (_valoresEntries.length > 0) {
+        formasPagamentoTexto = _valoresEntries.map(([f, v]) => `${_nomeForma(f)}: R$ ${formatarValorMonetario(v)}`).join(', ');
+        if (venda.pagamento.formas.includes('credito')) {
+            formasPagamentoTexto += ` (${venda.pagamento.parcelas}x)`;
+        }
+    } else {
+        formasPagamentoTexto = venda.pagamento.formas.map(f => _nomeForma(f)).join(', ');
     }
 
     let produtosTexto = '';
@@ -4319,22 +4327,25 @@ function enviarFaturaWhatsApp() {
     const dataEmissao = new Date().toLocaleDateString('pt-BR');
 
     // Montar formas de pagamento
+    const _nomeForma = f => f === 'pos' ? 'PIX POS' : f === 'pix' ? 'PIX' : f === 'debito' ? 'DÉBITO' : f === 'credito' ? 'CRÉDITO' : f === 'crediario' ? 'CREDIÁRIO' : f.toUpperCase();
+    const _valoresEntries = Object.entries(venda.pagamento.valores || {});
+    const _naoCartao = _valoresEntries.filter(([f]) => f !== 'debito' && f !== 'credito');
+    const _cartoesArr = Array.isArray(venda.pagamento.cartoes) ? venda.pagamento.cartoes : [];
+
     let pagamentoTexto = '';
-    if (venda.pagamento.valores && Object.keys(venda.pagamento.valores).length > 0) {
-        const formas = [];
-        for (const [forma, valor] of Object.entries(venda.pagamento.valores)) {
-            const nome = forma === 'pos' ? 'PIX POS' : forma === 'pix' ? 'PIX' : forma === 'debito' ? 'DÉBITO' : forma === 'credito' ? 'CRÉDITO' : forma === 'crediario' ? 'CREDIÁRIO' : forma.toUpperCase();
-            formas.push(`${nome}: R$ ${formatarValorMonetario(valor)}`);
+    if (_cartoesArr.length > 0) {
+        if (_naoCartao.length > 0) {
+            pagamentoTexto = _naoCartao.map(([f, v]) => `${_nomeForma(f)}: R$ ${formatarValorMonetario(v)}`).join('\n');
         }
-        pagamentoTexto = formas.join('\n');
+        const detalhes = _cartoesArr.map(c => `  ${descreverCartao(c)}`).join('\n');
+        pagamentoTexto += (pagamentoTexto ? '\n' : '') + detalhes;
+    } else if (_valoresEntries.length > 0) {
+        pagamentoTexto = _valoresEntries.map(([f, v]) => `${_nomeForma(f)}: R$ ${formatarValorMonetario(v)}`).join('\n');
+        if (venda.pagamento.formas.includes('credito')) {
+            pagamentoTexto += ` (${venda.pagamento.parcelas}x)`;
+        }
     } else {
-        pagamentoTexto = venda.pagamento.formas.map(f => f === 'pos' ? 'PIX POS' : f === 'crediario' ? 'CREDIÁRIO' : f.toUpperCase()).join(', ');
-    }
-    if (Array.isArray(venda.pagamento.cartoes) && venda.pagamento.cartoes.length > 0) {
-        const detalhes = venda.pagamento.cartoes.map(c => `  ${descreverCartao(c)}`).join('\n');
-        pagamentoTexto += `\n${detalhes}`;
-    } else if (venda.pagamento.formas.includes('credito')) {
-        pagamentoTexto += ` (${venda.pagamento.parcelas}x)`;
+        pagamentoTexto = venda.pagamento.formas.map(f => _nomeForma(f)).join(', ');
     }
 
     // Montar lista de produtos
