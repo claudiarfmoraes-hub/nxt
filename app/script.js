@@ -2,7 +2,7 @@
 const POWER_AUTOMATE_URLS = {
     vendas: 'https://hook.us2.make.com/ku3pkl5io6mnh7k8tq275vhowhkcwxxo',
     inventario: 'https://hook.us2.make.com/xp9611ae67d4cf47frtwlzc9qmhafzck',
-    conciliacaoCartoes: 'https://hook.us2.make.com/3sj67yg4r9vpkxgfvcmqo7fxivvjk9u4'
+    conciliacaoCartoes: 'https://hook.us2.make.com/wjl421mft9kokf9ph3eur171yso5ds1w'
 };
 
 // ========================================
