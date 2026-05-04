@@ -463,6 +463,7 @@ async function registrarVenda(event) {
             outros: document.getElementById('outrosPagamentoTexto').value,
             observacoes: document.getElementById('observacoesPagamento').value
         },
+        aceiteDetalhes: coletarAceiteDetalhes(),
         entrega: {
             tipo: document.getElementById('tipoEntrega').value,
             prazo: document.getElementById('prazoEntrega').value,
@@ -1714,6 +1715,8 @@ function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     }
     resumo += `\n`;
 
+    resumo += gerarTextoAceiteWhatsApp(venda.aceiteDetalhes);
+
     if (enviadoParaBling) {
         resumo += `*Venda enviada ao sistema Bling para emissão da NF-e*\n`;
     }
@@ -1761,6 +1764,7 @@ function copiarResumoVenda(isFromModal) {
                     cartoes: cartoesVenda.map(c => ({ ...c })),
                     observacoes: document.getElementById('observacoesPagamento').value
                 },
+                aceiteDetalhes: coletarAceiteDetalhes(),
                 valorFrete: obterValorNumerico('valorFrete'),
                 total: produtosDaVenda.reduce((acc, produto) => acc + produto.preco, 0) + obterValorNumerico('valorFrete'),
                 entrega: {
@@ -1920,6 +1924,8 @@ function gerarHTMLFatura(venda) {
             </div>
         </div>
 
+        ${gerarHTMLAceite(venda.aceiteDetalhes)}
+
         <div class="fatura-total">
             TOTAL GERAL: R$ ${formatarValorMonetario(venda.total)}
         </div>
@@ -2035,6 +2041,8 @@ Tipo: ${venda.entrega.tipo === 'retirada' ? 'Retirado pelo Cliente' : 'Receber e
     if (venda.valorFrete && venda.valorFrete > 0) {
         faturaTexto += `\nFrete: R$ ${formatarValorMonetario(venda.valorFrete)}`;
     }
+
+    faturaTexto += gerarTextoAceitePlano(venda.aceiteDetalhes);
 
     faturaTexto += `
 
@@ -2822,6 +2830,67 @@ function recalcularValoresCartao() {
     calcularTotalFormasPagamento();
 }
 
+// --- DETALHES INFORMADOS AO CLIENTE (aceite / pre-pos-venda) ---
+
+function handleDetalhesAceiteChange() {
+    const houve = document.getElementById('houveDetalhesAceite').value;
+    document.getElementById('detalhesAceiteFields').style.display = houve === 'sim' ? 'block' : 'none';
+}
+
+function coletarAceiteDetalhes() {
+    const houve = document.getElementById('houveDetalhesAceite')?.value || 'nao';
+    if (houve !== 'sim') {
+        return { houve: 'nao' };
+    }
+    const descricao = (document.getElementById('detalhesAceiteDescricao')?.value || '').trim();
+    const descontoStr = document.getElementById('detalhesAceiteDesconto')?.value || '';
+    const desconto = parseFloat(descontoStr.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+    const confirmadoPor = (document.getElementById('detalhesAceiteCliente')?.value || '').trim();
+    const cienciaConfirmada = !!document.getElementById('detalhesAceiteCiencia')?.checked;
+    return {
+        houve: 'sim',
+        descricao,
+        desconto,
+        confirmadoPor,
+        cienciaConfirmada,
+        timestamp: new Date().toISOString()
+    };
+}
+
+function temAceiteDetalhes(aceite) {
+    return aceite && aceite.houve === 'sim' && (aceite.descricao || '').trim().length > 0;
+}
+
+function gerarTextoAceiteWhatsApp(aceite) {
+    if (!temAceiteDetalhes(aceite)) return '';
+    let txt = `\n*DETALHES INFORMADOS AO CLIENTE*\n`;
+    txt += `${aceite.descricao}\n`;
+    if (aceite.desconto > 0) txt += `*Desconto concedido:* R$ ${formatarValorMonetario(aceite.desconto)}\n`;
+    if (aceite.confirmadoPor) txt += `*Confirmado por:* ${aceite.confirmadoPor}\n`;
+    if (aceite.cienciaConfirmada) txt += `_Cliente declarou ciência destes detalhes no momento da compra._\n`;
+    return txt;
+}
+
+function gerarTextoAceitePlano(aceite) {
+    if (!temAceiteDetalhes(aceite)) return '';
+    let txt = `\nDETALHES INFORMADOS AO CLIENTE\n`;
+    txt += `${aceite.descricao}\n`;
+    if (aceite.desconto > 0) txt += `Desconto concedido: R$ ${formatarValorMonetario(aceite.desconto)}\n`;
+    if (aceite.confirmadoPor) txt += `Confirmado por: ${aceite.confirmadoPor}\n`;
+    if (aceite.cienciaConfirmada) txt += `Cliente declarou ciência destes detalhes no momento da compra.\n`;
+    return txt;
+}
+
+function gerarHTMLAceite(aceite) {
+    if (!temAceiteDetalhes(aceite)) return '';
+    let h = `<h3 style="margin-top:1.5rem;border-bottom:1px solid #eee;padding-bottom:0.5rem;">Detalhes Informados ao Cliente</h3>`;
+    h += `<p>${aceite.descricao.replace(/\n/g, '<br>')}</p>`;
+    if (aceite.desconto > 0) h += `<p><strong>Desconto concedido:</strong> R$ ${formatarValorMonetario(aceite.desconto)}</p>`;
+    if (aceite.confirmadoPor) h += `<p><strong>Confirmado por:</strong> ${aceite.confirmadoPor}</p>`;
+    if (aceite.cienciaConfirmada) h += `<p><em>Cliente declarou ciência destes detalhes no momento da compra.</em></p>`;
+    return h;
+}
+
 // --- FUNÇÃO DE BUSCA DE VENDEDOR ---
 function configurarBuscaVendedor() {
     const vendedorInput = document.getElementById('vendedor');
@@ -3004,6 +3073,7 @@ function limparFormularioVenda(skipConfirm = false) {
     handleTipoEntregaChange();
     toggleCorCapacete();
     handlePagamentoChange();
+    handleDetalhesAceiteChange();
     definirDataAtual();
 
     // Limpar estados de validação inline
@@ -3278,6 +3348,14 @@ function sanitizarDadosParaEnvio(tipo, dados) {
                 origem: dados.entrega?.origem || 'propria_loja',
                 localSaida: dados.entrega?.localSaida || dados.loja || ''
             },
+            aceiteDetalhes: dados.aceiteDetalhes && dados.aceiteDetalhes.houve === 'sim' ? {
+                houve: 'sim',
+                descricao: dados.aceiteDetalhes.descricao || '',
+                desconto: dados.aceiteDetalhes.desconto || 0,
+                confirmadoPor: dados.aceiteDetalhes.confirmadoPor || '',
+                cienciaConfirmada: !!dados.aceiteDetalhes.cienciaConfirmada,
+                timestamp: dados.aceiteDetalhes.timestamp || ''
+            } : { houve: 'nao' },
             valorFrete: dados.valorFrete || 0,
             total: dados.total || 0
         };
@@ -3931,7 +4009,7 @@ Motor: ${produto.motor || 'N/A'}`;
         });
 
         const anoAtual = new Date().getFullYear();
-        const observacoesCompletas = `O uso de equipamentos de segurança é obrigatório.
+        let observacoesCompletas = `O uso de equipamentos de segurança é obrigatório.
 Fabricante NXT${infoProdutos}
 Ano ${anoAtual}
 
@@ -3941,6 +4019,12 @@ Motor: Garantia de 2 (dois) anos contra defeitos de fabricação, contados a par
 Bateria: Garantia de 6 (seis) meses contra defeitos de fabricação, contados a partir da data da nota fiscal.
 
 Observação: As garantias acima referem-se exclusivamente a defeitos de fabricação. Danos causados por uso inadequado, acidentes ou desgaste natural não estão cobertos.`;
+
+        // Detalhes informados ao cliente — registrados na NF para futura conferencia do SAC
+        const aceiteTxt = gerarTextoAceitePlano(venda.aceiteDetalhes);
+        if (aceiteTxt) {
+            observacoesCompletas += `\n\n${aceiteTxt.trim()}`;
+        }
 
         // 7. Calcular frete para transporte
         const valorFrete = venda.valorFrete || 0;
@@ -4394,7 +4478,7 @@ ${pagamentoTexto}${venda.pagamento.observacoes ? `\nObs: ${venda.pagamento.obser
 
 *ENTREGA*
 ${entregaTexto}
-
+${gerarTextoAceiteWhatsApp(venda.aceiteDetalhes)}
 ━━━━━━━━━━━━━━━━━
 *TOTAL: R$ ${formatarValorMonetario(venda.total)}*
 ━━━━━━━━━━━━━━━━━

@@ -497,6 +497,51 @@
                             </div>
                         </div>
 
+                        <!-- SEÇÃO 6: Detalhes informados ao cliente (registrado em fatura, resumo e NF) -->
+                        <div class="secao-form-nova" data-secao="6">
+                            <div class="secao-header" onclick="toggleSecao(this)">
+                                <div class="secao-titulo">
+                                    <h4>Detalhes informados ao cliente</h4>
+                                </div>
+                                <span class="secao-toggle">▼</span>
+                            </div>
+                            <div class="secao-content">
+                                <div class="form-group">
+                                    <label for="houveDetalhesAceite">
+                                        Houve detalhes informados ao cliente (com ou sem desconto)?
+                                    </label>
+                                    <select id="houveDetalhesAceite" class="select-enhanced" onchange="handleDetalhesAceiteChange()">
+                                        <option value="nao" selected>Não</option>
+                                        <option value="sim">Sim</option>
+                                    </select>
+                                </div>
+                                <div id="detalhesAceiteFields" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="detalhesAceiteDescricao">Quais detalhes</label>
+                                        <textarea id="detalhesAceiteDescricao" rows="3" placeholder="Ex: Risco no para-lama esquerdo; bateria com 6 meses de uso anterior; pequeno amassado lateral..." style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 0.95rem; resize: vertical;"></textarea>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="detalhesAceiteDesconto">
+                                                Valor do desconto concedido <span class="opcional-badge">Opcional</span>
+                                            </label>
+                                            <input type="text" id="detalhesAceiteDesconto" class="currency-input" placeholder="R$ 0,00">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="detalhesAceiteCliente">Confirmado por (nome do cliente)</label>
+                                            <input type="text" id="detalhesAceiteCliente" placeholder="Nome completo do cliente">
+                                        </div>
+                                    </div>
+                                    <div class="aceite-ciencia-box" style="margin-top: 0.75rem; padding: 0.75rem; background-color: #fff8e1; border-left: 3px solid #f57c00; border-radius: 4px;">
+                                        <label style="display: flex; align-items: flex-start; gap: 0.5rem; cursor: pointer; margin: 0;">
+                                            <input type="checkbox" id="detalhesAceiteCiencia" style="margin-top: 0.2rem; flex-shrink: 0;">
+                                            <span style="font-size: 0.9rem; color: #444;"><strong>Cliente declara ciência destes detalhes.</strong> Os detalhes serão registrados no resumo, na fatura enviada e nas observações da nota fiscal.</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- TOTAL E AÇÕES -->
                         <div class="venda-footer">
                             <div class="total-card">
