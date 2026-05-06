@@ -1,5 +1,4 @@
 {
-  "sao-bernardo-sbc-golden": { "nome": "São Bernardo - Golden", "tipo": "loja" },
   "santo-andre-abc": { "nome": "Santo André - ABC", "tipo": "loja" },
   "santo-andre-grand-plaza": { "nome": "Santo André - Grand Plaza", "tipo": "loja" },
   "mogi-guacu-buriti": { "nome": "Mogi Guaçu - Buriti", "tipo": "loja" },
@@ -19,7 +18,6 @@
   "jaragua-loja-fabrica": { "nome": "Jaraguá - Loja da Fábrica", "tipo": "loja" },
   "joinville-garten": { "nome": "Joinville - Garten", "tipo": "loja" },
   "joinville-loja": { "nome": "Joinville - Loja", "tipo": "loja" },
-  "blumenau-neumarkt": { "nome": "Blumenau - Neumarkt", "tipo": "loja" },
   "sao-jose-continente": { "nome": "São José - Continente", "tipo": "loja" },
   "blumenau-norte": { "nome": "Blumenau - Norte", "tipo": "loja" },
   "florianopolis-lagoa": { "nome": "Florianópolis Lagoa", "tipo": "loja" },
