@@ -519,6 +519,18 @@ async function registrarVenda(event) {
         });
     }
 
+    // Webhook paralelo de conciliacao de PIX (so dispara se a venda tiver PIX
+    // e se a URL nao for o placeholder — evita firing acidental antes do deploy)
+    if (Array.isArray(venda.pagamento?.pix) && venda.pagamento.pix.length > 0) {
+        if (POWER_AUTOMATE_URLS.conciliacaoPix.includes('PLACEHOLDER_AGUARDANDO_URL')) {
+            console.warn('[PIX] Webhook conciliacaoPix nao disparado: URL ainda e placeholder. Configurar POWER_AUTOMATE_URLS.conciliacaoPix.');
+        } else {
+            enviarParaAutomacao('conciliacaoPix', venda).catch(error => {
+                console.error('Erro no envio ao webhook de conciliacao PIX:', error);
+            });
+        }
+    }
+
     // Baixa automática no Sistema de Estoque (fire-and-forget)
     venda.produtos.forEach(prod => {
         if (prod.chassi) {
