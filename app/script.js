@@ -2659,7 +2659,19 @@ function obterValoresFormasPagamento() {
     if (formasSelecionadas.includes('debito')) valores.debito = totalCartaoDebito;
     if (formasSelecionadas.includes('credito')) valores.credito = totalCartaoCredito;
 
-    const naoCartao = formasSelecionadas.filter(f => f !== 'debito' && f !== 'credito');
+    // PIX: somar de pixVenda quando a vendedora preencheu transacoes detalhadas
+    const totalPix = pixVenda.reduce((s, p) => s + (p.valor || 0), 0);
+    const pixDetalhado = pixVenda.length > 0;
+    if (formasSelecionadas.includes('pix') && pixDetalhado) {
+        valores.pix = totalPix;
+    }
+
+    // Formas que sao tratadas pelo fluxo de campo individual (nao detalhadas)
+    const naoCartao = formasSelecionadas.filter(f => {
+        if (f === 'debito' || f === 'credito') return false;
+        if (f === 'pix' && pixDetalhado) return false;
+        return true;
+    });
 
     // Se UMA unica forma e nao e cartao, auto-atribuir o total da venda
     if (formasSelecionadas.length === 1 && naoCartao.length === 1) {
