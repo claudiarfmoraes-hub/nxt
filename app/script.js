@@ -1605,7 +1605,7 @@ function exportarInventarios() {
 
     const dataExportacao = new Date().toISOString().split('T')[0];
     const dados = {
-        versao: 'NXT V4.10',
+        versao: 'NXT V4.11',
         dataExportacao: new Date().toISOString(),
         totalInventarios: inventariosSalvos.length,
         inventarios: inventariosSalvos
@@ -1672,7 +1672,7 @@ function importarInventarios(event) {
 function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     const dataFormatada = new Date(venda.dataVenda).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
 
-    let resumo = `=== SISTEMA NXT V4.10===\n*RESUMO DA VENDA — ${venda.loja}*\n`;
+    let resumo = `=== SISTEMA NXT V4.11===\n*RESUMO DA VENDA — ${venda.loja}*\n`;
     resumo += `*Vendedor:* ${venda.matriculaVendedor ? venda.matriculaVendedor + ' - ' : ''}${venda.vendedor}\n`;
     resumo += `*Data:* ${dataFormatada}\n\n`;
     
@@ -1994,7 +1994,7 @@ function gerarHTMLFatura(venda) {
         </div>
 
         <div class="fatura-footer">
-            <p>Esta fatura foi gerada pelo Sistema NXT V4.10</p>
+            <p>Esta fatura foi gerada pelo Sistema NXT V4.11</p>
             <p>NXT Lojas - Soluções em Mobilidade Urbana</p>
             <p><strong>Visite nosso site:</strong> <a href="https://www.nxt.eco.br/" target="_blank">www.nxt.eco.br</a></p>
             <p><small>Para dúvidas ou suporte, entre em contato através do nosso site.</small></p>
@@ -2117,7 +2117,7 @@ Observação: As garantias acima referem-se exclusivamente a defeitos de fabrica
 
 *IMPORTANTE: Este documento tem caráter informativo e não constitui documento fiscal para fins tributários. A nota fiscal eletrônica será emitida e enviada separadamente*
 
-Esta fatura foi gerada pelo Sistema NXT V4.10
+Esta fatura foi gerada pelo Sistema NXT V4.11
 NXT Lojas - Soluções em Mobilidade Urbana
 
 Visite nosso site: https://www.nxt.eco.br/
@@ -2310,7 +2310,7 @@ function copiarResumoInventario() {
         // CABEÇALHO PROFISSIONAL
         // ══════════════════════════════
         resumo += `╔══════════════════════════════════╗\n`;
-        resumo += `   *SISTEMA NXT V4.10 - INVENTÁRIO*\n`;
+        resumo += `   *SISTEMA NXT V4.11 - INVENTÁRIO*\n`;
         resumo += `   Loja: *${lojaNome}*\n`;
         resumo += `   Data: ${new Date().toLocaleDateString('pt-BR')}\n`;
         resumo += `╚══════════════════════════════════╝\n\n`;
