@@ -2562,10 +2562,13 @@ h4, h5 {
 }
 
 .pix-grid {
+    display: grid;
     grid-template-columns: 2fr 1fr 1.2fr auto;
+    gap: 0.5rem;
+    align-items: end;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 720px) {
     .pix-grid {
         grid-template-columns: 1fr;
     }
