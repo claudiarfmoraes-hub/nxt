@@ -382,6 +382,32 @@
                                     </div>
                                 </div>
 
+                                <!-- Detalhes de PIX: registro por transferencia para conciliacao financeira -->
+                                <div id="pixGroup" class="cartoes-section pix-section" style="display: none;">
+                                    <div class="cartoes-header">
+                                        <h5>Detalhes do PIX</h5>
+                                        <button type="button" class="btn-add-cartao" onclick="adicionarPix()">+ Adicionar PIX</button>
+                                    </div>
+
+                                    <div class="pix-aviso-card">
+                                        <strong>ATENÇÃO — Preencha o nome de quem FEZ o PIX, não do cliente.</strong>
+                                        O extrato bancário identifica o depositante (pode ser pai, mãe, cônjuge, amigo do cliente).
+                                        É esse nome que concilia o PIX recebido com esta venda. O cadastro do cliente continua normal
+                                        nos dados da venda — esses dois campos são independentes.
+                                    </div>
+
+                                    <div id="pixList"></div>
+
+                                    <div class="pix-aviso-banner" id="pixAvisoSemPagador" style="display: none;">
+                                        <span id="pixAvisoSemPagadorTexto"></span>
+                                    </div>
+
+                                    <div class="cartoes-totais">
+                                        <span>Total PIX:</span>
+                                        <strong id="totalPix">R$ 0,00</strong>
+                                    </div>
+                                </div>
+
                                 <div id="outrosPagamentoGroup" style="display: none;">
                                     <div class="form-group">
                                         <label for="outrosPagamentoTexto">
