@@ -2833,6 +2833,17 @@ function recalcularValoresCartao() {
     calcularTotalFormasPagamento();
 }
 
+// --- HELPER DE ESCAPING HTML (compartilhado) ---
+
+function escapeHtml(s) {
+    return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 // --- DETALHES DE PIX (conciliacao financeira) ---
 
 function descreverPix(p) {
@@ -2861,7 +2872,7 @@ function renderPix() {
     const list = document.getElementById('pixList');
     if (!list) return;
     list.innerHTML = pixVenda.map((p, i) => {
-        const pagadorEscaped = (p.pagador || '').replace(/"/g, '&quot;');
+        const pagadorEscaped = escapeHtml(p.pagador);
         const pagadorVazio = !(p.pagador || '').trim();
         return `
         <div class="cartao-row pix-row ${pagadorVazio ? 'pix-pagador-vazio' : ''}" data-index="${i}">
