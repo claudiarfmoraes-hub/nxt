@@ -2516,6 +2516,61 @@ h4, h5 {
     }
 }
 
+/* Detalhes de PIX (conciliacao financeira) */
+.pix-section {
+    margin-top: 1rem;
+}
+
+.pix-section .cartoes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.pix-aviso-card {
+    background: #FEF3C7;
+    border-left: 4px solid #F59E0B;
+    padding: 0.875rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.875rem;
+    color: #78350F;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.pix-aviso-card strong {
+    display: block;
+    margin-bottom: 0.375rem;
+    color: #78350F;
+}
+
+.pix-row.pix-pagador-vazio {
+    border-color: #F59E0B;
+    box-shadow: 0 0 0 1px #F59E0B inset;
+}
+
+.pix-aviso-banner {
+    background: #FEF3C7;
+    border: 1px solid #F59E0B;
+    padding: 0.625rem 0.875rem;
+    border-radius: 6px;
+    margin: 0.5rem 0 0.75rem;
+    color: #78350F;
+    font-size: 0.8125rem;
+}
+
+.pix-grid {
+    grid-template-columns: 2fr 1fr 1.2fr auto;
+}
+
+@media (max-width: 600px) {
+    .pix-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* PIX Info Card */
 .pix-info-card {
     background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
