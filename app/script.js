@@ -2833,6 +2833,101 @@ function recalcularValoresCartao() {
     calcularTotalFormasPagamento();
 }
 
+// --- DETALHES DE PIX (conciliacao financeira) ---
+
+function descreverPix(p) {
+    const dh = p.dataHora ? ` — ${formatarDataHoraCartaoBR(p.dataHora)}` : '';
+    const pag = (p.pagador || '').trim() ? ` — ${p.pagador}` : '';
+    return `PIX — R$ ${formatarValorMonetario(p.valor || 0)}${pag}${dh}`;
+}
+
+function adicionarPix() {
+    pixVenda.push({
+        pagador: '',
+        valor: 0,
+        dataHora: dataHoraLocalAgora()
+    });
+    renderPix();
+    recalcularValoresPix();
+}
+
+function removerPix(index) {
+    pixVenda.splice(index, 1);
+    renderPix();
+    recalcularValoresPix();
+}
+
+function renderPix() {
+    const list = document.getElementById('pixList');
+    if (!list) return;
+    list.innerHTML = pixVenda.map((p, i) => {
+        const pagadorEscaped = (p.pagador || '').replace(/"/g, '&quot;');
+        const pagadorVazio = !(p.pagador || '').trim();
+        return `
+        <div class="cartao-row pix-row ${pagadorVazio ? 'pix-pagador-vazio' : ''}" data-index="${i}">
+            <div class="cartao-grid pix-grid">
+                <div class="cartao-field">
+                    <label>Nome do depositante</label>
+                    <input type="text" class="pix-pagador" placeholder="Quem fez o PIX" value="${pagadorEscaped}" oninput="atualizarLinhaPix(${i})">
+                </div>
+                <div class="cartao-field">
+                    <label>Valor</label>
+                    <input type="text" class="pix-valor currency-input" placeholder="R$ 0,00" value="${p.valor > 0 ? formatarValorMonetario(p.valor) : ''}" oninput="atualizarLinhaPix(${i})">
+                </div>
+                <div class="cartao-field">
+                    <label>Data/Hora</label>
+                    <input type="datetime-local" class="pix-datahora" value="${p.dataHora || ''}" onchange="atualizarLinhaPix(${i})">
+                </div>
+                <button type="button" class="btn-remove-cartao" onclick="removerPix(${i})" title="Remover">✕</button>
+            </div>
+        </div>
+    `;
+    }).join('');
+}
+
+function atualizarLinhaPix(index) {
+    const row = document.querySelectorAll('.pix-row')[index];
+    if (!row || !pixVenda[index]) return;
+
+    const pagador = row.querySelector('.pix-pagador').value;
+    const valorStr = row.querySelector('.pix-valor').value;
+    const valor = parseFloat(valorStr.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+    const dataHora = row.querySelector('.pix-datahora').value;
+
+    pixVenda[index] = { pagador, valor, dataHora };
+
+    row.classList.toggle('pix-pagador-vazio', !(pagador || '').trim());
+
+    recalcularValoresPix();
+}
+
+function recalcularValoresPix() {
+    const totalPix = pixVenda.reduce((s, p) => s + (p.valor || 0), 0);
+
+    const elTotal = document.getElementById('totalPix');
+    if (elTotal) elTotal.textContent = `R$ ${formatarValorMonetario(totalPix)}`;
+
+    // Sincronizar input oculto legacy (valorPix alimenta fluxos antigos)
+    const valPixInput = document.getElementById('valorPix');
+    if (valPixInput) valPixInput.value = totalPix > 0 ? formatarValorMonetario(totalPix) : '';
+
+    atualizarAvisoPixSemPagador();
+    calcularTotalFormasPagamento();
+}
+
+function atualizarAvisoPixSemPagador() {
+    const semPagador = pixVenda.filter(p => !(p.pagador || '').trim()).length;
+    const banner = document.getElementById('pixAvisoSemPagador');
+    const texto = document.getElementById('pixAvisoSemPagadorTexto');
+    if (!banner || !texto) return;
+    if (semPagador > 0) {
+        texto.innerHTML = `<strong>${semPagador} PIX sem nome do depositante</strong> — recomendado preencher para conciliação automática com o extrato.`;
+        banner.style.display = 'block';
+    } else {
+        banner.style.display = 'none';
+    }
+}
+
 // --- DETALHES INFORMADOS AO CLIENTE (aceite / pre-pos-venda) ---
 
 function handleDetalhesAceiteChange() {
