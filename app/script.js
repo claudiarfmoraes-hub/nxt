@@ -463,6 +463,14 @@ async function registrarVenda(event) {
             valores: obterValoresFormasPagamento(),
             parcelas: document.getElementById('parcelasCredito').value,
             cartoes: cartoesVenda.map(c => ({ ...c })),
+            pix: pixVenda.map(p => ({
+                tipo: 'pix',
+                modalidade: 'av',
+                parcelas: 1,
+                pagador: p.pagador || '',
+                valor: p.valor,
+                dataHora: p.dataHora
+            })),
             outros: document.getElementById('outrosPagamentoTexto').value,
             observacoes: document.getElementById('observacoesPagamento').value
         },
@@ -1776,6 +1784,14 @@ function copiarResumoVenda(isFromModal) {
                     valores: obterValoresFormasPagamento(),
                     parcelas: document.getElementById('parcelasCredito').value,
                     cartoes: cartoesVenda.map(c => ({ ...c })),
+                    pix: pixVenda.map(p => ({
+                        tipo: 'pix',
+                        modalidade: 'av',
+                        parcelas: 1,
+                        pagador: p.pagador || '',
+                        valor: p.valor,
+                        dataHora: p.dataHora
+                    })),
                     observacoes: document.getElementById('observacoesPagamento').value
                 },
                 aceiteDetalhes: coletarAceiteDetalhes(),
