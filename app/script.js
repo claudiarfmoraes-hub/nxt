@@ -1334,6 +1334,10 @@ function configurarPagamentoCards() {
                 pixGroup.style.display = pixChecked ? 'block' : 'none';
                 if (pixChecked && pixVenda.length === 0) {
                     adicionarPix(); // pre-adiciona uma linha pra facilitar
+                } else if (!pixChecked && pixVenda.length > 0) {
+                    pixVenda = [];
+                    renderPix();
+                    recalcularValoresPix();
                 }
             }
 
@@ -3191,6 +3195,9 @@ function limparFormularioVenda(skipConfirm = false) {
     cartoesVenda = [];
     renderCartoes();
     recalcularValoresCartao();
+    pixVenda = [];
+    renderPix();
+    recalcularValoresPix();
     ultimoResumoVenda = '';
     ultimaVendaRegistrada = null;
     document.getElementById('valorFrete').value = '';
