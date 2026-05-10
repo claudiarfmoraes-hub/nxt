@@ -1723,6 +1723,13 @@ function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
         resumo += `*Formas:* ${venda.pagamento.formas.map(f => _nomeForma(f)).join(', ')}\n`;
     }
 
+    if (Array.isArray(venda.pagamento?.pix) && venda.pagamento.pix.length > 0) {
+        resumo += `*PIX detalhado:*\n`;
+        venda.pagamento.pix.forEach(p => {
+            resumo += `  - ${descreverPix(p)}\n`;
+        });
+    }
+
 
     if (venda.pagamento.observacoes) {
         resumo += `*Observações:* ${venda.pagamento.observacoes}\n`;
@@ -1885,6 +1892,11 @@ function gerarHTMLFatura(venda) {
         formasPagamentoTexto = venda.pagamento.formas.map(f => _nomeForma(f)).join(', ');
     }
 
+    if (Array.isArray(venda.pagamento?.pix) && venda.pagamento.pix.length > 0) {
+        const detalhesPix = venda.pagamento.pix.map(p => escapeHtml(descreverPix(p))).join('<br>');
+        formasPagamentoTexto += (formasPagamentoTexto ? '<br>' : '') + `<small>${detalhesPix}</small>`;
+    }
+
     let produtosHTML = '';
     venda.produtos.forEach(produto => {
         produtosHTML += `
@@ -2030,6 +2042,11 @@ function gerarTextoFatura(venda) {
         }
     } else {
         formasPagamentoTexto = venda.pagamento.formas.map(f => _nomeForma(f)).join(', ');
+    }
+
+    if (Array.isArray(venda.pagamento?.pix) && venda.pagamento.pix.length > 0) {
+        const detalhesPix = venda.pagamento.pix.map(p => `  - ${descreverPix(p)}`).join('\n');
+        formasPagamentoTexto += (formasPagamentoTexto ? '\n' : '') + detalhesPix;
     }
 
     let produtosTexto = '';
@@ -4602,6 +4619,11 @@ function enviarFaturaWhatsApp() {
         }
     } else {
         pagamentoTexto = venda.pagamento.formas.map(f => _nomeForma(f)).join(', ');
+    }
+
+    if (Array.isArray(venda.pagamento?.pix) && venda.pagamento.pix.length > 0) {
+        const detalhesPix = venda.pagamento.pix.map(p => `  _${descreverPix(p)}_`).join('\n');
+        pagamentoTexto += (pagamentoTexto ? '\n' : '') + detalhesPix;
     }
 
     // Montar lista de produtos
