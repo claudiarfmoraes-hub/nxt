@@ -1325,9 +1325,16 @@ function configurarPagamentoCards() {
 
             // Mostrar info do PIX se selecionado
             const pixInfo = document.getElementById('pixInfoCard');
+            const pixGroup = document.getElementById('pixGroup');
             const pixChecked = document.querySelector('input[name="pagamento"][value="pix"]').checked;
             if (pixInfo) {
                 pixInfo.style.display = pixChecked ? 'block' : 'none';
+            }
+            if (pixGroup) {
+                pixGroup.style.display = pixChecked ? 'block' : 'none';
+                if (pixChecked && pixVenda.length === 0) {
+                    adicionarPix(); // pre-adiciona uma linha pra facilitar
+                }
             }
 
             // Mostrar info do Dinheiro se selecionado
