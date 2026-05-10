@@ -2,7 +2,9 @@
 const POWER_AUTOMATE_URLS = {
     vendas: 'https://hook.us2.make.com/ku3pkl5io6mnh7k8tq275vhowhkcwxxo',
     inventario: 'https://hook.us2.make.com/xp9611ae67d4cf47frtwlzc9qmhafzck',
-    conciliacaoCartoes: 'https://hook.us2.make.com/wjl421mft9kokf9ph3eur171yso5ds1w'
+    conciliacaoCartoes: 'https://hook.us2.make.com/wjl421mft9kokf9ph3eur171yso5ds1w',
+    // TODO: substituir antes do deploy — Claudia cria cenario Make.com e fornece a URL
+    conciliacaoPix: 'https://hook.us2.make.com/PLACEHOLDER_AGUARDANDO_URL'
 };
 
 // ========================================
@@ -41,6 +43,7 @@ let dadosMatriculas = {};
 let dadosFiscais = {};
 let produtosDaVenda = [];
 let cartoesVenda = []; // transacoes de cartao da venda atual (conciliacao financeira)
+let pixVenda = []; // transferencias de PIX da venda atual (conciliacao financeira)
 let itensInventario = [];
 let ultimoResumoVenda = '';
 let ultimaVendaRegistrada = null;
