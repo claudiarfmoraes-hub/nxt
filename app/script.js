@@ -3437,7 +3437,7 @@ function buscarCEP() {
 
 // Sanitiza os dados antes de enviar ao Make, garantindo que nenhum campo seja null/undefined
 function sanitizarDadosParaEnvio(tipo, dados) {
-    if (tipo === 'vendas' || tipo === 'conciliacaoCartoes') {
+    if (tipo === 'vendas' || tipo === 'conciliacaoCartoes' || tipo === 'conciliacaoPix') {
         return {
             id: dados.id || `VNDA-${Date.now()}`,
             loja: dados.loja || '',
@@ -3474,6 +3474,7 @@ function sanitizarDadosParaEnvio(tipo, dados) {
                 valores: dados.pagamento?.valores || {},
                 parcelas: dados.pagamento?.parcelas || '1',
                 cartoes: Array.isArray(dados.pagamento?.cartoes) ? dados.pagamento.cartoes : [],
+                pix: Array.isArray(dados.pagamento?.pix) ? dados.pagamento.pix : [],
                 outros: dados.pagamento?.outros || '',
                 observacoes: dados.pagamento?.observacoes || ''
             },
