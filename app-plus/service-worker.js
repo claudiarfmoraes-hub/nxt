@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nxt-plus-cache-v9';
+const CACHE_NAME = 'nxt-plus-cache-v10';
 const urlsToCache = [
   '/',
   '/index.html',
