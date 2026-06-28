@@ -612,11 +612,15 @@ function adicionarItemInventario(event) {
 
     const tipoItem = document.getElementById('tipoItem').value;
 
+    // Capacete pode ser contado como 0 (estoque zerado); moto exige no mínimo 1
+    const minimoQtd = tipoItem === 'capacete' ? 0 : 1;
+    const qtdRaw = parseInt(document.getElementById('quantidadeInventario').value);
+
     const item = {
         id: Date.now(),
         operacao: 'inventario',
         tipoItem: tipoItem,
-        quantidade: parseInt(document.getElementById('quantidadeInventario').value) || 1,
+        quantidade: Number.isNaN(qtdRaw) ? minimoQtd : qtdRaw,
         data: new Date().toISOString(),
     };
 
@@ -633,8 +637,8 @@ function adicionarItemInventario(event) {
         }
     }
 
-    if (item.quantidade < 1) {
-        mostrarFeedback('A quantidade deve ser no mínimo 1', 'erro');
+    if (item.quantidade < minimoQtd) {
+        mostrarFeedback(`A quantidade deve ser no mínimo ${minimoQtd}`, 'erro');
         return;
     }
 
@@ -783,12 +787,19 @@ function selecionarTipoItem(tipo) {
     // Atualizar campo hidden
     document.getElementById('tipoItem').value = tipo;
 
-    // Mostrar/ocultar campos de moto
+    // Mostrar/ocultar campos de moto e ajustar quantidade mínima
     const camposMoto = document.getElementById('camposMoto');
+    const qtdInput = document.getElementById('quantidadeInventario');
     if (tipo === 'capacete') {
         camposMoto.style.display = 'none';
+        // Capacete pode ser registrado com contagem 0
+        if (qtdInput) qtdInput.min = 0;
     } else {
         camposMoto.style.display = 'block';
+        if (qtdInput) {
+            qtdInput.min = 1;
+            if ((parseInt(qtdInput.value) || 0) < 1) qtdInput.value = 1;
+        }
     }
 }
 
@@ -892,8 +903,11 @@ function atualizarCamposCondicionaisMovimentacao() {
 
 function alterarQuantidade(delta) {
     const input = document.getElementById('quantidadeInventario');
-    let valor = parseInt(input.value) || 1;
-    valor = Math.max(1, valor + delta);
+    const tipoItem = document.getElementById('tipoItem').value;
+    const minimo = tipoItem === 'capacete' ? 0 : 1;
+    let valor = parseInt(input.value);
+    if (Number.isNaN(valor)) valor = minimo;
+    valor = Math.max(minimo, valor + delta);
     input.value = valor;
 }
 
@@ -1605,7 +1619,7 @@ function exportarInventarios() {
 
     const dataExportacao = new Date().toISOString().split('T')[0];
     const dados = {
-        versao: 'NXT V4.11',
+        versao: 'NXT V4.12',
         dataExportacao: new Date().toISOString(),
         totalInventarios: inventariosSalvos.length,
         inventarios: inventariosSalvos
@@ -1672,7 +1686,7 @@ function importarInventarios(event) {
 function gerarTextoResumoVenda(venda, enviadoParaBling = false) {
     const dataFormatada = new Date(venda.dataVenda).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
 
-    let resumo = `=== SISTEMA NXT V4.11===\n*RESUMO DA VENDA — ${venda.loja}*\n`;
+    let resumo = `=== SISTEMA NXT V4.12===\n*RESUMO DA VENDA — ${venda.loja}*\n`;
     resumo += `*Vendedor:* ${venda.matriculaVendedor ? venda.matriculaVendedor + ' - ' : ''}${venda.vendedor}\n`;
     resumo += `*Data:* ${dataFormatada}\n\n`;
     
@@ -1994,7 +2008,7 @@ function gerarHTMLFatura(venda) {
         </div>
 
         <div class="fatura-footer">
-            <p>Esta fatura foi gerada pelo Sistema NXT V4.11</p>
+            <p>Esta fatura foi gerada pelo Sistema NXT V4.12</p>
             <p>NXT Lojas - Soluções em Mobilidade Urbana</p>
             <p><strong>Visite nosso site:</strong> <a href="https://www.nxt.eco.br/" target="_blank">www.nxt.eco.br</a></p>
             <p><small>Para dúvidas ou suporte, entre em contato através do nosso site.</small></p>
@@ -2117,7 +2131,7 @@ Observação: As garantias acima referem-se exclusivamente a defeitos de fabrica
 
 *IMPORTANTE: Este documento tem caráter informativo e não constitui documento fiscal para fins tributários. A nota fiscal eletrônica será emitida e enviada separadamente*
 
-Esta fatura foi gerada pelo Sistema NXT V4.11
+Esta fatura foi gerada pelo Sistema NXT V4.12
 NXT Lojas - Soluções em Mobilidade Urbana
 
 Visite nosso site: https://www.nxt.eco.br/
@@ -2310,7 +2324,7 @@ function copiarResumoInventario() {
         // CABEÇALHO PROFISSIONAL
         // ══════════════════════════════
         resumo += `╔══════════════════════════════════╗\n`;
-        resumo += `   *SISTEMA NXT V4.11 - INVENTÁRIO*\n`;
+        resumo += `   *SISTEMA NXT V4.12 - INVENTÁRIO*\n`;
         resumo += `   Loja: *${lojaNome}*\n`;
         resumo += `   Data: ${new Date().toLocaleDateString('pt-BR')}\n`;
         resumo += `╚══════════════════════════════════╝\n\n`;
@@ -2351,10 +2365,9 @@ function copiarResumoInventario() {
             }
         });
 
-        if (totalCapacetes > 0) {
-            resumo += `│\n`;
-            resumo += `│ *Capacetes: ${totalCapacetes} unidades*\n`;
-        }
+        // Capacetes sempre aparecem, mesmo quando a contagem é zero
+        resumo += `│\n`;
+        resumo += `│ *Capacetes: ${totalCapacetes} unidades*\n`;
         resumo += `└──────────────────────────────────┘\n\n`;
 
         // ══════════════════════════════
@@ -2364,7 +2377,8 @@ function copiarResumoInventario() {
             resumo += `▸ *DETALHAMENTO POR UNIDADE*\n`;
 
             const motosInventario = itensInventarioOnly.filter(i => i.tipoItem !== 'capacete');
-            const capacetesInventario = itensInventarioOnly.filter(i => i.tipoItem === 'capacete');
+            // Detalhamento por unidade só lista capacetes com contagem (ignora os zerados)
+            const capacetesInventario = itensInventarioOnly.filter(i => i.tipoItem === 'capacete' && i.quantidade > 0);
 
             // Ordenar motos pela ordem fixa
             motosInventario.sort((a, b) => {

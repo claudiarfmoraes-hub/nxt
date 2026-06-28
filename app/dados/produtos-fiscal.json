@@ -419,5 +419,110 @@
       "quantidade": 1,
       "valor": 0.01
     }
+  },
+  "Jay": {
+    "itens": [
+      {
+        "tipo": "quadro",
+        "codigo": "JAY001",
+        "descricao": "JAY - NXT Autopropelido",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.20,
+        "principal": true
+      },
+      {
+        "tipo": "motor",
+        "codigo": "JAY003",
+        "descricao": "JAY - MOTOR DE CORRENTE CONTINUA, POTENCIA 1000W",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.40
+      },
+      {
+        "tipo": "bateria",
+        "codigo": "JAY002",
+        "descricao": "JAY - BATERIA DE GRAFENO PARA AUTOPROPELIDO ELETRICO - TENSAO 72V - 20ah DE PESO INFERIOR A 1000KG,",
+        "unidade": "UN",
+        "quantidade": 6,
+        "percentual": 0.0666666666666667
+      }
+    ],
+    "capacete": {
+      "descricao": "CAPACETE DE PLASTICO PVC",
+      "unidade": "UN",
+      "quantidade": 1,
+      "valor": 0.01
+    }
+  },
+  "V0": {
+    "itens": [
+      {
+        "tipo": "quadro",
+        "codigo": "V0001",
+        "descricao": "V0 - NXT Autopropelido",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.20,
+        "principal": true
+      },
+      {
+        "tipo": "motor",
+        "codigo": "V0002",
+        "descricao": "V0 - MOTOR DE CORRENTE CONTINUA, POTENCIA 800W",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.40
+      },
+      {
+        "tipo": "bateria",
+        "codigo": "V0003",
+        "descricao": "V0 - BATERIA DE GRAFENO PARA AUTOPROPELIDO ELETRICO - TENSAO 12V - 20ah DE PESO INFERIOR A 1000KG,",
+        "unidade": "UN",
+        "quantidade": 5,
+        "percentual": 0.08
+      }
+    ],
+    "capacete": {
+      "descricao": "CAPACETE DE PLASTICO PVC",
+      "unidade": "UN",
+      "quantidade": 1,
+      "valor": 0.01
+    }
+  },
+  "Akasha": {
+    "itens": [
+      {
+        "tipo": "quadro",
+        "codigo": "AK001",
+        "descricao": "AKASHA - NXT Autopropelido",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.20,
+        "principal": true
+      },
+      {
+        "tipo": "motor",
+        "codigo": "AK003",
+        "descricao": "AKASHA - MOTOR DE CORRENTE CONTINUA, POTENCIA 1000W",
+        "unidade": "UN",
+        "quantidade": 1,
+        "percentual": 0.40
+      },
+      {
+        "tipo": "bateria",
+        "codigo": "AK002",
+        "descricao": "AKASHA - BATERIA DE GRAFENO PARA AUTOPROPELIDO ELETRICO - TENSAO 72V - 20ah DE PESO INFERIOR A 1000KG,",
+        "unidade": "UN",
+        "quantidade": 6,
+        "percentual": 0.0666666666666667
+      }
+    ],
+    "capacete": {
+      "descricao": "CAPACETE DE PLASTICO PVC",
+      "unidade": "UN",
+      "quantidade": 1,
+      "valor": 0.01
+    }
   }
 }
