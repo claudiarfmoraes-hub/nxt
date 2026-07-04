@@ -5,11 +5,6 @@
       "loja": "NI HAO HOLAMBRA",
       "funcao": "GERENTE DE VENDAS"
     },
-    "5812": {
-      "nome": "LUAN LUCAS SPROVIERI IODETTTE",
-      "loja": "NI HAO HOLAMBRA",
-      "funcao": "VENDEDOR(A)"
-    },
     "3851": {
       "nome": "RAFAELA CRISTINA ABRAHAO",
       "loja": "NI HAO BRAGANCA",
@@ -67,11 +62,6 @@
       "loja": "NI HAO MINAS GERAIS(POÇOS DE CALDAS)",
       "funcao": "VENDEDOR(A)"
     },
-    "8816": {
-      "nome": "GABRIELE BIANCHI DANTAS",
-      "loja": "NI HAO CAMPINAS (SHOPP GRAND PLAZA)",
-      "funcao": "VENDEDOR(A)"
-    },
     "8896": {
       "nome": "VANESSA CRISTINA BUENO PITELI",
       "loja": "NI HAO CAMPINAS (SUMARE PARK CITY)",
@@ -82,31 +72,14 @@
       "loja": "NI HAO CAMPINAS (SUMARE PARK CITY)",
       "funcao": "VENDEDOR(A)"
     },
-    "7805": [
-      {
-        "nome": "MATHEUS HENRIQUE DE OLIVEIRA",
-        "loja": "NI HAO CAMPINAS (SHOPP SÃO CARLOS)",
-        "funcao": "VENDEDOR(A)"
-      },
-      {
-        "nome": "WESLEY PINEDA DA SILVA",
-        "loja": "NI HAO CAMPINAS (SHOPP PATIO LIMEIRA)",
-        "funcao": "VENDEDOR(A)"
-      }
-    ],
+    "7805": {
+      "nome": "WESLEY PINEDA DA SILVA",
+      "loja": "NI HAO CAMPINAS (SHOPP PATIO LIMEIRA)",
+      "funcao": "VENDEDOR(A)"
+    },
     "1846": {
       "nome": "BRUNO CARDOSO GOMES",
       "loja": "NI HAO CAMPINAS (SHOPP SANTANA)",
-      "funcao": "VENDEDOR(A)"
-    },
-    "3803": {
-      "nome": "VINICIUS GONCALVES FRANCO",
-      "loja": "NI HAO CAMPINAS (SHOPP TIVOLLI)",
-      "funcao": "VENDEDOR(A)"
-    },
-    "4800": {
-      "nome": "DANIEL FELIPE COSTA DE OLIVEIRA",
-      "loja": "NI HAO CAMPINAS (SHOPP GOLDEN)",
       "funcao": "VENDEDOR(A)"
     },
     "5810": {
@@ -119,11 +92,6 @@
       "loja": "NI HAO (SANTOS)",
       "funcao": "VENDEDOR(A)"
     },
-    "2936": {
-      "nome": "JONAS HONORATO GONÇALVES DOS SANTOS",
-      "loja": "NI HAO BLUMENAU(SHOPP NORTE)",
-      "funcao": "VENDEDOR(A)"
-    },
     "3974": {
       "nome": "CELSO VITORIA WEBER JUNIOR",
       "loja": "NI HAO FLORIPA",
@@ -134,11 +102,6 @@
       "loja": "NI HAO CAMPINAS (SHOPP VALINHOS)",
       "funcao": "VENDEDOR(A)"
     },
-    "2895": {
-      "nome": "RAISSA EMY OGAWA SAKAMOTO",
-      "loja": "NI HAO CAMPINAS (SHOPP ARARAQUARA)",
-      "funcao": "VENDEDOR(A)"
-    },
     "1889": {
       "nome": "VANESSA DO CARMO SANTOS",
       "loja": "NI HAO CAMPINAS (SHOPP ABC)",
@@ -147,11 +110,6 @@
     "6894": {
       "nome": "HELIOMAR ARAUJO JUNIOR",
       "loja": "NI HAO MATRIZ",
-      "funcao": "VENDEDOR(A)"
-    },
-    "1821": {
-      "nome": "CLAUDIA APARECIDA DA SILVA",
-      "loja": "NI HAO MATRIZ (SHOPP HORTOLANDIA)",
       "funcao": "VENDEDOR(A)"
     },
     "7873": {
@@ -184,16 +142,6 @@
       "loja": "NI HAO MATRIZ (SHOPP HORTOLANDIA)",
       "funcao": "VENDEDOR(A)"
     },
-    "3832": {
-      "nome": "JESSICA DE SOUZA PEREIRA",
-      "loja": "NI HAO MATRIZ (SHOPP HORTOLANDIA)",
-      "funcao": "VENDEDOR(A)"
-    },
-    "1219": {
-      "nome": "JOAO ROBERTO CARDIAS FERREIRA",
-      "loja": "NI HAO BLUMENAU(SHOPP NORTE)",
-      "funcao": "VENDEDOR(A)"
-    },
     "6697": {
       "nome": "JULIA BEATRIZ SANTANA PIERINI",
       "loja": "NI HAO MATRIZ (SHOPP BURITI)",
@@ -212,11 +160,6 @@
     "2813": {
       "nome": "CAMILLY VITTORIA FRANCISCO ALVES DA SILVA",
       "loja": "NI HAO CAMPINAS (SHOPP VALINHOS)",
-      "funcao": "VENDEDOR(A)"
-    },
-    "1840": {
-      "nome": "PAULO DANILO COSTA FERREIRA",
-      "loja": "NI HAO MATRIZ (SHOPP GRAND PLAZA)",
       "funcao": "VENDEDOR(A)"
     },
     "8898": {
@@ -244,11 +187,6 @@
       "loja": "NI HAO MATRIZ (SHOPP DAS NAÇÕES)",
       "funcao": "VENDEDOR(A)"
     },
-    "8235": {
-      "nome": "GIOVANNI MENDES FRANCO",
-      "loja": "NI HAO MATRIZ (SHOPP INDAIATUBA)",
-      "funcao": "VENDEDOR(A)"
-    },
     "8809": {
       "nome": "FERNANDO VERONEZ FERREIRA",
       "loja": "NI HAO MATRIZ( GALPAO(MOTORISTA/ESTOQ)",
@@ -257,26 +195,6 @@
     "1899": {
       "nome": "FERNANDO MARQUES BRAZ FLORÊNCIO",
       "loja": "NI HAO INDAIATUBA POLO",
-      "funcao": "VENDEDOR(A)"
-    },
-    "4827": {
-      "nome": "LEONARDO NASCIMENTO CRISPIM",
-      "loja": "NI HAO MATRIZ (SHOPP BUTANTA)",
-      "funcao": "VENDEDOR(A)"
-    },
-    "8888": {
-      "nome": "PATRICIA HELOISA DE MOURA OLIVEIRA LOPES",
-      "loja": "NI HAO MATRIZ (SHOPP GOLDEN)",
-      "funcao": "VENDEDOR(A)"
-    },
-    "4605": {
-      "nome": "JOAO GABRIEL DA SILVA RODRIGUES",
-      "loja": "NI HAO JOINVILLE",
-      "funcao": "VENDEDOR(A)"
-    },
-    "8957": {
-      "nome": "ALERSON GEAN DE MELO FAGUNDES",
-      "loja": "NI HAO BALNEARIO(ATLANTICA)",
       "funcao": "VENDEDOR(A)"
     },
     "7821": {
@@ -294,16 +212,6 @@
       "loja": "NI HAO MATRIZ (SHOPP BURITI)",
       "funcao": "VENDEDOR(A)"
     },
-    "4878": {
-      "nome": "FELIPE SIMOES LOURENÇO",
-      "loja": "NI HAO CAMPINAS (SHOPP SOROCABA)",
-      "funcao": "VENDEDOR(A)"
-    },
-    "5958": {
-      "nome": "SAMARA NOGUEIRA",
-      "loja": "NI HAO JOINVILLE (SHOPP GARTEN)",
-      "funcao": "VENDEDOR(A)"
-    },
     "9941": {
       "nome": "RODRIGO HAHNEMANN",
       "loja": "NI HAO BLUMENAU (SHOPP NEUMARKT)",
@@ -319,11 +227,6 @@
       "loja": "NI HAO BALNEARIO(CARREFOUR)",
       "funcao": "VENDEDOR(A)"
     },
-    "6978": {
-      "nome": "ARIANE NATALIA PEREIRA",
-      "loja": "NI HAO SAO JOSE(SHOPP CONTINENTE)",
-      "funcao": "VENDEDOR(A)"
-    },
     "7893": {
       "nome": "ROBSON DONIZETE RIBEIRO",
       "loja": "NI HAO MATRIZ (SHOPP BUTANTA)",
@@ -334,43 +237,13 @@
       "loja": "NI HAO CAMPINAS (LOJA NORTE/SUL CAMPINAS)",
       "funcao": "GERENTE DE VENDAS"
     },
-    "1510": {
-      "nome": "LUIZ VITOR PORTO SANTOS",
-      "loja": "NI HAO JOINVILLE (SHOPP GARTEN)",
-      "funcao": "VENDEDOR(A)"
-    },
     "0877": {
       "nome": "GABRIEL BATISTA MACEDO",
       "loja": "NI HAO (SANTOS)",
       "funcao": "VENDEDOR(A)"
     },
-    "1898": {
-      "nome": "ELLEN CRISTINA GOMES",
-      "loja": "NI HAO CAMPINAS (SHOPP SÃO CARLOS)",
-      "funcao": "VENDEDOR(A)"
-    },
-    "0802": {
-      "nome": "MELYSSA ALVES DA SILVA",
-      "loja": "NI HAO CAMPINAS (SHOPP RIO CLARO)",
-      "funcao": "VENDEDOR(A)"
-    },
-    "4820": {
-      "nome": "JOAO CANDIDO PEREIRA DA SILVA",
-      "loja": "NI HAO CAMPINAS (SHOPP RIO CLARO)",
-      "funcao": "VENDEDOR(A)"
-    },
-    "6253": {
-      "nome": "WALLAKCE DA SILVA E SILVA",
-      "loja": "NI HAO BLUMENAU (SHOPP NEUMARKT)",
-      "funcao": "VENDEDOR(A)"
-    },
     "1836": {
       "nome": "ANA LARA LIMA SILVA",
-      "loja": "",
-      "funcao": "VENDEDOR(A)"
-    },
-    "7899": {
-      "nome": "SAMIRES DA SILVA FERNANDES VIDAL",
       "loja": "",
       "funcao": "VENDEDOR(A)"
     },
@@ -386,11 +259,6 @@
     },
     "9870": {
       "nome": "JACKELINE GIL DOS SANTOS",
-      "loja": "",
-      "funcao": "VENDEDOR(A)"
-    },
-    "9856": {
-      "nome": "ULLIAN DO SACRAMENTO SOARES",
       "loja": "",
       "funcao": "VENDEDOR(A)"
     },
@@ -419,97 +287,131 @@
       "loja": "",
       "funcao": "VENDEDOR(A)"
     },
-    "6954": {
-      "nome": "WILLIAN PEREIRA POSICH DE JESUS",
+    "5523": {
+      "nome": "ALESSANDRA DE MENEZES MOTA",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
+    },
+    "1818": {
+      "nome": "BRENO DOS PASSOS MORALES",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
+    },
+    "7808": {
+      "nome": "VANESSA FIGUEIREDO ASPAR",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
+    },
+    "0417": {
+      "nome": "MARLYN MELO SANTOS",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
+    },
+    "2879": {
+      "nome": "JAINE FABIANA DE OLIVEIRA",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
+    },
+    "3800": {
+      "nome": "RAQUEL ALBUQUERQUE MOREIRA SILVA",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
+    },
+    "6809": {
+      "nome": "MARIA EDUARDA LIMA DE OLIVEIRA",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
+    },
+    "8446": {
+      "nome": "MARIANA MONTEIRO DIAS DA SILVA",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
+    },
+    "4833": {
+      "nome": "RULYAN CAMILLO",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
+    },
+    "2859": {
+      "nome": "LUCAS DE FREITAS OLIVEIRA",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
+    },
+    "1936": {
+      "nome": "GABRIELA JAQUES DA SILVA PROBST",
       "loja": "",
       "funcao": "VENDEDOR(A)"
     }
   },
   "vendedores": [
-    "ALERSON GEAN DE MELO FAGUNDES",
-    "ANDERSON FERNANDO RIBEIRO DOS SANTOS BRITO JUNIOR",
+    "ALESSANDRA DE MENEZES MOTA",
     "ANA LARA LIMA SILVA",
-    "ARIANE NATALIA PEREIRA",
+    "ANDERSON FERNANDO RIBEIRO DOS SANTOS BRITO JUNIOR",
     "BIANCA IASMIN BARROS MARANHAO",
     "BRENO DAMACENA DE OLIVEIRA",
+    "BRENO DOS PASSOS MORALES",
     "BRUNO CARDOSO GOMES",
     "BRYAN KELVIN LOPES CARDOSO",
     "CAMILLY VITTORIA FRANCISCO ALVES DA SILVA",
     "CELSO VITORIA WEBER JUNIOR",
-    "CLAUDIA APARECIDA DA SILVA",
-    "DANIEL FELIPE COSTA DE OLIVEIRA",
     "DIEGO AMERICO DE SOUZA",
     "DIEGO HENRIQUE DOS SANTOS",
     "EDGAR MELARATO SILVA",
-    "EDUARDO CORRÊA",
     "EDSON OLIVEIRA CAMPOS",
-    "ELLEN CRISTINA GOMES",
+    "EDUARDO CORRÊA",
     "FELIPE ASSUNCAO CARDOSO",
-    "FELIPE SIMOES LOURENÇO",
     "FERNANDO MARQUES BRAZ FLORÊNCIO",
     "FERNANDO VERONEZ FERREIRA",
     "FLAVIA ALESSANDRA CAZALINI",
     "GABRIEL BATISTA MACEDO",
     "GABRIELA CRISTINA ANTONIO",
-    "GABRIELE BIANCHI DANTAS",
-    "GIOVANNI MENDES FRANCO",
+    "GABRIELA JAQUES DA SILVA PROBST",
     "GUILHERME MITSUYUKI",
     "HELIOMAR ARAUJO JUNIOR",
     "HELOISA GOMES DE OLIVEIRA",
     "IGOR RANGEL GONCALVES",
     "INGRID KAYANE VIEIRA DE MORAES",
     "JACKELINE GIL DOS SANTOS",
+    "JAINE FABIANA DE OLIVEIRA",
     "JAQUELINE TAIOKI MOREIRA MONTENEGRO",
-    "JESSICA DE SOUZA PEREIRA",
     "JESSICA VICTORIA POSSOLINO",
     "JHULYA CAUANE MACHADO DA SILVA",
-    "JOAO CANDIDO PEREIRA DA SILVA",
-    "JOAO GABRIEL DA SILVA RODRIGUES",
-    "JOAO ROBERTO CARDIAS FERREIRA",
-    "JONAS HONORATO GONÇALVES DOS SANTOS",
     "JOYCE FORESTE FERREIRA",
     "JULIA BEATRIZ SANTANA PIERINI",
     "JUSSIMARA AMINADABE DA SILVA DOS SANTOS",
     "KATHLLEEN PEREIRA LIMA",
     "LARA FABIAN CAVALCANTE FINOTTI",
     "LEONARDO DIAS DE SOUZA",
-    "LEONARDO NASCIMENTO CRISPIM",
-    "LUAN LUCAS SPROVIERI IODETTTE",
     "LUANA BIASI LEITE",
+    "LUCAS DE FREITAS OLIVEIRA",
     "LUCAS MACHADO WITZOREKE",
     "LUCIANO MARCON DE CARVALHO",
-    "LUIZ VITOR PORTO SANTOS",
+    "MARIA EDUARDA LIMA DE OLIVEIRA",
+    "MARIANA MONTEIRO DIAS DA SILVA",
+    "MARLYN MELO SANTOS",
     "MATHEUS CERQUEIRA SANTOS",
-    "MATHEUS HENRIQUE DE OLIVEIRA",
     "MATHEUS SANTOS DA SILVA",
-    "MELYSSA ALVES DA SILVA",
     "MICHEL FRANK DE OLIVEIRA",
-    "PATRICIA HELOISA DE MOURA OLIVEIRA LOPES",
-    "PAULO DANILO COSTA FERREIRA",
     "RAFAELA CRISTINA ABRAHAO",
-    "RAISSA EMY OGAWA SAKAMOTO",
     "RAPHAEL TADEU DO NASCIMENTO",
+    "RAQUEL ALBUQUERQUE MOREIRA SILVA",
     "RENE GOMES CARDOSO",
     "ROBSON DONIZETE RIBEIRO",
     "RODRIGO HAHNEMANN",
     "RODRIGO VINICIUS CORREA",
     "ROSELAINE APARECIDA MENEGASSO",
+    "RULYAN CAMILLO",
     "RYAN VIGORITO OLIVEIRA",
-    "SAMARA NOGUEIRA",
-    "SAMIRES DA SILVA FERNANDES VIDAL",
     "SERGIO PEREIRA DE GODOY",
     "TAYNA JULIA DE ALVARENGA SOUSA",
     "THAÍS PACHECO MARQUES",
-    "ULLIAN DO SACRAMENTO SOARES",
     "VANESSA CRISTINA BUENO PITELI",
     "VANESSA DO CARMO SANTOS",
-    "VINICIUS GONCALVES FRANCO",
+    "VANESSA FIGUEIREDO ASPAR",
     "VITORIA GABRIELI GUIMARAES SILVA",
-    "WALLAKCE DA SILVA E SILVA",
     "WESLEY PINEDA DA SILVA",
-    "WILLIAN PEREIRA POSICH DE JESUS",
     "WILLIANS SACRAMENTO SOARES",
     "WILLIAS NARCIZO"
   ],
-  "total_vendedores": 82
+  "total_vendedores": 68
 }
