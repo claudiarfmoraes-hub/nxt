@@ -341,6 +341,11 @@
       "nome": "GABRIELA JAQUES DA SILVA PROBST",
       "loja": "",
       "funcao": "VENDEDOR(A)"
+    },
+    "4740": {
+      "nome": "LAURA SOARES ESCOCARD",
+      "loja": "",
+      "funcao": "VENDEDOR(A)"
     }
   },
   "vendedores": [
@@ -381,6 +386,7 @@
     "JUSSIMARA AMINADABE DA SILVA DOS SANTOS",
     "KATHLLEEN PEREIRA LIMA",
     "LARA FABIAN CAVALCANTE FINOTTI",
+    "LAURA SOARES ESCOCARD",
     "LEONARDO DIAS DE SOUZA",
     "LUANA BIASI LEITE",
     "LUCAS DE FREITAS OLIVEIRA",
@@ -413,5 +419,5 @@
     "WILLIANS SACRAMENTO SOARES",
     "WILLIAS NARCIZO"
   ],
-  "total_vendedores": 68
+  "total_vendedores": 69
 }
