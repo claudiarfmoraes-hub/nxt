@@ -1,0 +1,37 @@
+.vercel
+
+# ─── Item 2 do listão (27/08) ────────────────────────────────────────────────
+# ⚠️ ESTE REPO É PÚBLICO: github.com/claudiarfmoraes-hub/NXT
+# A lição do sac-pecas (07/08): o que entra no histórico não sai mais por clone.
+# As regras abaixo existem para que um `git add .` distraído não publique
+# dado de cliente. Ao liberar uma exceção, use `!` em arquivo NOMEADO — nunca
+# solte a extensão inteira.
+
+# Documento fiscal e planilha — nunca. (Havia um DANFE em "Mapeamento Fiscal/"
+# e a "RELACAO MATRICULAS.xlsx" a um `git add .` de distância.)
+Mapeamento Fiscal/
+*.pdf
+*.xlsx
+*.xlsm
+*.csv
+
+# Capturas de tela: mostram a operação real, com nome de cliente na tela.
+*.png
+*.jpg
+*.jpeg
+!app/logo nxt.png
+!app-plus/logo nxt.png
+
+# Ferramentas do agente e lixo de build
+.claude/
+.omc/
+.playwright-mcp/
+__pycache__/
+node_modules/
+nul
+
+# Regras do Firestore do projeto `nxt-plus` — o que está NO AR hoje.
+# É uma nota de copiar-e-colar, não a fonte da verdade (essa é o
+# `firestore.rules` do nxtlojas-dash). Num repo público, publicar o modelo
+# de acesso do projeto vivo é entregar o mapa da fechadura de graça.
+app-plus/FIREBASE-RULES.txt
